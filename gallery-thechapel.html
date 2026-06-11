@@ -69,7 +69,7 @@
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <button class="lightbox-prev" onclick="changePhoto(-1)">‹</button>
-  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" oncontextmenu="return false;" ondragstart="return false;">
   <button class="lightbox-next" onclick="changePhoto(1)">›</button>
   <span class="lightbox-counter" id="lightboxCounter"></span>
 </div>
@@ -112,7 +112,7 @@ document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') 
 document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
 <style>
-  img { -webkit-user-select: none; user-select: none; pointer-events: none; }
+  img { -webkit-user-select: none; user-select: none; pointer-events: none; -webkit-touch-callout: none; }
   .photo-item, .lightbox-img { pointer-events: auto; }
 </style>
 </body>
