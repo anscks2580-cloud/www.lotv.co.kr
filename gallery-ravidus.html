@@ -157,6 +157,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft') changePhoto(-1);
   if (e.key === 'ArrowRight') changePhoto(1);
 });
+
+/* ── 이미지 보호 ── */
+document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
+<style>
+  img { -webkit-user-select: none; user-select: none; pointer-events: none; }
+  .photo-item, .lightbox-img { pointer-events: auto; }
+</style>
 </body>
 </html>
