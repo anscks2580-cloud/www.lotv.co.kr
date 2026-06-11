@@ -137,11 +137,12 @@
     max-width: 520px;
   }
   .hero-eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.28em;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 4vw, 52px);
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 18px;
+    color: var(--ink);
+    font-weight: 300;
   }
   .hero-title {
     font-family: 'Cormorant Garamond', serif;
@@ -559,7 +560,7 @@
 <!-- ── NAV ── -->
 <nav id="mainNav">
   <a class="nav-logo" href="#">
-    <img src="logo.png" alt="LOTV 로고" class="logo-img">
+    <span class="logo-text">LOTV</span>
   </a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#gallery" onclick="closeMenu()">Gallery</a></li>
@@ -580,8 +581,6 @@
   <div class="hero-overlay"></div>
   <div class="hero-text">
     <p class="hero-eyebrow">Lily of the Valley Snap</p>
-    <h1 class="hero-title">결혼식의<br><em>한 장면</em>을<br>영원히</h1>
-    <p class="hero-sub">본식 스냅 &nbsp;·&nbsp; 아이폰 감성 &nbsp;·&nbsp; 필름 무드</p>
   </div>
   <div class="hero-scroll-hint">Scroll</div>
 </section>
