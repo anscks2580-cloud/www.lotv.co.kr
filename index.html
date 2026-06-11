@@ -484,7 +484,7 @@
     background: var(--warm-white);
   }
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(40px, 5vw, 58px);
+    font-size: clamp(52px, 7vw, 80px);
     font-weight: 300;
     line-height: 1.1;
     margin-bottom: 28px;
@@ -555,30 +555,36 @@
 
   /* ── FOOTER ── */
   footer {
-    padding: 32px 48px;
+    padding: 36px 48px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    border-top: 0.5px solid rgba(28,26,23,0.1);
-    flex-wrap: wrap;
     gap: 12px;
+    border-top: 0.5px solid rgba(28,26,23,0.1);
+    text-align: center;
   }
-  .ft-brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 15px;
-    font-weight: 300;
-    letter-spacing: 0.14em;
-    color: var(--ink-soft);
-  }
-  .ft-domain {
+  .ft-business {
     font-size: 11px;
     color: var(--ink-soft);
-    letter-spacing: 0.14em;
+    letter-spacing: 0.08em;
+  }
+  .ft-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
   .ft-copy {
     font-size: 11px;
     color: var(--accent);
     letter-spacing: 0.1em;
+  }
+  .ft-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
   }
 
   /* ── SCROLL REVEAL ── */
@@ -789,7 +795,7 @@
     <div class="policy-divider"></div>
 
     <h2 class="reserve-title">Reserve the day<br><em>we'll capture together</em></h2>
-    <p class="reserve-sub">
+    <p class="reserve-sub" style="margin-top: 60px;">
       함께할 소중한 날을 위해 아래 정보를<br>
       카카오톡 채널 <strong>LOTV</strong>로 보내주세요.<br><br>
       • 성함<br>
@@ -825,9 +831,13 @@
 
 <!-- ── FOOTER ── -->
 <footer>
-  <span class="ft-brand">LOTV — Lily of the Valley Snap</span>
-  <span class="ft-domain">www.lotv.com</span>
-  <span class="ft-copy">© 2025 LOTV. All rights reserved.</span>
+  <div class="ft-business">
+    <span>상호명 : 엘오티브이(LOTV) &nbsp;|&nbsp; 사업자등록번호 : 349-29-02113</span>
+  </div>
+  <div class="ft-bottom">
+    <span class="ft-copy">© 2026 LOTV SNAP. All Rights Reserved.</span>
+    <span class="ft-tagline">Every moment we capture becomes a memory that lingers.</span>
+  </div>
 </footer>
 
 <script>
