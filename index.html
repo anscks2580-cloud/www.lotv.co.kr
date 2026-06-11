@@ -273,7 +273,7 @@
   .gallery-tabs {
     display: flex;
     gap: 0;
-    margin-bottom: 56px;
+    margin-bottom: 48px;
     border-bottom: 0.5px solid rgba(28,26,23,0.12);
   }
   .gallery-tab {
@@ -292,80 +292,80 @@
     margin-bottom: -0.5px;
   }
   .gallery-tab:hover { color: var(--ink); }
-  .gallery-tab.active {
-    color: var(--ink);
-    border-bottom-color: var(--ink);
-  }
-  .gallery-venue {
-    display: none;
-  }
-  .gallery-venue.active {
-    display: block;
-  }
-  .gallery-venue-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 13px;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 24px;
-  }
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .gallery-grid-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .gallery-item {
-    background: var(--cream-dark);
-    overflow: hidden;
-    cursor: pointer;
-    transition: opacity 0.35s;
-    aspect-ratio: 3/4;
-  }
-  .gallery-item.landscape {
-    aspect-ratio: 4/3;
-  }
-  .gallery-item.square {
-    aspect-ratio: 1/1;
-  }
-  .gallery-item:hover { opacity: 0.85; }
-  .gallery-item img {
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
-  }
-  .gallery-item-inner {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-  }
+  .gallery-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
 
-  /* ── 갤러리 아이템 캡션 ── */
-  .gallery-item-wrap {
+  .gallery-venue { display: none; }
+  .gallery-venue.active { display: flex; gap: 32px; align-items: flex-start; }
+
+  /* 왼쪽 썸네일 목록 */
+  .gallery-thumb-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    width: 220px;
+    flex-shrink: 0;
   }
-  .gallery-caption {
+  .gallery-thumb {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background: var(--cream-dark);
+    transition: opacity 0.3s;
+  }
+  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-thumb:hover { opacity: 0.85; }
+  .gallery-thumb.active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--ink);
+  }
+  .gallery-thumb-name {
     font-size: 11px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--ink-soft);
     text-align: center;
+    margin-top: 8px;
+    transition: color 0.2s;
   }
+  .gallery-thumb-wrap { display: flex; flex-direction: column; cursor: pointer; }
+  .gallery-thumb-wrap.active .gallery-thumb-name { color: var(--ink); }
+
+  /* 오른쪽 사진 그리드 */
+  .gallery-detail {
+    flex: 1;
+    display: none;
+  }
+  .gallery-detail.active { display: block; }
+  .gallery-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .gallery-detail-item {
+    aspect-ratio: 3/4;
+    background: var(--cream-dark);
+    overflow: hidden;
+  }
+  .gallery-detail-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-detail-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  /* ── 갤러리 아이템 캡션 (기존 호환) ── */
+  .gallery-item-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .gallery-caption { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft); text-align: center; }
+  .gallery-item { background: var(--cream-dark); overflow: hidden; cursor: pointer; transition: opacity 0.35s; aspect-ratio: 3/4; }
+  .gallery-item:hover { opacity: 0.85; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-item-inner { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; letter-spacing: 0.06em; }
   .packages {
     background: var(--ink);
     color: var(--cream);
@@ -722,79 +722,102 @@
   <div class="section-label scroll-reveal">Gallery</div>
 
   <div class="gallery-tabs scroll-reveal">
-    <button class="gallery-tab active" data-venue="all">All</button>
-    <button class="gallery-tab" data-venue="hall">웨딩홀</button>
+    <button class="gallery-tab active" data-venue="hall">웨딩홀</button>
     <button class="gallery-tab" data-venue="hotel">호텔</button>
     <button class="gallery-tab" data-venue="studio">스튜디오</button>
   </div>
 
-  <!-- ALL -->
-  <div class="gallery-venue active" data-venue="all">
-    <div class="gallery-grid">
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_main.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_01.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_01.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_02.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_02.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-    </div>
-  </div>
-
   <!-- 웨딩홀 -->
-  <div class="gallery-venue" data-venue="hall">
-    <!-- 라비두스 -->
-    <div class="gallery-grid">
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_01.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_02.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_03.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_04.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_05.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_06.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_07.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_08.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_09.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_10.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_11.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_12.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_13.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_14.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_15.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_16.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="ravidus/ravidus_17.jpg" alt="라비두스"></div><span class="gallery-caption">라비두스</span></div>
+  <div class="gallery-venue active" data-venue="hall">
+    <!-- 왼쪽 썸네일 -->
+    <div class="gallery-thumb-list">
+      <div class="gallery-thumb-wrap active" data-detail="ravidus">
+        <div class="gallery-thumb"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
+        <span class="gallery-thumb-name">라비두스</span>
+      </div>
+      <div class="gallery-thumb-wrap" data-detail="samsung">
+        <div class="gallery-thumb"><img src="samsung/samsung_main.jpg" alt="삼성전자 금융캠퍼스"></div>
+        <span class="gallery-thumb-name">삼성전자 금융캠퍼스</span>
+      </div>
     </div>
-    <!-- 삼성전자 금융캠퍼스 -->
-    <div class="gallery-grid" style="margin-top: 48px;">
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_main.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_01.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_02.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_03.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_04.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_05.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_06.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_07.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_08.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_09.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_10.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><img src="samsung/samsung_11.jpg" alt="삼성전자 금융캠퍼스"></div><span class="gallery-caption">삼성전자 금융캠퍼스</span></div>
+    <!-- 오른쪽 상세 -->
+    <div style="flex:1;">
+      <div class="gallery-detail active" data-detail="ravidus">
+        <div class="gallery-detail-title">라비두스</div>
+        <div class="gallery-detail-grid">
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_01.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_02.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_03.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_04.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_05.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_06.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_07.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_08.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_09.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_10.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_11.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_12.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_13.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_14.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_15.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_16.jpg" alt="라비두스"></div>
+          <div class="gallery-detail-item"><img src="ravidus/ravidus_17.jpg" alt="라비두스"></div>
+        </div>
+      </div>
+      <div class="gallery-detail" data-detail="samsung">
+        <div class="gallery-detail-title">삼성전자 금융캠퍼스</div>
+        <div class="gallery-detail-grid">
+          <div class="gallery-detail-item"><img src="samsung/samsung_main.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_01.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_02.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_03.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_04.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_05.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_06.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_07.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_08.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_09.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_10.jpg" alt="삼성전자 금융캠퍼스"></div>
+          <div class="gallery-detail-item"><img src="samsung/samsung_11.jpg" alt="삼성전자 금융캠퍼스"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- 호텔 -->
+  <!-- 호텔 (사진 추가 예정) -->
   <div class="gallery-venue" data-venue="hotel">
-    <div class="gallery-grid">
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
+    <div class="gallery-thumb-list">
+      <div class="gallery-thumb-wrap active" data-detail="hotel_placeholder">
+        <div class="gallery-thumb"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;">photo</div></div>
+        <span class="gallery-thumb-name">호텔명</span>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <div class="gallery-detail active" data-detail="hotel_placeholder">
+        <div class="gallery-detail-title">호텔</div>
+        <div class="gallery-detail-grid">
+          <div class="gallery-detail-item"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;">사진 추가 예정</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- 스튜디오 -->
+  <!-- 스튜디오 (사진 추가 예정) -->
   <div class="gallery-venue" data-venue="studio">
-    <div class="gallery-grid">
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
-      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+    <div class="gallery-thumb-list">
+      <div class="gallery-thumb-wrap active" data-detail="studio_placeholder">
+        <div class="gallery-thumb"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;">photo</div></div>
+        <span class="gallery-thumb-name">스튜디오명</span>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <div class="gallery-detail active" data-detail="studio_placeholder">
+        <div class="gallery-detail-title">스튜디오</div>
+        <div class="gallery-detail-grid">
+          <div class="gallery-detail-item"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:'Cormorant Garamond',serif;font-style:italic;">사진 추가 예정</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -947,6 +970,19 @@
       const venue = tab.dataset.venue;
       document.querySelectorAll('.gallery-venue').forEach(v => {
         v.classList.toggle('active', v.dataset.venue === venue);
+      });
+    });
+  });
+
+  /* ── 썸네일 클릭 → 상세 사진 전환 ── */
+  document.querySelectorAll('.gallery-thumb-wrap').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const venue = thumb.closest('.gallery-venue');
+      const detail = thumb.dataset.detail;
+      venue.querySelectorAll('.gallery-thumb-wrap').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      venue.querySelectorAll('.gallery-detail').forEach(d => {
+        d.classList.toggle('active', d.dataset.detail === detail);
       });
     });
   });
