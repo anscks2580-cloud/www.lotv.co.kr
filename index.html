@@ -496,19 +496,8 @@
     text-transform: uppercase;
     color: var(--ink);
     margin-bottom: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-  }
-  .reserve-section-label::before,
-  .reserve-section-label::after {
-    content: '';
-    display: block;
-    height: 0.5px;
-    width: 48px;
-    background: var(--accent);
-    opacity: 0.5;
+    text-align: center;
+    line-height: 1.4;
   }
   .reserve {
     text-align: center;
@@ -835,12 +824,12 @@
 
 <!-- ── RESERVE ── -->
 <section class="reserve" id="reserve">
-  <div class="reserve-section-label scroll-reveal">Reservation &amp; Policy</div>
+  <div class="reserve-section-label scroll-reveal">Reservation<br>&amp; Policy</div>
   <div class="scroll-reveal">
 
     <!-- 환불 규정 -->
     <div class="policy-box">
-      <p class="policy-notice">예약 신청 전 환불 및 취소 규정을 반드시 확인해 주세요.<br>예약 진행 시 해당 규정에 동의한 것으로 간주됩니다.</p>
+      <p class="policy-notice">예약 신청 전 환불 및 취소<br>규정을 반드시 확인해 주세요.<br>예약 진행 시 해당 규정에<br>동의한 것으로 간주됩니다.</p>
       <a class="policy-btn" href="https://blog.naver.com/lotv_snap/224299487971" target="_blank" rel="noopener">
         환불 규정 확인 →
       </a>
