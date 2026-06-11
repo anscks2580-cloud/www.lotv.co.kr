@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라비두스 — LOTV Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F2EFE8;
+    --cream-dark: #E8E3D8;
+    --ink: #1C1A17;
+    --ink-soft: #5A5650;
+    --warm-white: #FAF8F4;
+    --accent: #9B8E7A;
+  }
+  body { background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 24px 48px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(242,239,232,0.94); backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid rgba(28,26,23,0.08);
+  }
+  .nav-logo { text-decoration: none; color: var(--ink); font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; letter-spacing: 0.18em; }
+  .nav-back { text-decoration: none; color: var(--ink-soft); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+  .nav-back:hover { color: var(--ink); }
+
+  .page-header {
+    padding: 140px 48px 60px;
+  }
+  .page-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; }
+
+  .photo-grid {
+    padding: 0 48px 100px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .photo-item {
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--cream-dark);
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .photo-item:hover { opacity: 0.88; }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* 라이트박스 */
+  .lightbox {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(28,26,23,0.95);
+    align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+  .lightbox-close {
+    position: absolute; top: 24px; right: 32px;
+    color: rgba(242,239,232,0.6); font-size: 28px; cursor: pointer; background: none; border: none;
+    transition: color 0.2s;
+  }
+  .lightbox-close:hover { color: var(--cream); }
+  .lightbox-prev, .lightbox-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    color: rgba(242,239,232,0.5); font-size: 24px; cursor: pointer;
+    background: none; border: none; padding: 16px; transition: color 0.2s;
+  }
+  .lightbox-prev { left: 16px; }
+  .lightbox-next { right: 16px; }
+  .lightbox-prev:hover, .lightbox-next:hover { color: var(--cream); }
+  .lightbox-counter { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); color: rgba(242,239,232,0.4); font-size: 11px; letter-spacing: 0.2em; }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .page-header { padding: 100px 24px 40px; }
+    .photo-grid { padding: 0 24px 80px; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LOTV</a>
+  <a class="nav-back" href="index.html#gallery">← Gallery</a>
+</nav>
+
+<div class="page-header">
+  <p class="page-eyebrow">웨딩홀 · Wedding Hall</p>
+  <h1 class="page-title">라비두스</h1>
+</div>
+
+<div class="photo-grid" id="photoGrid">
+  <div class="photo-item" onclick="openLightbox(0)"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(1)"><img src="ravidus/ravidus_01.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(2)"><img src="ravidus/ravidus_02.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(3)"><img src="ravidus/ravidus_03.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(4)"><img src="ravidus/ravidus_04.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(5)"><img src="ravidus/ravidus_05.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(6)"><img src="ravidus/ravidus_06.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(7)"><img src="ravidus/ravidus_07.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(8)"><img src="ravidus/ravidus_08.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(9)"><img src="ravidus/ravidus_09.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(10)"><img src="ravidus/ravidus_10.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(11)"><img src="ravidus/ravidus_11.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(12)"><img src="ravidus/ravidus_12.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(13)"><img src="ravidus/ravidus_13.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(14)"><img src="ravidus/ravidus_14.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(15)"><img src="ravidus/ravidus_15.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(16)"><img src="ravidus/ravidus_16.jpg" alt="라비두스"></div>
+  <div class="photo-item" onclick="openLightbox(17)"><img src="ravidus/ravidus_17.jpg" alt="라비두스"></div>
+</div>
+
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-prev" onclick="changePhoto(-1)">‹</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <button class="lightbox-next" onclick="changePhoto(1)">›</button>
+  <span class="lightbox-counter" id="lightboxCounter"></span>
+</div>
+
+<script>
+const photos = [
+  'ravidus/ravidus_main.jpg','ravidus/ravidus_01.jpg','ravidus/ravidus_02.jpg',
+  'ravidus/ravidus_03.jpg','ravidus/ravidus_04.jpg','ravidus/ravidus_05.jpg',
+  'ravidus/ravidus_06.jpg','ravidus/ravidus_07.jpg','ravidus/ravidus_08.jpg',
+  'ravidus/ravidus_09.jpg','ravidus/ravidus_10.jpg','ravidus/ravidus_11.jpg',
+  'ravidus/ravidus_12.jpg','ravidus/ravidus_13.jpg','ravidus/ravidus_14.jpg',
+  'ravidus/ravidus_15.jpg','ravidus/ravidus_16.jpg','ravidus/ravidus_17.jpg'
+];
+let current = 0;
+function openLightbox(i) {
+  current = i;
+  document.getElementById('lightboxImg').src = photos[i];
+  document.getElementById('lightboxCounter').textContent = (i+1) + ' / ' + photos.length;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function changePhoto(dir) {
+  current = (current + dir + photos.length) % photos.length;
+  document.getElementById('lightboxImg').src = photos[current];
+  document.getElementById('lightboxCounter').textContent = (current+1) + ' / ' + photos.length;
+}
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') changePhoto(-1);
+  if (e.key === 'ArrowRight') changePhoto(1);
+});
+</script>
+</body>
+</html>
