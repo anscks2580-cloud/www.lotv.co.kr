@@ -272,57 +272,77 @@
   .gallery { background: var(--cream); }
   .gallery-tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 56px;
+    border-bottom: 0.5px solid rgba(28,26,23,0.12);
   }
   .gallery-tab {
     background: none;
-    border: 0.5px solid var(--accent);
-    color: var(--accent);
+    border: none;
+    border-bottom: 1.5px solid transparent;
+    color: var(--ink-soft);
     font-family: 'Jost', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 300;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    padding: 8px 20px;
+    padding: 12px 24px;
     cursor: pointer;
-    transition: background 0.25s, color 0.25s;
+    transition: color 0.25s, border-color 0.25s;
+    margin-bottom: -0.5px;
   }
-  .gallery-tab:hover,
+  .gallery-tab:hover { color: var(--ink); }
   .gallery-tab.active {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--cream);
+    color: var(--ink);
+    border-bottom-color: var(--ink);
   }
-  .gallery-intro {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 40px;
+  .gallery-venue {
+    display: none;
   }
-  .gallery-title {
+  .gallery-venue.active {
+    display: block;
+  }
+  .gallery-venue-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 44px;
+    font-size: 13px;
     font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
   }
-  .gallery-title em { font-style: italic; }
-  .gallery-masonry {
-    columns: 3;
-    column-gap: 8px;
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .gallery-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
   }
   .gallery-item {
-    break-inside: avoid;
-    margin-bottom: 8px;
     background: var(--cream-dark);
     overflow: hidden;
     cursor: pointer;
     transition: opacity 0.35s;
-    position: relative;
+    aspect-ratio: 3/4;
   }
-  .gallery-item:hover { opacity: 0.82; }
+  .gallery-item.landscape {
+    aspect-ratio: 4/3;
+  }
+  .gallery-item.square {
+    aspect-ratio: 1/1;
+  }
+  .gallery-item:hover { opacity: 0.85; }
+  .gallery-item img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
   .gallery-item-inner {
-    width: 100%;
+    width: 100%; height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,12 +352,20 @@
     font-size: 12px;
     letter-spacing: 0.06em;
   }
-  /* .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; } */
-  .h-tall  { height: 300px; }
-  .h-mid   { height: 210px; }
-  .h-short { height: 165px; }
 
-  /* ── PACKAGES ── */
+  /* ── 갤러리 아이템 캡션 ── */
+  .gallery-item-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gallery-caption {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: center;
+  }
   .packages {
     background: var(--ink);
     color: var(--cream);
@@ -612,17 +640,19 @@
 
     section { padding: 72px 24px; }
 
-    .about { grid-template-columns: 1fr; gap: 40px; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .gallery-grid-2 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .gallery-tabs { overflow-x: auto; flex-wrap: nowrap; }
     .about-visual { aspect-ratio: 4/3; }
     .about-title { font-size: 30px; }
 
     .gallery-masonry { columns: 2; }
 
+    .about { grid-template-columns: 1fr; gap: 40px; }
+
     .pkg-grid { grid-template-columns: 1fr; }
 
     .reserve { padding: 80px 24px; }
-
-    .contact-strip { gap: 40px; padding: 48px 24px; }
 
     footer { padding: 24px; flex-direction: column; text-align: center; gap: 8px; }
   }
@@ -691,35 +721,61 @@
 <section class="gallery" id="gallery">
   <div class="section-label scroll-reveal">Gallery</div>
 
-  <!-- 장소별 탭 필터 -->
   <div class="gallery-tabs scroll-reveal">
-    <button class="gallery-tab active" data-filter="all">All</button>
-    <button class="gallery-tab" data-filter="hall">웨딩홀</button>
-    <button class="gallery-tab" data-filter="hotel">호텔</button>
-    <button class="gallery-tab" data-filter="outdoor">야외</button>
-    <button class="gallery-tab" data-filter="small">스몰웨딩</button>
+    <button class="gallery-tab active" data-venue="all">All</button>
+    <button class="gallery-tab" data-venue="hall">웨딩홀</button>
+    <button class="gallery-tab" data-venue="hotel">호텔</button>
+    <button class="gallery-tab" data-venue="studio">스튜디오</button>
   </div>
 
-  <div class="gallery-masonry scroll-reveal" style="transition-delay: 0.12s;">
-    <!-- 사진 추가 방법:
-      <div class="gallery-item" data-category="hall">
-        <img src="사진.jpg" alt="웨딩홀 스냅" style="width:100%; height:220px; object-fit:cover; display:block;">
-      </div>
-      data-category: hall / hotel / outdoor / small
-    -->
-    <div class="gallery-item" data-category="hall"><div class="gallery-item-inner h-tall">photo</div></div>
-    <div class="gallery-item" data-category="hotel"><div class="gallery-item-inner h-mid">photo</div></div>
-    <div class="gallery-item" data-category="outdoor"><div class="gallery-item-inner h-tall">photo</div></div>
-    <div class="gallery-item" data-category="small"><div class="gallery-item-inner h-short">photo</div></div>
-    <div class="gallery-item" data-category="hall"><div class="gallery-item-inner h-mid">photo</div></div>
-    <div class="gallery-item" data-category="hotel"><div class="gallery-item-inner h-short">photo</div></div>
-    <div class="gallery-item" data-category="outdoor"><div class="gallery-item-inner h-mid">photo</div></div>
-    <div class="gallery-item" data-category="small"><div class="gallery-item-inner h-tall">photo</div></div>
-    <div class="gallery-item" data-category="hall"><div class="gallery-item-inner h-mid">photo</div></div>
-    <div class="gallery-item" data-category="hotel"><div class="gallery-item-inner h-short">photo</div></div>
-    <div class="gallery-item" data-category="outdoor"><div class="gallery-item-inner h-mid">photo</div></div>
-    <div class="gallery-item" data-category="small"><div class="gallery-item-inner h-short">photo</div></div>
+  <!-- ALL -->
+  <div class="gallery-venue active" data-venue="all">
+    <div class="gallery-grid">
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">장소명</span></div>
+    </div>
   </div>
+
+  <!-- 웨딩홀 -->
+  <div class="gallery-venue" data-venue="hall">
+    <div class="gallery-grid">
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">웨딩홀명</span></div>
+    </div>
+  </div>
+
+  <!-- 호텔 -->
+  <div class="gallery-venue" data-venue="hotel">
+    <div class="gallery-grid">
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">신라호텔</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">그랜드하얏트</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">호텔명</span></div>
+    </div>
+  </div>
+
+  <!-- 스튜디오 -->
+  <div class="gallery-venue" data-venue="studio">
+    <div class="gallery-grid">
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+      <div class="gallery-item-wrap"><div class="gallery-item"><div class="gallery-item-inner">photo</div></div><span class="gallery-caption">스튜디오명</span></div>
+    </div>
+  </div>
+
 </section>
 
 <!-- ── PACKAGES ── -->
@@ -866,13 +922,9 @@
     tab.addEventListener('click', () => {
       document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      const filter = tab.dataset.filter;
-      document.querySelectorAll('.gallery-item').forEach(item => {
-        if (filter === 'all' || item.dataset.category === filter) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
+      const venue = tab.dataset.venue;
+      document.querySelectorAll('.gallery-venue').forEach(v => {
+        v.classList.toggle('active', v.dataset.venue === venue);
       });
     });
   });
