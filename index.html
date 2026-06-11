@@ -437,12 +437,52 @@
   }
 
   /* ── RESERVE ── */
+  .policy-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background: var(--cream-dark);
+    border: 0.5px solid rgba(28,26,23,0.12);
+    padding: 32px 48px;
+    margin-bottom: 0;
+  }
+  .policy-notice {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+  }
+  .policy-btn {
+    display: inline-block;
+    padding: 11px 32px;
+    border: 0.5px solid var(--ink);
+    font-family: 'Jost', sans-serif;
+    font-size: 10.5px;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    background: transparent;
+    transition: background 0.3s, color 0.3s;
+  }
+  .policy-btn:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .policy-divider {
+    width: 0.5px;
+    height: 60px;
+    background: var(--accent);
+    opacity: 0.4;
+    margin: 40px auto;
+  }
   .reserve {
     text-align: center;
     padding: 130px 48px;
     background: var(--warm-white);
   }
-  .reserve-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(40px, 5vw, 58px);
     font-weight: 300;
@@ -736,18 +776,25 @@
 
 <!-- ── RESERVE ── -->
 <section class="reserve" id="reserve">
-  <div class="section-label" style="justify-content: center; margin-bottom: 20px;">Reservation</div>
+  <div class="section-label" style="justify-content: center; margin-bottom: 20px;">Reservation &amp; Policy</div>
   <div class="scroll-reveal">
+
+    <!-- 환불 규정 -->
+    <div class="policy-box">
+      <p class="policy-notice">예약 신청 전 환불 및 취소 규정을 반드시 확인해 주세요.<br>예약 진행 시 해당 규정에 동의한 것으로 간주됩니다.</p>
+      <a class="policy-btn" href="https://blog.naver.com/lotv_snap/224299487971" target="_blank" rel="noopener">
+        환불 규정 확인 →
+      </a>
+    </div>
+
+    <div class="policy-divider"></div>
+
     <h2 class="reserve-title">함께할 날을<br><em>예약해주세요</em></h2>
     <p class="reserve-sub">
       카카오톡 채널 <strong>LOTV</strong>로<br>
       결혼 날짜와 웨딩홀 정보를 보내주시면<br>
       빠르게 가능 여부를 확인해 드립니다.
     </p>
-    <!--
-      카카오톡 채널 링크 확인 후 href 업데이트:
-      카카오톡 채널 URL 형식: https://pf.kakao.com/_채널ID
-    -->
     <a class="reserve-btn" href="https://pf.kakao.com/" target="_blank" rel="noopener">
       카카오톡 채널 상담하기
     </a>
