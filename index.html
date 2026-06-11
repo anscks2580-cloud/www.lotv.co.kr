@@ -58,7 +58,8 @@
   .logo-img {
     height: 44px;
     width: auto;
-    mix-blend-mode: multiply;
+    mix-blend-mode: screen;
+    filter: invert(1);
   }
   .logo-text {
     font-family: 'Cormorant Garamond', serif;
@@ -579,7 +580,7 @@
 <!-- ── NAV ── -->
 <nav id="mainNav">
   <a class="nav-logo" href="#">
-    <img src="logo.jpg" alt="LOTV 로고" class="logo-img">
+    <img src="logo.png" alt="LOTV 로고" class="logo-img">
   </a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#gallery" onclick="closeMenu()">Gallery</a></li>
