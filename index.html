@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="LOTV — Lily of the Valley Snap. 결혼식 본식 스냅, 아이폰 감성, 필름 무드.">
+<meta property="og:title" content="LOTV — Lily of the Valley Snap">
+<meta property="og:description" content="결혼식의 한 장면을 영원히. 본식 스냅 · 아이폰 감성 · 필름 무드">
+<meta property="og:url" content="https://www.lotv.com">
+<title>LOTV — Lily of the Valley Snap</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F2EFE8;
+    --cream-dark: #E8E3D8;
+    --ink: #1C1A17;
+    --ink-soft: #5A5650;
+    --warm-white: #FAF8F4;
+    --accent: #9B8E7A;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.4s, padding 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(242,239,232,0.94);
+    backdrop-filter: blur(10px);
+    padding: 16px 48px;
+    border-bottom: 0.5px solid rgba(28,26,23,0.08);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* 모바일 햄버거 */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 0.5px;
+    background: var(--ink);
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 0.8fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+  }
+  .hero-img {
+    background: var(--cream-dark);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+  /* ── 사진 업로드 후 이 부분을 img 태그로 교체하세요 ── */
+  /* .hero-img img { width:100%; height:100%; object-fit:cover; } */
+  .hero-img:nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+  .hero-img:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .hero-img:nth-child(3) { grid-column: 3; grid-row: 1; }
+  .hero-img:nth-child(4) { grid-column: 2; grid-row: 2; }
+  .hero-img:nth-child(5) { grid-column: 3; grid-row: 2; }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(242,239,232,0.9) 0%, rgba(242,239,232,0.1) 55%, transparent 100%);
+    pointer-events: none;
+  }
+  .hero-text {
+    position: relative;
+    z-index: 2;
+    max-width: 520px;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 6.5vw, 76px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    margin-bottom: 26px;
+  }
+  .hero-title em { font-style: italic; }
+  .hero-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    right: 48px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .hero-scroll-hint::after {
+    content: '';
+    display: block;
+    width: 0.5px;
+    height: 40px;
+    background: var(--accent);
+    animation: scrollLine 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 100px 48px; }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    display: block;
+    height: 0.5px;
+    width: 48px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  /* ── ABOUT ── */
+  .about {
+    background: var(--warm-white);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .about-visual {
+    aspect-ratio: 3/4;
+    background: var(--cream-dark);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+  /* .about-visual img { width:100%; height:100%; object-fit:cover; } */
+  .about-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 32px;
+  }
+  .about-title em { font-style: italic; }
+  .about-body {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 2.1;
+    margin-bottom: 20px;
+  }
+  .about-divider {
+    width: 32px;
+    height: 0.5px;
+    background: var(--accent);
+    margin: 32px 0;
+    opacity: 0.6;
+  }
+  .about-tag-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .about-tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 0.5px solid var(--accent);
+    padding: 6px 14px;
+    opacity: 0.7;
+  }
+
+  /* ── GALLERY ── */
+  .gallery { background: var(--cream); }
+  .gallery-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+  }
+  .gallery-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+  }
+  .gallery-title em { font-style: italic; }
+  .gallery-masonry {
+    columns: 3;
+    column-gap: 8px;
+  }
+  .gallery-item {
+    break-inside: avoid;
+    margin-bottom: 8px;
+    background: var(--cream-dark);
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity 0.35s;
+    position: relative;
+  }
+  .gallery-item:hover { opacity: 0.82; }
+  .gallery-item-inner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  /* .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; } */
+  .h-tall  { height: 300px; }
+  .h-mid   { height: 210px; }
+  .h-short { height: 165px; }
+
+  /* ── PACKAGES ── */
+  .packages {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .packages .section-label { color: var(--accent); }
+  .packages .section-label::after { background: var(--accent); }
+  .packages-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+  .packages-heading em { font-style: italic; }
+  .packages-sub {
+    font-size: 12px;
+    color: rgba(242,239,232,0.4);
+    letter-spacing: 0.1em;
+    margin-bottom: 0;
+  }
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-top: 56px;
+  }
+  .pkg-card {
+    background: var(--ink);
+    padding: 52px 40px;
+    transition: background 0.3s;
+    cursor: default;
+    position: relative;
+  }
+  .pkg-card:hover { background: #222019; }
+  .pkg-card.featured { background: #222019; }
+  .pkg-tag {
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: block;
+  }
+  .pkg-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+  .pkg-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: rgba(242,239,232,0.95);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .pkg-price-note {
+    font-size: 11px;
+    color: rgba(242,239,232,0.38);
+    letter-spacing: 0.08em;
+    margin-bottom: 28px;
+  }
+  .pkg-divider {
+    height: 0.5px;
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 28px;
+  }
+  .pkg-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .pkg-features li {
+    font-size: 12.5px;
+    color: rgba(242,239,232,0.6);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.65;
+  }
+  .pkg-features li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 10px;
+    top: 2px;
+  }
+  .pkg-note {
+    font-size: 11px;
+    color: rgba(242,239,232,0.28);
+    margin-top: 48px;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  /* ── RESERVE ── */
+  .reserve {
+    text-align: center;
+    padding: 130px 48px;
+    background: var(--warm-white);
+  }
+  .reserve-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 5vw, 58px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+  .reserve-title em { font-style: italic; }
+  .reserve-sub {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    margin-bottom: 52px;
+    line-height: 2.1;
+  }
+  .reserve-sub strong {
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .reserve-btn {
+    display: inline-block;
+    padding: 17px 56px;
+    border: 0.5px solid var(--ink);
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    background: transparent;
+    transition: background 0.3s, color 0.3s;
+    cursor: pointer;
+  }
+  .reserve-btn:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  /* ── CONTACT STRIP ── */
+  .contact-strip {
+    background: var(--cream-dark);
+    padding: 52px 48px;
+    display: flex;
+    justify-content: center;
+    gap: 72px;
+    align-items: center;
+    border-top: 0.5px solid rgba(28,26,23,0.1);
+    flex-wrap: wrap;
+  }
+  .contact-item { text-align: center; }
+  .contact-item .label {
+    font-size: 9.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .contact-item .value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+  .contact-item .value a {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .contact-item .value a:hover { color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 0.5px solid rgba(28,26,23,0.1);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ft-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+  }
+  .ft-domain {
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+  }
+  .ft-copy {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.85s ease, transform 0.85s ease;
+  }
+  .scroll-reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    nav.scrolled { padding: 14px 24px; }
+    .nav-links { display: none; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--cream); align-items: center; justify-content: center; gap: 32px; z-index: 99; }
+    .nav-links.open { display: flex; }
+    .nav-links a { font-size: 14px; }
+    .nav-toggle { display: flex; z-index: 101; }
+
+    .hero { padding: 0 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    .hero-img:nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
+    .hero-img:nth-child(2) { grid-column: 1; grid-row: 2; }
+    .hero-img:nth-child(3) { grid-column: 2; grid-row: 2; }
+    .hero-img:nth-child(4) { grid-column: 1; grid-row: 3; }
+    .hero-img:nth-child(5) { grid-column: 2; grid-row: 3; }
+    .hero-scroll-hint { display: none; }
+
+    section { padding: 72px 24px; }
+
+    .about { grid-template-columns: 1fr; gap: 40px; }
+    .about-visual { aspect-ratio: 4/3; }
+    .about-title { font-size: 30px; }
+
+    .gallery-masonry { columns: 2; }
+
+    .pkg-grid { grid-template-columns: 1fr; }
+
+    .reserve { padding: 80px 24px; }
+
+    .contact-strip { gap: 40px; padding: 48px 24px; }
+
+    footer { padding: 24px; flex-direction: column; text-align: center; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="mainNav">
+  <a class="nav-logo" href="#">
+    <svg width="30" height="42" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 줄기 -->
+      <path d="M30 74 C30 74 22 58 22 44 C22 30 28 18 32 10" stroke="#1C1A17" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <!-- 꽃봉오리 상단 꺾임 -->
+      <path d="M32 10 L29 3" stroke="#1C1A17" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M32 10 L39 7" stroke="#1C1A17" stroke-width="1.3" stroke-linecap="round"/>
+      <!-- 꽃 가지 -->
+      <path d="M27 28 C31 24 37 25 41 29" stroke="#1C1A17" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <circle cx="41" cy="29" r="2.8" stroke="#1C1A17" stroke-width="1" fill="none"/>
+      <!-- 잎 좌 -->
+      <path d="M25 46 C16 43 9 52 13 63 C15 69 24 72 30 74" stroke="#1C1A17" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <!-- 잎 우 -->
+      <path d="M30 74 C35 69 43 62 41 53 C39 46 32 46 27 46" stroke="#1C1A17" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span class="logo-text">LOTV</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#gallery" onclick="closeMenu()">Gallery</a></li>
+    <li><a href="#about" onclick="closeMenu()">About</a></li>
+    <li><a href="#packages" onclick="closeMenu()">Package</a></li>
+    <li><a href="#reserve" onclick="closeMenu()">Reserve</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-grid">
+    <!--
+      사진 추가 방법:
+      아래 div를 <div class="hero-img"><img src="사진파일명.jpg" alt="웨딩 스냅"></div> 으로 교체
+    -->
+    <div class="hero-img">photo 01</div>
+    <div class="hero-img">photo 02</div>
+    <div class="hero-img">photo 03</div>
+    <div class="hero-img">photo 04</div>
+    <div class="hero-img">photo 05</div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <p class="hero-eyebrow">Lily of the Valley Snap</p>
+    <h1 class="hero-title">결혼식의<br><em>한 장면</em>을<br>영원히</h1>
+    <p class="hero-sub">본식 스냅 &nbsp;·&nbsp; 아이폰 감성 &nbsp;·&nbsp; 필름 무드</p>
+  </div>
+  <div class="hero-scroll-hint">Scroll</div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section class="about" id="about">
+  <div class="about-visual scroll-reveal">
+    <!--
+      사진 추가 방법:
+      <img src="about.jpg" alt="LOTV 작가 소개"> 로 교체
+    -->
+    대표 사진
+  </div>
+  <div class="about-content scroll-reveal" style="transition-delay: 0.15s;">
+    <div class="section-label">About LOTV</div>
+    <h2 class="about-title">은방울꽃처럼,<br><em>섬세하고 단아하게</em></h2>
+    <p class="about-body">
+      LOTV는 결혼식 현장의 진짜 감정을 담습니다.<br>
+      연출보다 순간, 포즈보다 표정,<br>
+      완벽한 구도보다 그날의 공기를 기억하는 사진을 찍습니다.
+    </p>
+    <div class="about-divider"></div>
+    <p class="about-body">
+      아이폰 특유의 자연스러운 색감과<br>
+      필름 감성의 편집으로 오래 간직하고 싶은<br>
+      사진을 만들어드립니다.
+    </p>
+    <div class="about-tag-row" style="margin-top: 32px;">
+      <span class="about-tag">본식 스냅</span>
+      <span class="about-tag">아이폰 촬영</span>
+      <span class="about-tag">필름 무드</span>
+      <span class="about-tag">전국 가능</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── GALLERY ── -->
+<section class="gallery" id="gallery">
+  <div class="gallery-intro scroll-reveal">
+    <div>
+      <div class="section-label">Gallery</div>
+      <h2 class="gallery-title"><em>촬영</em> 작품</h2>
+    </div>
+  </div>
+
+  <!--
+    갤러리 사진 추가 방법:
+    <div class="gallery-item">
+      <img src="사진.jpg" alt="웨딩 스냅" style="width:100%; height:220px; object-fit:cover; display:block;">
+    </div>
+    높이 클래스: h-tall(300px) / h-mid(210px) / h-short(165px)
+  -->
+  <div class="gallery-masonry scroll-reveal" style="transition-delay: 0.12s;">
+    <div class="gallery-item"><div class="gallery-item-inner h-tall">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-mid">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-tall">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-short">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-mid">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-short">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-mid">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-tall">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-mid">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-short">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-mid">photo</div></div>
+    <div class="gallery-item"><div class="gallery-item-inner h-short">photo</div></div>
+  </div>
+</section>
+
+<!-- ── PACKAGES ── -->
+<section class="packages" id="packages">
+  <div class="section-label">Package</div>
+  <h2 class="packages-heading">촬영 <em>패키지</em></h2>
+  <p class="packages-sub" style="margin-top: 10px;">패키지 세부 내용은 카카오톡 채널 LOTV로 문의해 주세요.</p>
+
+  <div class="pkg-grid scroll-reveal">
+
+    <!-- A 패키지 — 블로그 내용 확인 후 업데이트 예정 -->
+    <div class="pkg-card">
+      <span class="pkg-tag">A Package</span>
+      <div class="pkg-name">A 패키지</div>
+      <div class="pkg-price">가격 문의</div>
+      <div class="pkg-price-note">카카오톡 채널 상담</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features">
+        <li>패키지 내용 업데이트 예정</li>
+        <li>카카오톡으로 문의 주세요</li>
+      </ul>
+    </div>
+
+    <!-- B 패키지 -->
+    <div class="pkg-card featured">
+      <span class="pkg-tag">B Package &nbsp;—&nbsp; Most Popular</span>
+      <div class="pkg-name">B 패키지</div>
+      <div class="pkg-price">가격 문의</div>
+      <div class="pkg-price-note">카카오톡 채널 상담</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features">
+        <li>패키지 내용 업데이트 예정</li>
+        <li>카카오톡으로 문의 주세요</li>
+      </ul>
+    </div>
+
+    <!-- C 패키지 -->
+    <div class="pkg-card">
+      <span class="pkg-tag">C Package</span>
+      <div class="pkg-name">C 패키지</div>
+      <div class="pkg-price">가격 문의</div>
+      <div class="pkg-price-note">카카오톡 채널 상담</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features">
+        <li>패키지 내용 업데이트 예정</li>
+        <li>카카오톡으로 문의 주세요</li>
+      </ul>
+    </div>
+
+  </div>
+  <p class="pkg-note">
+    * 정확한 가격 및 상세 내용은 카카오톡 채널 상담을 통해 안내드립니다.<br>
+    * 날짜·웨딩홀 정보를 함께 보내주시면 더 빠른 확인이 가능합니다.
+  </p>
+</section>
+
+<!-- ── RESERVE ── -->
+<section class="reserve" id="reserve">
+  <div class="section-label" style="justify-content: center; margin-bottom: 20px;">Reservation</div>
+  <div class="scroll-reveal">
+    <h2 class="reserve-title">함께할 날을<br><em>예약해주세요</em></h2>
+    <p class="reserve-sub">
+      카카오톡 채널 <strong>LOTV</strong>로<br>
+      결혼 날짜와 웨딩홀 정보를 보내주시면<br>
+      빠르게 가능 여부를 확인해 드립니다.
+    </p>
+    <!--
+      카카오톡 채널 링크 확인 후 href 업데이트:
+      카카오톡 채널 URL 형식: https://pf.kakao.com/_채널ID
+    -->
+    <a class="reserve-btn" href="https://pf.kakao.com/" target="_blank" rel="noopener">
+      카카오톡 채널 상담하기
+    </a>
+  </div>
+</section>
+
+<!-- ── CONTACT STRIP ── -->
+<div class="contact-strip">
+  <div class="contact-item">
+    <div class="label">Website</div>
+    <div class="value">www.lotv.com</div>
+  </div>
+  <div class="contact-item">
+    <div class="label">Instagram</div>
+    <div class="value">
+      <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">@lotv.snap</a>
+    </div>
+  </div>
+  <div class="contact-item">
+    <div class="label">KakaoTalk</div>
+    <div class="value">LOTV</div>
+  </div>
+  <div class="contact-item">
+    <div class="label">촬영 지역</div>
+    <div class="value">전국 가능</div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span class="ft-brand">LOTV — Lily of the Valley Snap</span>
+  <span class="ft-domain">www.lotv.com</span>
+  <span class="ft-copy">© 2025 LOTV. All rights reserved.</span>
+</footer>
+
+<script>
+  /* ── 스크롤 시 nav 스타일 변경 ── */
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  /* ── 모바일 메뉴 토글 ── */
+  const toggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    navLinks.classList.toggle('open');
+    document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+  });
+  function closeMenu() {
+    toggle.classList.remove('open');
+    navLinks.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ── 스크롤 reveal 애니메이션 ── */
+  const reveals = document.querySelectorAll('.scroll-reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => io.observe(el));
+  /* 페이지 로드 시 이미 보이는 요소 처리 */
+  reveals.forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight) {
+      el.classList.add('visible');
+    }
+  });
+</script>
+
+</body>
+</html>
