@@ -488,6 +488,28 @@
     opacity: 0.4;
     margin: 40px auto;
   }
+  .reserve-section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .reserve-section-label::before,
+  .reserve-section-label::after {
+    content: '';
+    display: block;
+    height: 0.5px;
+    width: 48px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
   .reserve {
     text-align: center;
     padding: 130px 48px;
@@ -813,7 +835,7 @@
 
 <!-- ── RESERVE ── -->
 <section class="reserve" id="reserve">
-  <div class="section-label" style="justify-content: center; margin-bottom: 20px;">Reservation &amp; Policy</div>
+  <div class="reserve-section-label scroll-reveal">Reservation &amp; Policy</div>
   <div class="scroll-reveal">
 
     <!-- 환불 규정 -->
@@ -826,10 +848,10 @@
 
     <div class="policy-divider"></div>
 
-    <h2 class="reserve-title">Reserve the day<br><em>we'll capture together</em></h2>
+    <h2 class="reserve-title">" Reserve the day<br><em>we'll capture together</em> "</h2>
     <p class="reserve-sub" style="margin-top: 60px;">
-      함께할 소중한 날을 위해 아래 정보를<br>
-      카카오톡 채널 <strong>LOTV</strong>로 보내주세요.<br><br>
+      함께할 소중한 날을 위해<br>
+      아래 정보를 카카오톡 채널 <strong>LOTV</strong>로 보내주세요.<br><br>
       • 성함<br>
       • 연락처<br>
       • 결혼식 일시<br>
