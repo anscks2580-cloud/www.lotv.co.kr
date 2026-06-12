@@ -115,5 +115,53 @@ document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.
   img { -webkit-user-select: none; user-select: none; pointer-events: none; -webkit-touch-callout: none; }
   .photo-item, .lightbox-img { pointer-events: auto; }
 </style>
+<!-- ── 카카오톡 플로팅 버튼 ── -->
+<style>
+  .kakao-float {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .kakao-float-btn {
+    width: 56px;
+    height: 56px;
+    background: #FEE500;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kakao-float:hover .kakao-float-btn {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .kakao-float-btn svg { width: 28px; height: 28px; }
+  .kakao-float-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft, #5A5650);
+    background: rgba(242,239,232,0.92);
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+</style>
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
 </body>
 </html>
