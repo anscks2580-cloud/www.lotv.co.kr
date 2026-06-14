@@ -966,26 +966,23 @@
     document.body.style.overflow = '';
   }
 
-  /* ── 갤러리 탭 필터 (카드 모션) ── */
+  /* ── 갤러리 탭 필터 (고급 모션) ── */
   function switchVenue(nextVenue) {
     const current = document.querySelector('.gallery-venue.active');
     const next = document.querySelector(`.gallery-venue[data-venue="${nextVenue}"]`);
     if (!next || current === next) return;
 
-    const CARD_DELAY = 40; // 카드별 딜레이(ms)
+    const STAGGER = 55;
 
-    // 1. 현재 venue 카드들 leaving 애니메이션 (중앙으로 모이며 사라짐)
-    const currentCards = current.querySelectorAll('.gallery-card');
-    const cx = current.getBoundingClientRect().left + current.offsetWidth / 2;
+    // 나갈 때: 카드들이 살짝 위로 흐르며 조용히 사라짐
+    const currentCards = [...current.querySelectorAll('.gallery-card')];
     currentCards.forEach((card, i) => {
-      const rect = card.getBoundingClientRect();
-      const dx = cx - (rect.left + rect.width / 2);
-      card.style.transition = `transform 0.4s cubic-bezier(0.4,0,0.2,1) ${i * CARD_DELAY}ms, opacity 0.4s ease ${i * CARD_DELAY}ms`;
-      card.style.transform = `translateX(${dx * 0.3}px) scale(0.82)`;
+      card.style.transition = `transform 0.55s cubic-bezier(0.4,0,1,1) ${i * STAGGER}ms, opacity 0.45s ease ${i * STAGGER}ms`;
+      card.style.transform = 'translateY(-14px)';
       card.style.opacity = '0';
     });
 
-    const leaveDuration = 400 + currentCards.length * CARD_DELAY;
+    const leaveDuration = 550 + currentCards.length * STAGGER;
 
     setTimeout(() => {
       current.classList.remove('active');
@@ -995,31 +992,29 @@
         card.style.opacity = '';
       });
 
-      // 2. 다음 venue 카드들 entering 애니메이션 (아래서 올라오며 등장)
+      // 들어올 때: 아주 살짝 아래에서 천천히 스며들듯
       next.classList.add('active');
-      const nextCards = next.querySelectorAll('.gallery-card');
-      nextCards.forEach((card, i) => {
-        card.style.transform = 'translateY(24px) scale(0.92)';
+      const nextCards = [...next.querySelectorAll('.gallery-card')];
+      nextCards.forEach(card => {
+        card.style.transform = 'translateY(10px)';
         card.style.opacity = '0';
         card.style.transition = 'none';
       });
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          nextCards.forEach((card, i) => {
-            card.style.transition = `transform 0.5s cubic-bezier(0.2,0,0,1) ${i * CARD_DELAY}ms, opacity 0.5s ease ${i * CARD_DELAY}ms`;
-            card.style.transform = 'translateY(0) scale(1)';
-            card.style.opacity = '1';
-          });
-          setTimeout(() => {
-            nextCards.forEach(card => {
-              card.style.transition = '';
-              card.style.transform = '';
-              card.style.opacity = '';
-            });
-          }, 500 + nextCards.length * CARD_DELAY);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        nextCards.forEach((card, i) => {
+          card.style.transition = `transform 0.75s cubic-bezier(0.2,0,0,1) ${i * STAGGER}ms, opacity 0.7s ease ${i * STAGGER}ms`;
+          card.style.transform = 'translateY(0)';
+          card.style.opacity = '1';
         });
-      });
+        setTimeout(() => {
+          nextCards.forEach(card => {
+            card.style.transition = '';
+            card.style.transform = '';
+            card.style.opacity = '';
+          });
+        }, 750 + nextCards.length * STAGGER);
+      }));
     }, leaveDuration);
   }
 
