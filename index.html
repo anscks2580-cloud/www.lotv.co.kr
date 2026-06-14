@@ -297,24 +297,9 @@
     display: block;
     opacity: 1;
   }
-  .gallery-venue.is-leaving {
-    display: block;
-    position: absolute;
-    width: 100%;
-    pointer-events: none;
-    animation: venue-out 0.6s cubic-bezier(0.4,0,0.6,1) forwards;
-  }
-  .gallery-venue.is-entering {
-    display: block;
-    animation: venue-in 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
-  }
-  @keyframes venue-out {
-    0%   { opacity: 1; filter: blur(0px);   transform: scale(1); }
-    100% { opacity: 0; filter: blur(6px);   transform: scale(1.015); }
-  }
-  @keyframes venue-in {
-    0%   { opacity: 0; filter: blur(4px);   transform: scale(0.985); }
-    100% { opacity: 1; filter: blur(0px);   transform: scale(1); }
+  .gallery-card {
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform, opacity;
   }
   .gallery-thumb-grid {
     display: grid;
@@ -969,34 +954,56 @@
     document.body.style.overflow = '';
   }
 
-  /* ── 갤러리 탭 필터 (크로스페이드 + 블러) ── */
-  let isSwitching = false;
+  /* ── 갤러리 탭 필터 (고급 모션) ── */
   function switchVenue(nextVenue) {
-    if (isSwitching) return;
     const current = document.querySelector('.gallery-venue.active');
     const next = document.querySelector(`.gallery-venue[data-venue="${nextVenue}"]`);
     if (!next || current === next) return;
 
-    isSwitching = true;
+    const STAGGER = 55;
 
-    // 현재 venue: 블러 아웃
-    current.classList.remove('active');
-    current.classList.add('is-leaving');
+    // 나갈 때: 카드들이 살짝 위로 흐르며 조용히 사라짐
+    const currentCards = [...current.querySelectorAll('.gallery-card')];
+    currentCards.forEach((card, i) => {
+      card.style.transition = `transform 0.55s cubic-bezier(0.4,0,1,1) ${i * STAGGER}ms, opacity 0.45s ease ${i * STAGGER}ms`;
+      card.style.transform = 'translateY(-14px)';
+      card.style.opacity = '0';
+    });
 
-    // 다음 venue: 살짝 뒤에 블러 인
+    const leaveDuration = 550 + currentCards.length * STAGGER;
+
     setTimeout(() => {
-      next.classList.add('is-entering');
+      current.classList.remove('active');
+      currentCards.forEach(card => {
+        card.style.transition = '';
+        card.style.transform = '';
+        card.style.opacity = '';
+      });
 
-      next.addEventListener('animationend', () => {
-        next.classList.remove('is-entering');
-        next.classList.add('active');
-        isSwitching = false;
-      }, { once: true });
-    }, 200);
+      // 들어올 때: 아주 살짝 아래에서 천천히 스며들듯
+      next.classList.add('active');
+      const nextCards = [...next.querySelectorAll('.gallery-card')];
+      nextCards.forEach(card => {
+        card.style.transform = 'translateY(10px)';
+        card.style.opacity = '0';
+        card.style.transition = 'none';
+      });
 
-    current.addEventListener('animationend', () => {
-      current.classList.remove('is-leaving');
-    }, { once: true });
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        nextCards.forEach((card, i) => {
+          card.style.transition = `transform 0.75s cubic-bezier(0.2,0,0,1) ${i * STAGGER}ms, opacity 0.7s ease ${i * STAGGER}ms`;
+          card.style.transform = 'translateY(0)';
+          card.style.opacity = '1';
+        });
+        setTimeout(() => {
+          nextCards.forEach(card => {
+            card.style.transition = '';
+            card.style.transform = '';
+            card.style.opacity = '';
+          });
+        }, 750 + nextCards.length * STAGGER);
+      }));
+    }, leaveDuration);
   }
 
   document.querySelectorAll('.gallery-tab').forEach(tab => {
