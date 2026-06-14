@@ -289,8 +289,30 @@
   }
   .gallery-tab:hover { color: var(--ink); }
   .gallery-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-  .gallery-venue { display: none; }
-  .gallery-venue.active { display: block; }
+  .gallery-venue {
+    display: none;
+    opacity: 0;
+  }
+  .gallery-venue.active {
+    display: block;
+    opacity: 1;
+  }
+  .gallery-card {
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform, opacity;
+  }
+  .gallery-venue.leaving .gallery-card {
+    transform: scale(0.8) translateY(24px);
+    opacity: 0;
+  }
+  .gallery-venue.entering .gallery-card {
+    transform: scale(0.9) translateY(16px);
+    opacity: 0;
+  }
+  .gallery-venue.entered .gallery-card {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
   .gallery-thumb-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -944,15 +966,68 @@
     document.body.style.overflow = '';
   }
 
-  /* ── 갤러리 탭 필터 ── */
+  /* ── 갤러리 탭 필터 (카드 모션) ── */
+  function switchVenue(nextVenue) {
+    const current = document.querySelector('.gallery-venue.active');
+    const next = document.querySelector(`.gallery-venue[data-venue="${nextVenue}"]`);
+    if (!next || current === next) return;
+
+    const CARD_DELAY = 40; // 카드별 딜레이(ms)
+
+    // 1. 현재 venue 카드들 leaving 애니메이션 (중앙으로 모이며 사라짐)
+    const currentCards = current.querySelectorAll('.gallery-card');
+    const cx = current.getBoundingClientRect().left + current.offsetWidth / 2;
+    currentCards.forEach((card, i) => {
+      const rect = card.getBoundingClientRect();
+      const dx = cx - (rect.left + rect.width / 2);
+      card.style.transition = `transform 0.4s cubic-bezier(0.4,0,0.2,1) ${i * CARD_DELAY}ms, opacity 0.4s ease ${i * CARD_DELAY}ms`;
+      card.style.transform = `translateX(${dx * 0.3}px) scale(0.82)`;
+      card.style.opacity = '0';
+    });
+
+    const leaveDuration = 400 + currentCards.length * CARD_DELAY;
+
+    setTimeout(() => {
+      current.classList.remove('active');
+      currentCards.forEach(card => {
+        card.style.transition = '';
+        card.style.transform = '';
+        card.style.opacity = '';
+      });
+
+      // 2. 다음 venue 카드들 entering 애니메이션 (아래서 올라오며 등장)
+      next.classList.add('active');
+      const nextCards = next.querySelectorAll('.gallery-card');
+      nextCards.forEach((card, i) => {
+        card.style.transform = 'translateY(24px) scale(0.92)';
+        card.style.opacity = '0';
+        card.style.transition = 'none';
+      });
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nextCards.forEach((card, i) => {
+            card.style.transition = `transform 0.5s cubic-bezier(0.2,0,0,1) ${i * CARD_DELAY}ms, opacity 0.5s ease ${i * CARD_DELAY}ms`;
+            card.style.transform = 'translateY(0) scale(1)';
+            card.style.opacity = '1';
+          });
+          setTimeout(() => {
+            nextCards.forEach(card => {
+              card.style.transition = '';
+              card.style.transform = '';
+              card.style.opacity = '';
+            });
+          }, 500 + nextCards.length * CARD_DELAY);
+        });
+      });
+    }, leaveDuration);
+  }
+
   document.querySelectorAll('.gallery-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      const venue = tab.dataset.venue;
-      document.querySelectorAll('.gallery-venue').forEach(v => {
-        v.classList.toggle('active', v.dataset.venue === venue);
-      });
+      switchVenue(tab.dataset.venue);
     });
   });
 
