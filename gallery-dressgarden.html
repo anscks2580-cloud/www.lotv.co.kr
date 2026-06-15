@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>드레스가든 — LOTV Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F2EFE8;
+    --cream-dark: #E8E3D8;
+    --ink: #1C1A17;
+    --ink-soft: #5A5650;
+    --warm-white: #FAF8F4;
+    --accent: #9B8E7A;
+  }
+  body { background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 24px 48px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(242,239,232,0.94); backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid rgba(28,26,23,0.08);
+  }
+  .nav-logo { text-decoration: none; color: var(--ink); font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; letter-spacing: 0.18em; }
+  .nav-back { text-decoration: none; color: var(--ink-soft); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+  .nav-back:hover { color: var(--ink); }
+
+  .page-header {
+    padding: 140px 48px 60px;
+  }
+  .page-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; }
+
+  .photo-grid {
+    padding: 0 48px 100px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .photo-item {
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--cream-dark);
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .photo-item:hover { opacity: 0.88; }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* 라이트박스 */
+  .lightbox {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(28,26,23,0.95);
+    align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+  .lightbox-close {
+    position: absolute; top: 24px; right: 32px;
+    color: rgba(242,239,232,0.6); font-size: 28px; cursor: pointer; background: none; border: none;
+    transition: color 0.2s;
+  }
+  .lightbox-close:hover { color: var(--cream); }
+  .lightbox-prev, .lightbox-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    color: rgba(242,239,232,0.5); font-size: 24px; cursor: pointer;
+    background: none; border: none; padding: 16px; transition: color 0.2s;
+  }
+  .lightbox-prev { left: 16px; }
+  .lightbox-next { right: 16px; }
+  .lightbox-prev:hover, .lightbox-next:hover { color: var(--cream); }
+  .lightbox-counter { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); color: rgba(242,239,232,0.4); font-size: 11px; letter-spacing: 0.2em; }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .page-header { padding: 100px 24px 40px; }
+    .photo-grid { padding: 0 24px 80px; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LOTV</a>
+  <a class="nav-back" href="index.html#gallery">← Gallery</a>
+</nav>
+
+<div class="page-header">
+  <p class="page-eyebrow">웨딩홀 · Wedding Hall</p>
+  <h1 class="page-title">드레스가든</h1>
+</div>
+
+<div class="photo-grid" id="photoGrid">
+  <div class="photo-item" onclick="openLightbox(0)"><img src="dressgarden/dressgarden_01.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(1)"><img src="dressgarden/dressgarden_02.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(2)"><img src="dressgarden/dressgarden_03.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(3)"><img src="dressgarden/dressgarden_04.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(4)"><img src="dressgarden/dressgarden_05.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(5)"><img src="dressgarden/dressgarden_06.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(6)"><img src="dressgarden/dressgarden_07.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(7)"><img src="dressgarden/dressgarden_08.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(8)"><img src="dressgarden/dressgarden_09.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(9)"><img src="dressgarden/dressgarden_10.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(10)"><img src="dressgarden/dressgarden_11.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(11)"><img src="dressgarden/dressgarden_12.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(12)"><img src="dressgarden/dressgarden_13.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(13)"><img src="dressgarden/dressgarden_14.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(14)"><img src="dressgarden/dressgarden_15.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(15)"><img src="dressgarden/dressgarden_16.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(16)"><img src="dressgarden/dressgarden_17.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(17)"><img src="dressgarden/dressgarden_18.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(18)"><img src="dressgarden/dressgarden_19.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(19)"><img src="dressgarden/dressgarden_20.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(20)"><img src="dressgarden/dressgarden_21.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(21)"><img src="dressgarden/dressgarden_22.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(22)"><img src="dressgarden/dressgarden_23.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(23)"><img src="dressgarden/dressgarden_24.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(24)"><img src="dressgarden/dressgarden_25.jpg" alt="드레스가든"></div>
+  <div class="photo-item" onclick="openLightbox(25)"><img src="dressgarden/dressgarden_26.jpg" alt="드레스가든"></div>
+
+</div>
+
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-prev" onclick="changePhoto(-1)">‹</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" oncontextmenu="return false;" ondragstart="return false;">
+  <button class="lightbox-next" onclick="changePhoto(1)">›</button>
+  <span class="lightbox-counter" id="lightboxCounter"></span>
+</div>
+
+<script>
+const photos = [
+  'dressgarden/dressgarden_01.jpg',
+  'dressgarden/dressgarden_02.jpg',
+  'dressgarden/dressgarden_03.jpg',
+  'dressgarden/dressgarden_04.jpg',
+  'dressgarden/dressgarden_05.jpg',
+  'dressgarden/dressgarden_06.jpg',
+  'dressgarden/dressgarden_07.jpg',
+  'dressgarden/dressgarden_08.jpg',
+  'dressgarden/dressgarden_09.jpg',
+  'dressgarden/dressgarden_10.jpg',
+  'dressgarden/dressgarden_11.jpg',
+  'dressgarden/dressgarden_12.jpg',
+  'dressgarden/dressgarden_13.jpg',
+  'dressgarden/dressgarden_14.jpg',
+  'dressgarden/dressgarden_15.jpg',
+  'dressgarden/dressgarden_16.jpg',
+  'dressgarden/dressgarden_17.jpg',
+  'dressgarden/dressgarden_18.jpg',
+  'dressgarden/dressgarden_19.jpg',
+  'dressgarden/dressgarden_20.jpg',
+  'dressgarden/dressgarden_21.jpg',
+  'dressgarden/dressgarden_22.jpg',
+  'dressgarden/dressgarden_23.jpg',
+  'dressgarden/dressgarden_24.jpg',
+  'dressgarden/dressgarden_25.jpg',
+  'dressgarden/dressgarden_26.jpg'
+];
+let current = 0;
+function openLightbox(i) {
+  current = i;
+  document.getElementById('lightboxImg').src = photos[i];
+  document.getElementById('lightboxCounter').textContent = (i+1) + ' / ' + photos.length;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function changePhoto(dir) {
+  current = (current + dir + photos.length) % photos.length;
+  document.getElementById('lightboxImg').src = photos[current];
+  document.getElementById('lightboxCounter').textContent = (current+1) + ' / ' + photos.length;
+}
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') changePhoto(-1);
+  if (e.key === 'ArrowRight') changePhoto(1);
+});
+
+/* ── 이미지 보호 ── */
+document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+</script>
+<style>
+  img { -webkit-user-select: none; user-select: none; pointer-events: none; -webkit-touch-callout: none; }
+  .photo-item, .lightbox-img { pointer-events: auto; }
+</style>
+<!-- ── 카카오톡 플로팅 버튼 ── -->
+<style>
+  .kakao-float {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .kakao-float-btn {
+    width: 56px;
+    height: 56px;
+    background: #FEE500;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kakao-float:hover .kakao-float-btn {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .kakao-float-btn svg { width: 28px; height: 28px; }
+  .kakao-float-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft, #5A5650);
+    background: rgba(242,239,232,0.92);
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+</style>
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+</body>
+</html>
