@@ -40,14 +40,13 @@
     gap: 16px;
   }
   .photo-item {
-    aspect-ratio: 3/4;
     overflow: hidden;
     background: var(--cream-dark);
     cursor: pointer;
     transition: opacity 0.3s;
   }
   .photo-item:hover { opacity: 0.88; }
-  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-item img { width: 100%; height: auto; display: block; }
 
   /* 라이트박스 */
   .lightbox {
@@ -108,18 +107,7 @@
   <div class="photo-item" onclick="openLightbox(11)"><img src="dressgarden/dressgarden_12.jpg" alt="드레스가든"></div>
   <div class="photo-item" onclick="openLightbox(12)"><img src="dressgarden/dressgarden_13.jpg" alt="드레스가든"></div>
   <div class="photo-item" onclick="openLightbox(13)"><img src="dressgarden/dressgarden_14.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(14)"><img src="dressgarden/dressgarden_15.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(15)"><img src="dressgarden/dressgarden_16.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(16)"><img src="dressgarden/dressgarden_17.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(17)"><img src="dressgarden/dressgarden_18.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(18)"><img src="dressgarden/dressgarden_19.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(19)"><img src="dressgarden/dressgarden_20.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(20)"><img src="dressgarden/dressgarden_21.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(21)"><img src="dressgarden/dressgarden_22.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(22)"><img src="dressgarden/dressgarden_23.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(23)"><img src="dressgarden/dressgarden_24.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(24)"><img src="dressgarden/dressgarden_25.jpg" alt="드레스가든"></div>
-  <div class="photo-item" onclick="openLightbox(25)"><img src="dressgarden/dressgarden_26.jpg" alt="드레스가든"></div>
+
 
 </div>
 
@@ -147,19 +135,7 @@ const photos = [
   'dressgarden/dressgarden_11.jpg',
   'dressgarden/dressgarden_12.jpg',
   'dressgarden/dressgarden_13.jpg',
-  'dressgarden/dressgarden_14.jpg',
-  'dressgarden/dressgarden_15.jpg',
-  'dressgarden/dressgarden_16.jpg',
-  'dressgarden/dressgarden_17.jpg',
-  'dressgarden/dressgarden_18.jpg',
-  'dressgarden/dressgarden_19.jpg',
-  'dressgarden/dressgarden_20.jpg',
-  'dressgarden/dressgarden_21.jpg',
-  'dressgarden/dressgarden_22.jpg',
-  'dressgarden/dressgarden_23.jpg',
-  'dressgarden/dressgarden_24.jpg',
-  'dressgarden/dressgarden_25.jpg',
-  'dressgarden/dressgarden_26.jpg'
+  'dressgarden/dressgarden_14.jpg'
 ];
 let current = 0;
 function openLightbox(i) {
