@@ -35,19 +35,19 @@
 
   .photo-grid {
     padding: 0 48px 100px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    columns: 3;
+    column-gap: 16px;
   }
   .photo-item {
-    aspect-ratio: 3/4;
+    break-inside: avoid;
+    margin-bottom: 16px;
     overflow: hidden;
     background: var(--cream-dark);
     cursor: pointer;
     transition: opacity 0.3s;
   }
   .photo-item:hover { opacity: 0.88; }
-  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-item img { width: 100%; height: auto; display: block; }
 
   /* 라이트박스 */
   .lightbox {
@@ -77,7 +77,8 @@
   @media (max-width: 768px) {
     nav { padding: 16px 24px; }
     .page-header { padding: 100px 24px 40px; }
-    .photo-grid { padding: 0 24px 80px; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .photo-grid { padding: 0 24px 80px; columns: 2; column-gap: 10px; }
+    .photo-item { margin-bottom: 10px; }
   }
 </style>
 </head>
@@ -94,7 +95,7 @@
 </div>
 
 <div class="photo-grid" id="photoGrid">
-  <div class="photo-item" onclick="openLightbox(0)"><img src="rakgojai/rakgojai_01.jpg" alt="락고재 서울"></div>
+  <div class="photo-item" onclick="openLightbox(0)"><img src="rakgojai/rakgojai_main.jpg" alt="락고재 서울"></div>
   <div class="photo-item" onclick="openLightbox(1)"><img src="rakgojai/rakgojai_02.jpg" alt="락고재 서울"></div>
   <div class="photo-item" onclick="openLightbox(2)"><img src="rakgojai/rakgojai_03.jpg" alt="락고재 서울"></div>
   <div class="photo-item" onclick="openLightbox(3)"><img src="rakgojai/rakgojai_04.jpg" alt="락고재 서울"></div>
@@ -119,7 +120,6 @@
   <div class="photo-item" onclick="openLightbox(22)"><img src="rakgojai/rakgojai_23.jpg" alt="락고재 서울"></div>
   <div class="photo-item" onclick="openLightbox(23)"><img src="rakgojai/rakgojai_24.jpg" alt="락고재 서울"></div>
   <div class="photo-item" onclick="openLightbox(24)"><img src="rakgojai/rakgojai_25.jpg" alt="락고재 서울"></div>
-  <div class="photo-item" onclick="openLightbox(25)"><img src="rakgojai/rakgojai_26.jpg" alt="락고재 서울"></div>
 
 </div>
 
@@ -134,7 +134,7 @@
 
 <script>
 const photos = [
-  'rakgojai/rakgojai_01.jpg',
+  'rakgojai/rakgojai_main.jpg',
   'rakgojai/rakgojai_02.jpg',
   'rakgojai/rakgojai_03.jpg',
   'rakgojai/rakgojai_04.jpg',
@@ -159,7 +159,6 @@ const photos = [
   'rakgojai/rakgojai_23.jpg',
   'rakgojai/rakgojai_24.jpg',
   'rakgojai/rakgojai_25.jpg',
-  'rakgojai/rakgojai_26.jpg'
 ];
 let current = 0;
 function openLightbox(i) {
