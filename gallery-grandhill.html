@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="LOTV — 그랜드힐 컨벤션 웨딩 스냅 갤러리">
+<title>그랜드힐 컨벤션 — LOTV Snap</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F2EFE8;
+    --cream-dark: #E8E3D8;
+    --ink: #1C1A17;
+    --ink-soft: #5A5650;
+    --warm-white: #FAF8F4;
+    --accent: #9B8E7A;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.4s, padding 0.4s;
+    background: rgba(242,239,232,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid rgba(28,26,23,0.08);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+  }
+  .nav-back {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-back::before { content: '←'; font-size: 14px; }
+
+  /* ── HERO ── */
+  .gallery-hero {
+    padding-top: 100px;
+    padding-bottom: 60px;
+    padding-left: 48px;
+    padding-right: 48px;
+    background: var(--warm-white);
+  }
+  .gallery-hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .gallery-hero-eyebrow::after {
+    content: '';
+    display: block;
+    height: 0.5px;
+    width: 48px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+  .gallery-hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .gallery-hero-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── MAIN IMAGE ── */
+  .gallery-main-img {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── PHOTO GRID ── */
+  .gallery-section {
+    padding: 80px 48px;
+  }
+  .gallery-columns {
+    columns: 3;
+    column-gap: 16px;
+  }
+  .gallery-col-item {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    overflow: hidden;
+    background: var(--cream-dark);
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .gallery-col-item:hover { opacity: 0.88; }
+  .gallery-col-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .gallery-col-item:hover img { transform: scale(1.02); }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(28,26,23,0.95);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    display: block;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 24px; right: 32px;
+    font-size: 28px;
+    color: var(--cream);
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .lightbox-close:hover { opacity: 1; }
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--cream);
+    font-size: 28px;
+    cursor: pointer;
+    padding: 16px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .lightbox-nav:hover { opacity: 1; }
+  .lightbox-prev { left: 16px; }
+  .lightbox-next { right: 16px; }
+  .lightbox-counter {
+    position: absolute;
+    bottom: 24px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(242,239,232,0.5);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .ft-business {
+    font-size: 11px;
+    color: rgba(242,239,232,0.3);
+    letter-spacing: 0.08em;
+  }
+  .ft-copy {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .ft-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(242,239,232,0.35);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .gallery-hero { padding: 90px 24px 48px; }
+    .gallery-section { padding: 48px 24px; }
+    .gallery-columns { columns: 2; column-gap: 10px; }
+    .gallery-col-item { margin-bottom: 10px; }
+    footer { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="logo-text">LOTV</span>
+  </a>
+  <a class="nav-back" href="index.html#gallery">Gallery</a>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="gallery-hero">
+  <p class="gallery-hero-eyebrow">Wedding Hall · Convention</p>
+  <h1 class="gallery-hero-title">그랜드힐 컨벤션</h1>
+  <p class="gallery-hero-sub">26 photos</p>
+</div>
+
+<!-- ── MAIN IMAGE ── -->
+<img class="gallery-main-img" src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션 메인">
+
+<!-- ── PHOTO GRID ── -->
+<section class="gallery-section">
+  <div class="gallery-columns" id="photoGrid">
+    <div class="gallery-col-item" onclick="openLightbox(0)"><img src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션 01"></div>
+    <div class="gallery-col-item" onclick="openLightbox(1)"><img src="grandhill/grandhill_02.jpg" alt="그랜드힐 컨벤션 02"></div>
+    <div class="gallery-col-item" onclick="openLightbox(2)"><img src="grandhill/grandhill_03.jpg" alt="그랜드힐 컨벤션 03"></div>
+    <div class="gallery-col-item" onclick="openLightbox(3)"><img src="grandhill/grandhill_04.jpg" alt="그랜드힐 컨벤션 04"></div>
+    <div class="gallery-col-item" onclick="openLightbox(4)"><img src="grandhill/grandhill_05.jpg" alt="그랜드힐 컨벤션 05"></div>
+    <div class="gallery-col-item" onclick="openLightbox(5)"><img src="grandhill/grandhill_06.jpg" alt="그랜드힐 컨벤션 06"></div>
+    <div class="gallery-col-item" onclick="openLightbox(6)"><img src="grandhill/grandhill_07.jpg" alt="그랜드힐 컨벤션 07"></div>
+    <div class="gallery-col-item" onclick="openLightbox(7)"><img src="grandhill/grandhill_08.jpg" alt="그랜드힐 컨벤션 08"></div>
+    <div class="gallery-col-item" onclick="openLightbox(8)"><img src="grandhill/grandhill_09.jpg" alt="그랜드힐 컨벤션 09"></div>
+    <div class="gallery-col-item" onclick="openLightbox(9)"><img src="grandhill/grandhill_10.jpg" alt="그랜드힐 컨벤션 10"></div>
+    <div class="gallery-col-item" onclick="openLightbox(10)"><img src="grandhill/grandhill_11.jpg" alt="그랜드힐 컨벤션 11"></div>
+    <div class="gallery-col-item" onclick="openLightbox(11)"><img src="grandhill/grandhill_12.jpg" alt="그랜드힐 컨벤션 12"></div>
+    <div class="gallery-col-item" onclick="openLightbox(12)"><img src="grandhill/grandhill_13.jpg" alt="그랜드힐 컨벤션 13"></div>
+    <div class="gallery-col-item" onclick="openLightbox(13)"><img src="grandhill/grandhill_14.jpg" alt="그랜드힐 컨벤션 14"></div>
+    <div class="gallery-col-item" onclick="openLightbox(14)"><img src="grandhill/grandhill_15.jpg" alt="그랜드힐 컨벤션 15"></div>
+    <div class="gallery-col-item" onclick="openLightbox(15)"><img src="grandhill/grandhill_16.jpg" alt="그랜드힐 컨벤션 16"></div>
+    <div class="gallery-col-item" onclick="openLightbox(16)"><img src="grandhill/grandhill_17.jpg" alt="그랜드힐 컨벤션 17"></div>
+    <div class="gallery-col-item" onclick="openLightbox(17)"><img src="grandhill/grandhill_18.jpg" alt="그랜드힐 컨벤션 18"></div>
+    <div class="gallery-col-item" onclick="openLightbox(18)"><img src="grandhill/grandhill_19.jpg" alt="그랜드힐 컨벤션 19"></div>
+    <div class="gallery-col-item" onclick="openLightbox(19)"><img src="grandhill/grandhill_20.jpg" alt="그랜드힐 컨벤션 20"></div>
+    <div class="gallery-col-item" onclick="openLightbox(20)"><img src="grandhill/grandhill_21.jpg" alt="그랜드힐 컨벤션 21"></div>
+    <div class="gallery-col-item" onclick="openLightbox(21)"><img src="grandhill/grandhill_22.jpg" alt="그랜드힐 컨벤션 22"></div>
+    <div class="gallery-col-item" onclick="openLightbox(22)"><img src="grandhill/grandhill_23.jpg" alt="그랜드힐 컨벤션 23"></div>
+    <div class="gallery-col-item" onclick="openLightbox(23)"><img src="grandhill/grandhill_24.jpg" alt="그랜드힐 컨벤션 24"></div>
+    <div class="gallery-col-item" onclick="openLightbox(24)"><img src="grandhill/grandhill_25.jpg" alt="그랜드힐 컨벤션 25"></div>
+    <div class="gallery-col-item" onclick="openLightbox(25)"><img src="grandhill/grandhill_26.jpg" alt="그랜드힐 컨벤션 26"></div>
+  </div>
+</section>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <button class="lightbox-nav lightbox-prev" onclick="changeLightbox(-1)">‹</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <button class="lightbox-nav lightbox-next" onclick="changeLightbox(1)">›</button>
+  <span class="lightbox-counter" id="lightboxCounter"></span>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="ft-business">상호명 : 엘오티브이(LOTV) &nbsp;&nbsp; 사업자등록번호 : 349-29-02113</div>
+  <span class="ft-copy">© 2026 LOTV SNAP. All Rights Reserved.</span>
+  <span class="ft-tagline">Every moment we capture becomes a memory that lingers.</span>
+</footer>
+
+<script>
+  const images = [
+    'grandhill/grandhill_01.jpg',
+    'grandhill/grandhill_02.jpg',
+    'grandhill/grandhill_03.jpg',
+    'grandhill/grandhill_04.jpg',
+    'grandhill/grandhill_05.jpg',
+    'grandhill/grandhill_06.jpg',
+    'grandhill/grandhill_07.jpg',
+    'grandhill/grandhill_08.jpg',
+    'grandhill/grandhill_09.jpg',
+    'grandhill/grandhill_10.jpg',
+    'grandhill/grandhill_11.jpg',
+    'grandhill/grandhill_12.jpg',
+    'grandhill/grandhill_13.jpg',
+    'grandhill/grandhill_14.jpg',
+    'grandhill/grandhill_15.jpg',
+    'grandhill/grandhill_16.jpg',
+    'grandhill/grandhill_17.jpg',
+    'grandhill/grandhill_18.jpg',
+    'grandhill/grandhill_19.jpg',
+    'grandhill/grandhill_20.jpg',
+    'grandhill/grandhill_21.jpg',
+    'grandhill/grandhill_22.jpg',
+    'grandhill/grandhill_23.jpg',
+    'grandhill/grandhill_24.jpg',
+    'grandhill/grandhill_25.jpg',
+    'grandhill/grandhill_26.jpg',
+  ];
+
+  let current = 0;
+
+  function openLightbox(idx) {
+    current = idx;
+    document.getElementById('lightboxImg').src = images[current];
+    document.getElementById('lightboxCounter').textContent = (current + 1) + ' / ' + images.length;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function changeLightbox(dir) {
+    current = (current + dir + images.length) % images.length;
+    document.getElementById('lightboxImg').src = images[current];
+    document.getElementById('lightboxCounter').textContent = (current + 1) + ' / ' + images.length;
+  }
+
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') changeLightbox(-1);
+    if (e.key === 'ArrowRight') changeLightbox(1);
+  });
+</script>
+
+<!-- ── 카카오톡 플로팅 버튼 ── -->
+<style>
+  .kakao-float { position: fixed; bottom: 28px; right: 28px; z-index: 999; display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
+  .kakao-float-btn { width: 56px; height: 56px; background: #FEE500; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; }
+  .kakao-float:hover .kakao-float-btn { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .kakao-float-btn svg { width: 28px; height: 28px; }
+  .kakao-float-label { font-size: 10px; letter-spacing: 0.08em; color: var(--ink-soft); background: rgba(242,239,232,0.92); padding: 3px 8px; border-radius: 10px; white-space: nowrap; }
+</style>
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+</body>
+</html>
