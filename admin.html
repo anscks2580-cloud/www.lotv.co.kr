@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관리자 | 송우찬수학학원</title>
+<link rel="stylesheet" href="style.css">
+<!-- SheetJS 엑셀 파싱 -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<!-- JSZip: PDF 일괄 다운로드용 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+.admin-wrap { max-width:960px; margin:0 auto; padding:100px 24px 96px; }
+.admin-header { margin-bottom:40px; }
+.admin-header h1 { font-size:26px; font-weight:700; margin-bottom:6px; }
+.admin-header p { font-size:13px; color:var(--muted); }
+
+.admin-tabs { display:flex; gap:0; border-bottom:2px solid var(--border-soft); margin-bottom:32px; flex-wrap:wrap; }
+.admin-tab {
+  padding:11px 24px; background:none; border:none;
+  font-size:13px; font-weight:600; font-family:inherit;
+  color:var(--muted); cursor:pointer; position:relative; transition:color 0.2s;
+}
+.admin-tab::after {
+  content:''; position:absolute; bottom:-2px; left:0; right:0;
+  height:2px; background:var(--gold);
+  transform:scaleX(0); transition:transform 0.2s;
+}
+.admin-tab.active { color:var(--gold); }
+.admin-tab.active::after { transform:scaleX(1); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+.card {
+  background:var(--bg-card); border:1px solid var(--border-soft);
+  border-radius:14px; padding:26px; margin-bottom:20px;
+}
+.card h3 { font-size:15px; font-weight:600; margin-bottom:18px; color:var(--gold); }
+
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.form-group input, .form-group select {
+  padding:10px 13px; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1); border-radius:8px;
+  color:var(--off-white); font-size:14px; font-family:inherit; outline:none;
+  transition:border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color:rgba(240,192,64,0.5); }
+.form-group select option { background:#1A1230; }
+
+.btn { padding:10px 20px; border:none; border-radius:8px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s; }
+.btn-primary { background:var(--gold); color:var(--bg); }
+.btn-primary:hover { background:#f5cc50; }
+.btn-secondary { background:rgba(255,255,255,0.08); color:var(--off-white); border:1px solid var(--border-soft); }
+.btn-secondary:hover { background:rgba(255,255,255,0.14); }
+.btn-danger { background:rgba(255,80,80,0.15); color:#ff9090; border:1px solid rgba(255,80,80,0.3); }
+.btn-danger:hover { background:rgba(255,80,80,0.25); }
+.btn-sm { padding:6px 13px; font-size:12px; }
+  #toast {
+    position:fixed; bottom:28px; right:28px;
+    background:#1e1440; border:1px solid #f0c040;
+    color:#f0c040; padding:12px 22px;
+    border-radius:10px; font-size:13px; font-weight:600;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    opacity:0; transform:translateY(10px);
+    transition:opacity 0.2s, transform 0.2s;
+    pointer-events:none; z-index:9999;
+  }
+  #toast.show { opacity:1; transform:translateY(0); }
+
+/* 엑셀 업로드 영역 */
+.excel-drop {
+  border:2px dashed rgba(240,192,64,0.25);
+  border-radius:12px; padding:32px;
+  text-align:center; cursor:pointer;
+  transition:border-color 0.2s, background 0.2s;
+  margin-bottom:16px;
+}
+.excel-drop:hover, .excel-drop.drag { border-color:rgba(240,192,64,0.6); background:rgba(240,192,64,0.04); }
+.excel-drop-icon { font-size:32px; margin-bottom:10px; }
+.excel-drop p { font-size:13px; color:var(--muted); margin-bottom:4px; }
+.excel-drop small { font-size:11px; color:rgba(255,255,255,0.3); }
+#excelFileInput { display:none; }
+
+/* 미리보기 테이블 */
+.preview-table {
+  width:100%; border-collapse:collapse; font-size:13px; margin-top:16px;
+}
+.preview-table th {
+  padding:10px 12px; text-align:left;
+  font-size:11px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;
+  border-bottom:1px solid var(--border-soft);
+}
+.preview-table td {
+  padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04);
+  color:var(--muted);
+}
+.preview-table tr:last-child td { border-bottom:none; }
+.preview-badge {
+  font-size:11px; background:rgba(240,192,64,0.1);
+  color:var(--gold); padding:2px 8px; border-radius:4px;
+}
+
+/* 학생 목록 */
+.student-item {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border-soft); border-radius:10px;
+  margin-bottom:8px;
+}
+.student-name { font-weight:600; font-size:14px; flex:1; }
+.student-meta { font-size:12px; color:var(--muted); }
+
+/* 강의 배정 */
+.assign-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border-soft); border-radius:8px;
+  margin-bottom:8px;
+}
+.assign-item input[type=checkbox] { width:15px; height:15px; accent-color:var(--gold); cursor:pointer; flex-shrink:0; }
+.assign-title { flex:1; font-size:13px; }
+.assign-tag { font-size:11px; color:var(--gold); background:rgba(240,192,64,0.1); padding:2px 8px; border-radius:4px; flex-shrink:0; }
+
+.msg { padding:10px 14px; border-radius:8px; font-size:13px; margin-top:12px; display:none; }
+.msg.success { background:rgba(80,200,80,0.1); color:#90ff90; border:1px solid rgba(80,200,80,0.3); }
+.msg.error { background:rgba(255,80,80,0.1); color:#ff9090; border:1px solid rgba(255,80,80,0.3); }
+
+.grade-map-info {
+  padding:14px 16px; background:rgba(240,192,64,0.05);
+  border:1px solid rgba(240,192,64,0.15); border-radius:8px;
+  font-size:12px; color:var(--muted); line-height:1.9; margin-bottom:16px;
+}
+.grade-map-info b { color:var(--gold); }
+
+@media(max-width:768px) {
+  .form-row { grid-template-columns:1fr; }
+  .student-item { flex-wrap:wrap; }
+}
+
+/* 월말보고서 탭 */
+.monthly-filter-btn {
+  padding:7px 16px; border-radius:20px; font-size:13px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all 0.18s;
+  background:rgba(255,255,255,0.05); border:1px solid var(--border-soft); color:var(--muted);
+}
+.monthly-filter-btn:hover { border-color:rgba(240,192,64,0.4); color:var(--gold); }
+.monthly-filter-btn.active { background:rgba(240,192,64,0.15); border-color:var(--gold); color:var(--gold); }
+
+.monthly-teacher-section { margin-bottom:20px; }
+.monthly-teacher-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 18px; background:rgba(240,192,64,0.07);
+  border:1px solid rgba(240,192,64,0.2); border-radius:10px 10px 0 0;
+  cursor:pointer;
+}
+.monthly-teacher-header h4 { font-size:14px; font-weight:700; color:var(--gold); margin:0; }
+.monthly-teacher-header span { font-size:12px; color:var(--muted); }
+.monthly-teacher-body { border:1px solid rgba(240,192,64,0.15); border-top:none; border-radius:0 0 10px 10px; overflow:hidden; }
+.monthly-report-row {
+  display:flex; align-items:center; gap:12px; padding:13px 18px;
+  border-bottom:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02);
+  flex-wrap:wrap;
+}
+.monthly-report-row:last-child { border-bottom:none; }
+.monthly-report-info { flex:1; min-width:160px; }
+.monthly-report-info .month-label { font-size:13px; font-weight:600; margin-bottom:3px; }
+.monthly-report-info .file-label { font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#F0EDF8;flex-shrink:0;">
+    <img src="data:image/png;base64,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" style="height:30px;width:30px;object-fit:contain;" alt="SWC">
+    <span style="font-size:13px;font-weight:600;color:#F0EDF8;white-space:nowrap;">관리자 페이지</span>
+  </a>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <span id="adminName" style="font-size:13px;color:var(--muted);"></span>
+    <a href="index.html" class="btn btn-sm btn-secondary" style="text-decoration:none;">🏠 홈으로</a>
+    <button class="btn btn-sm btn-secondary" onclick="doLogout()">로그아웃</button>
+  </div>
+</nav>
+
+<div class="admin-wrap">
+  <div class="admin-header">
+    <h1>👨‍💼 관리자 페이지</h1>
+    <p>학생 계정 관리 · 강의 배정 · 강의 목록 관리</p>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('students',this)">학생 관리</button>
+    <button class="admin-tab" onclick="switchTab('excel',this)">엑셀 일괄 등록</button>
+    <button class="admin-tab" onclick="switchTab('assign',this)">강의 배정</button>
+    <button class="admin-tab" onclick="switchTab('videos',this)">강의 목록</button>
+    <button class="admin-tab" onclick="switchTab('teachers',this)">선생님 관리</button>
+    <button class="admin-tab" onclick="switchTab('monthly',this);initMonthlyTab()">📝 월말보고서</button>
+    <button class="admin-tab" onclick="switchTab('satclinic',this);initSatClinicTab()">🏥 토요클리닉</button>
+  </div>
+
+  <!-- 학생 관리 -->
+  <div class="tab-panel active" id="tab-students">
+    <div class="card">
+      <h3>+ 신규 학생 개별 등록</h3>
+      <div class="form-row">
+        <div class="form-group"><label>이름 (아이디)</label><input type="text" id="n-name" placeholder="홍길동"></div>
+        <div class="form-group"><label>전화번호 (비밀번호)</label><input type="text" id="n-phone" placeholder="01012345678"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>학년</label>
+          <select id="n-grade">
+            <option>중1</option><option>중2</option><option>중3</option>
+            <option>고1</option><option>고2</option><option>고3</option><option>N수</option>
+          </select>
+        </div>
+        <div class="form-group"><label>관할</label>
+          <select id="n-branch"><option>평촌관</option><option>산본관</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>담당 선생님</label>
+          <select id="n-teacher"><option value="">선생님 선택...</option></select>
+        </div>
+        <div class="form-group"><label>등원 요일</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;padding:9px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="월" style="accent-color:var(--gold);width:14px;height:14px;"> 월</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="화" style="accent-color:var(--gold);width:14px;height:14px;"> 화</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="수" style="accent-color:var(--gold);width:14px;height:14px;"> 수</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="목" style="accent-color:var(--gold);width:14px;height:14px;"> 목</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="금" style="accent-color:var(--gold);width:14px;height:14px;"> 금</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--off-white);cursor:pointer;text-transform:none;letter-spacing:0;"><input type="checkbox" class="n-day" value="토" style="accent-color:var(--gold);width:14px;height:14px;"> 토</label>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+        <button class="btn btn-primary" onclick="createStudent()">등록</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;">
+          <input type="checkbox" id="n-autoAssign" checked style="accent-color:var(--gold);"> 학년별 강의 자동 배정
+        </label>
+      </div>
+      <div class="msg" id="createMsg"></div>
+    </div>
+    <div class="card">
+      <h3>📋 등록된 학생 (<span id="studentCount">0</span>명)</h3>
+      <div style="margin-bottom:14px;">
+        <button class="btn btn-danger" onclick="deleteAllStudents()" style="font-size:12px;">
+          🗑 전체 학생 삭제 (Firestore만 / Auth는 Firebase Console에서 별도 삭제)
+        </button>
+      </div>
+      <div id="studentList"><div style="color:var(--muted);font-size:13px;">불러오는 중...</div></div>
+    </div>
+  </div>
+
+  <!-- 엑셀 일괄 등록 -->
+  <div class="tab-panel" id="tab-excel">
+    <div class="card">
+      <h3>📊 엑셀 파일로 학생 일괄 등록</h3>
+      <div class="grade-map-info">
+        <b>엑셀 파일 형식 안내</b><br>
+        컬럼 순서: <b style="color:var(--gold);">이름 / 전화번호 / 학년 / 관할 / 담당선생님 / 요일</b><br>
+        예시: 홍길동 | 01012345678 | 고1 | 평촌관 | 송문찬 | 월수금<br>
+        · 담당선생님: 선생님 이름 그대로 입력 (등록된 선생님과 자동 매칭)<br>
+        · 요일: 붙여서 입력 — 예) 월수금, 화목, 월화수목금<br>
+        · 학년 값: 중1, 중2, 중3, 고1, 고2, 고3, N수
+      </div>
+
+      <div class="excel-drop" id="excelDrop" onclick="document.getElementById('excelFileInput').click()">
+        <div class="excel-drop-icon">📂</div>
+        <p>클릭하거나 파일을 여기에 드래그하세요</p>
+        <small>.xlsx / .xls 파일 지원</small>
+      </div>
+      <input type="file" id="excelFileInput" accept=".xlsx,.xls">
+
+      <div id="excelPreview" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-size:13px;color:var(--muted);" id="previewCount"></span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="e-autoAssign" checked style="accent-color:var(--gold);"> 학년별 강의 자동 배정
+            </label>
+            <button class="btn btn-primary" onclick="uploadExcel()">일괄 등록</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="preview-table" id="previewTable"></table>
+        </div>
+        <div class="msg" id="excelMsg"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📥 엑셀 양식 다운로드</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">아래 버튼으로 양식 파일을 다운받아 작성 후 업로드하세요.</p>
+      <button class="btn btn-secondary" onclick="downloadTemplate()">양식 다운로드 (.xlsx)</button>
+    </div>
+  </div>
+
+  <!-- 강의 배정 -->
+  <div class="tab-panel" id="tab-assign">
+    <div class="card">
+      <h3>🎬 학생별 개별 강의 배정</h3>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>학생 선택</label>
+        <select id="assignStudent" onchange="loadStudentVideos()">
+          <option value="">학생을 선택하세요</option>
+        </select>
+      </div>
+      <div id="assignVideoList" style="color:var(--muted);font-size:13px;">학생을 먼저 선택해주세요.</div>
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="saveAssign()">배정 저장</button>
+      <div class="msg" id="assignMsg"></div>
+    </div>
+    <div class="card">
+      <h3>⚡ 학년별 일괄 자동 배정</h3>
+      <div class="grade-map-info">
+        강의 목록에서 각 강의의 <b>카테고리(태그)</b>를 기준으로 학년에 맞는 강의를 자동 배정합니다.<br>
+        · 중등: <b>중등</b> 태그 강의<br>
+        · 고1·고2: <b>수학1, 수학2, 내신</b> 태그 강의<br>
+        · 고3·N수: <b>수학1, 수학2, 미적분, 확통, 논술</b> 태그 강의
+      </div>
+      <div class="form-row" style="max-width:400px;">
+        <div class="form-group">
+          <label>대상 학년</label>
+          <select id="bulkGrade">
+            <option value="all">전체 학생</option>
+            <option>중1</option><option>중2</option><option>중3</option>
+            <option>고1</option><option>고2</option><option>고3</option><option>N수</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="bulkAutoAssign()">자동 배정 실행</button>
+      <div class="msg" id="bulkMsg"></div>
+    </div>
+  </div>
+
+  <!-- 선생님 관리 -->
+  <div class="tab-panel" id="tab-teachers">
+    <div class="card">
+      <h3>+ 선생님 계정 등록</h3>
+      <div class="form-row">
+        <div class="form-group"><label>이름 (로그인 아이디)</label><input type="text" id="t-name" placeholder="예: 홍길동"></div>
+        <div class="form-group"><label>비밀번호 (8자리 이상)</label><input type="password" id="t-pw" placeholder="비밀번호 입력"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>담당 관</label><select id="t-branch"><option>평촌관</option><option>산본관</option><option>공통</option></select></div>
+        <div class="form-group"><label>담당 과목</label><input type="text" id="t-subject" placeholder="예: 수학, 수리논술"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>메모 (선택)</label><input type="text" id="t-memo" placeholder="예: 고등부 전담, 화목 수업"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createTeacher()">등록</button>
+      <div class="msg" id="teacherCreateMsg"></div>
+      <div style="margin-top:14px;padding:12px 14px;background:rgba(240,192,64,0.06);border:1px solid rgba(240,192,64,0.2);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.8;">
+        선생님 로그인: <b style="color:var(--gold);">이름</b>과 <b style="color:var(--gold);">비밀번호</b>로 <a href="teacher.html" target="_blank" style="color:var(--gold);">teacher.html</a> 에서 로그인합니다.
+      </div>
+    </div>
+    <div class="card">
+      <h3>📊 선생님 엑셀 일괄 등록</h3>
+      <div class="grade-map-info">
+        <b>엑셀 파일 형식</b><br>
+        컬럼 순서: <b style="color:var(--gold);">이름 / 비밀번호 / 담당관 / 담당과목 / 메모</b><br>
+        예시: 송문찬 | 12345678 | 평촌관 | 고등 | 고등부 전담<br>
+        · 담당관: 평촌관 / 산본관 / 공통<br>
+        · 비밀번호: 8자리 이상
+      </div>
+      <div class="excel-drop" id="teacherExcelDrop" onclick="document.getElementById('teacherExcelInput').click()">
+        <div class="excel-drop-icon">📂</div>
+        <p>클릭하거나 파일을 여기에 드래그하세요</p>
+        <small>.xlsx / .xls 파일 지원</small>
+      </div>
+      <input type="file" id="teacherExcelInput" accept=".xlsx,.xls" style="display:none;">
+      <div id="teacherExcelPreview" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-size:13px;color:var(--muted);" id="teacherPreviewCount"></span>
+          <button class="btn btn-primary" onclick="uploadTeacherExcel()">일괄 등록</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="preview-table" id="teacherPreviewTable"></table>
+        </div>
+      </div>
+      <div class="msg" id="teacherExcelMsg"></div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-secondary" onclick="downloadTeacherTemplate()">양식 다운로드 (.xlsx)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>등록된 선생님 (<span id="teacherCount">0</span>명)</h3>
+      <div id="teacherList"><div style="color:var(--muted);font-size:13px;">불러오는 중...</div></div>
+    </div>
+
+
+    <!-- 주간성취도 엑셀 다운로드 -->
+    <div class="card">
+      <h3>📥 주간성취도 엑셀 다운로드</h3>
+      <div class="form-row" style="max-width:500px;margin-bottom:16px;">
+        <div class="form-group">
+          <label>조회 주차</label>
+          <input type="week" id="excelWeek" style="color-scheme:dark;padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+        </div>
+        <div class="form-group">
+          <label>선생님 필터</label>
+          <select id="excelTeacher">
+            <option value="">전체 선생님</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="downloadWeeklyExcel()">📊 엑셀 다운로드</button>
+      </div>
+      <div class="msg" id="excelWeeklyMsg"></div>
+    </div>
+    <!-- 반별 진도 엑셀 다운로드 -->
+    <div class="card">
+      <h3>📍 반별 진도 엑셀 다운로드</h3>
+      <div class="form-row" style="max-width:500px;margin-bottom:16px;">
+        <div class="form-group">
+          <label>조회 주차</label>
+          <input type="week" id="progressWeek" style="color-scheme:dark;padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+        </div>
+        <div class="form-group">
+          <label>선생님 필터</label>
+          <select id="progressTeacher">
+            <option value="">전체 선생님</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="downloadProgressExcel()">📊 엑셀 다운로드</button>
+      </div>
+      <div class="msg" id="progressExcelMsg"></div>
+    </div>
+  </div>
+
+  <!-- 월말보고서 -->
+  <div class="tab-panel" id="tab-monthly">
+
+    <!-- 필터 카드 -->
+    <div class="card">
+      <h3>📝 월말보고서 다운로드</h3>
+
+      <!-- 선생님 필터 버튼 -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">선생님 선택</div>
+        <div id="monthlyTeacherBtns" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="monthly-filter-btn active" data-uid="" onclick="selectMonthlyTeacher(this)">전체</button>
+        </div>
+      </div>
+
+      <!-- 월 필터 -->
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px;">
+        <div class="form-group">
+          <label>연도</label>
+          <select id="monthlyYear" style="padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+            <option value="">전체</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>월</label>
+          <select id="monthlyMonth" style="padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+            <option value="">전체</option>
+            <option value="01">1월</option>
+            <option value="02">2월</option>
+            <option value="03">3월</option>
+            <option value="04">4월</option>
+            <option value="05">5월</option>
+            <option value="06">6월</option>
+            <option value="07">7월</option>
+            <option value="08">8월</option>
+            <option value="09">9월</option>
+            <option value="10">10월</option>
+            <option value="11">11월</option>
+            <option value="12">12월</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary" onclick="loadMonthlyAdmin()">🔍 조회</button>
+        <button class="btn btn-secondary" id="monthlyZipBtn" onclick="downloadMonthlyZip()" style="display:none;">📦 ZIP 다운로드</button>
+      </div>
+      <div class="msg" id="monthlyAdminMsg"></div>
+    </div>
+
+    <!-- 결과: 선생님별 섹션 -->
+    <div id="monthlyAdminResult"></div>
+  </div>
+
+  <!-- 토요클리닉 -->
+  <div class="tab-panel" id="tab-satclinic">
+
+    <!-- 필터 카드 -->
+    <div class="card">
+      <h3>🏥 토요 추가클리닉 조회 · 다운로드</h3>
+
+      <div class="form-row" style="max-width:600px;margin-bottom:16px;">
+        <div class="form-group">
+          <label>날짜 (시작)</label>
+          <input type="date" id="clinicDateFrom" style="color-scheme:dark;width:100%;padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+        </div>
+        <div class="form-group">
+          <label>날짜 (종료)</label>
+          <input type="date" id="clinicDateTo" style="color-scheme:dark;width:100%;padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--off-white);font-size:14px;font-family:inherit;outline:none;">
+        </div>
+        <div class="form-group">
+          <label>선생님 필터</label>
+          <select id="clinicTeacherFilter">
+            <option value="">전체 선생님</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="loadSatClinicAdmin()">🔍 조회</button>
+        <button class="btn btn-secondary" id="clinicExcelBtn" onclick="downloadClinicExcel()" style="display:none;">📊 엑셀 다운로드</button>
+      </div>
+      <div class="msg" id="clinicAdminMsg"></div>
+    </div>
+
+    <!-- 결과 테이블 -->
+    <div id="clinicAdminResult"></div>
+  </div>
+
+  <!-- 강의 목록 -->
+  <div class="tab-panel" id="tab-videos">
+    <div class="card">
+      <h3>+ 강의 추가</h3>
+      <div class="form-row">
+        <div class="form-group"><label>강의 제목</label><input type="text" id="v-title" placeholder="수열의 극한 개념 완전정복"></div>
+        <div class="form-group"><label>Vimeo ID</label><input type="text" id="v-ytid" placeholder="123456789"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>카테고리</label>
+          <select id="v-tag">
+            <optgroup label="중등">
+              <option value="중1">중1</option>
+              <option value="중2">중2</option>
+              <option value="중3">중3</option>
+            </optgroup>
+            <optgroup label="고등 — 고1">
+              <option value="공통수학1">공통수학1</option>
+              <option value="공통수학2">공통수학2</option>
+            </optgroup>
+            <optgroup label="고등 — 고2">
+              <option value="대수">대수</option>
+              <option value="미적분">미적분</option>
+              <option value="확통">확통</option>
+            </optgroup>
+            <optgroup label="고등 — 고3">
+              <option value="미적분2">미적분2</option>
+              <option value="기하">기하</option>
+            </optgroup>
+            <optgroup label="기출해설 — 고1">
+              <option value="기출_고1_2025">기출_고1_2025</option>
+              <option value="기출_고1_2024">기출_고1_2024</option>
+              <option value="기출_고1_2023">기출_고1_2023</option>
+              <option value="기출_고1_2022">기출_고1_2022</option>
+              <option value="기출_고1_2021">기출_고1_2021</option>
+            </optgroup>
+            <optgroup label="기출해설 — 고2">
+              <option value="기출_고2_2025">기출_고2_2025</option>
+              <option value="기출_고2_2024">기출_고2_2024</option>
+              <option value="기출_고2_2023">기출_고2_2023</option>
+              <option value="기출_고2_2022">기출_고2_2022</option>
+              <option value="기출_고2_2021">기출_고2_2021</option>
+            </optgroup>
+            <optgroup label="기출해설 — 고3">
+              <option value="기출_고3_2025">기출_고3_2025</option>
+              <option value="기출_고3_2024">기출_고3_2024</option>
+              <option value="기출_고3_2023">기출_고3_2023</option>
+              <option value="기출_고3_2022">기출_고3_2022</option>
+              <option value="기출_고3_2021">기출_고3_2021</option>
+            </optgroup>
+            <optgroup label="기타">
+              <option value="수리논술">수리논술</option>
+            </optgroup>
+            <optgroup label="보충강의실 — 평촌관">
+              <option value="보충_평촌_송우찬T">보충_평촌_송우찬T</option>
+              <option value="보충_평촌_송문찬T">보충_평촌_송문찬T</option>
+              <option value="보충_평촌_김영진T">보충_평촌_김영진T</option>
+              <option value="보충_평촌_신민훈T">보충_평촌_신민훈T</option>
+            </optgroup>
+            <optgroup label="보충강의실 — 산본관">
+              <option value="보충_산본_송우찬T">보충_산본_송우찬T</option>
+              <option value="보충_산본_송문찬T">보충_산본_송문찬T</option>
+              <option value="보충_산본_공민정T">보충_산본_공민정T</option>
+              <option value="보충_산본_장미현T">보충_산본_장미현T</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group"><label>날짜</label><input type="text" id="v-date" placeholder="2025.06"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addVideo()">강의 추가</button>
+      <div class="msg" id="videoMsg"></div>
+    </div>
+    <div class="card">
+      <h3>🔄 Vimeo 동기화</h3>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.7;">
+        가져올 폴더를 선택하거나 검색하세요. 선택 안 하면 전체 폴더를 확인합니다.
+      </div>
+
+      <!-- 폴더 선택기 -->
+      <div style="border:1px solid rgba(255,255,255,0.1);border-radius:8px;margin-bottom:12px;overflow:hidden;">
+        <!-- 검색 + 전체선택 헤더 -->
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.08);">
+          <input id="folderSearchInput" type="text" placeholder="폴더 검색..."
+            oninput="filterFolderList()"
+            style="flex:1;padding:6px 10px;background:#1A1230;border:1px solid rgba(255,255,255,0.15);
+              border-radius:6px;color:var(--off-white);font-size:12px;font-family:inherit;color-scheme:dark;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;white-space:nowrap;">
+            <input type="checkbox" id="folderCheckAll" onchange="toggleAllFolders(this)"
+              style="accent-color:var(--gold);">
+            전체선택
+          </label>
+          <span id="folderSelectedCount" style="font-size:11px;color:var(--gold);white-space:nowrap;"></span>
+        </div>
+        <!-- 아코디언 폴더 목록 -->
+        <div id="folderAccordion" style="max-height:300px;overflow-y:auto;"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="syncVimeo()">📥 Vimeo에서 불러오기</button>
+        <span id="syncStatus" style="font-size:13px;color:var(--muted);"></span>
+      </div>
+      <div id="syncPreview" style="margin-top:16px;display:none;">
+        <div style="font-size:12px;color:var(--gold);margin-bottom:10px;" id="syncPreviewTitle"></div>
+        <div id="syncPreviewList" style="max-height:320px;overflow-y:auto;"></div>
+        <div style="margin-top:12px;display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="syncSaveAll()">✅ 전체 저장</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('syncPreview').style.display='none'">취소</button>
+        </div>
+      </div>
+      <div class="msg" id="syncMsg"></div>
+    </div>
+
+    <div class="card">
+      <h3>📹 전체 강의 목록 (<span id="videoCount">0</span>개)</h3>
+      <!-- 카테고리 필터 -->
+      <div id="videoFilterBtns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-primary btn-sm" data-vcat="" onclick="filterAdminVideos('',this)">전체</button>
+        <button class="btn btn-secondary btn-sm" data-vcat="중등" onclick="filterAdminVideos('중등',this)">중등</button>
+        <button class="btn btn-secondary btn-sm" data-vcat="고등" onclick="filterAdminVideos('고등',this)">고등</button>
+        <button class="btn btn-secondary btn-sm" data-vcat="기출해설" onclick="filterAdminVideos('기출해설',this)">기출해설</button>
+        <button class="btn btn-secondary btn-sm" data-vcat="수리논술" onclick="filterAdminVideos('수리논술',this)">수리논술</button>
+        <button class="btn btn-secondary btn-sm" data-vcat="보충강의실" onclick="filterAdminVideos('보충강의실',this)">보충강의실</button>
+      </div>
+      <div id="videoAdminList"><div style="color:var(--muted);font-size:13px;">불러오는 중...</div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeApp as initializeSecondaryApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_eYNKzfa-aT41E3Dqt_HyJc6UeSR5ErA",
+  authDomain: "songmath.firebaseapp.com",
+  projectId: "songmath",
+  storageBucket: "songmath.firebasestorage.app",
+  messagingSenderId: "936295436575",
+  appId: "1:936295436575:web:d1e201508719850cfbe02a"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+// 학생 계정 생성용 보조 앱 (생성 후 자동 로그인 방지)
+const secondaryApp = initializeSecondaryApp(firebaseConfig, 'secondary');
+const secondaryAuth = getAuth(secondaryApp);
+
+// 학년별 자동 배정 태그 맵
+const GRADE_TAG_MAP = {
+  '중1': ['중등','내신'],
+  '중2': ['중등','내신'],
+  '중3': ['중등','내신'],
+  '고1': ['수학1','수학2','내신'],
+  '고2': ['수학1','수학2','내신'],
+  '고3': ['수학1','수학2','미적분','확통','논술'],
+  'N수': ['수학1','수학2','미적분','확통','논술'],
+};
+
+let studentsCache = [];
+let videosCache = [];
+
+// 관리자 확인
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+  if (!adminDoc.exists()) { window.location.href = 'index.html'; return; }
+  document.getElementById('adminName').textContent = user.email;
+  await loadStudents();
+  await loadVideos();
+  await loadGroupNames();
+  renderFolderAccordion();
+  await loadTeachers();
+  setupExcelDrop();
+  setupTeacherExcelDrop();
+});
+
+window.switchTab = (id, btn) => {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+};
+
+window.doLogout = async () => { await signOut(auth); window.location.href = 'login.html'; };
+
+// ── 학생 로드 ──
+async function loadStudents() {
+  const snap = await getDocs(collection(db, 'students'));
+  studentsCache = [];
+  snap.forEach(d => studentsCache.push({id: d.id, ...d.data()}));
+  renderStudents();
+  renderAssignSelect();
+  document.getElementById('studentCount').textContent = studentsCache.length;
+}
+
+function renderStudents() {
+  const el = document.getElementById('studentList');
+  if (!studentsCache.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;">등록된 학생이 없습니다.</div>'; return; }
+  el.innerHTML = studentsCache.map(s => `
+    <div class="student-item">
+      <div class="student-name">${s.name}</div>
+      <span class="student-meta">${s.grade} · ${s.branch}</span>
+      <span class="student-meta" style="color:var(--gold);font-size:12px;">${s.teacherName ? s.teacherName + ' T' : '미배정'}</span>
+      <span class="student-meta" style="font-size:11px;">${(s.days||[]).join('·') || '-'}</span>
+      <span class="student-meta" style="font-size:11px;">강의 ${(s.assignedVideos||[]).length}개</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}','${s.name}')">삭제</button>
+    </div>`).join('');
+}
+
+function renderAssignSelect() {
+  const sel = document.getElementById('assignStudent');
+  sel.innerHTML = '<option value="">학생을 선택하세요</option>' +
+    studentsCache.map(s => `<option value="${s.id}">${s.name} (${s.grade} / ${s.branch})</option>`).join('');
+}
+
+// 학년별 자동 배정 비디오 ID 목록 계산
+function getAutoAssignVideos(grade) {
+  const tags = GRADE_TAG_MAP[grade] || [];
+  return videosCache.filter(v => tags.includes(v.tag)).map(v => v.id);
+}
+
+// ── 개별 학생 등록 ──
+window.createStudent = async () => {
+  const name = document.getElementById('n-name').value.trim();
+  const phone = document.getElementById('n-phone').value.trim().replace(/-/g,'');
+  const grade = document.getElementById('n-grade').value;
+  const branch = document.getElementById('n-branch').value;
+  const teacherUid = document.getElementById('n-teacher').value;
+  const teacherName = teacherUid ? (teachersCache.find(t => t.id === teacherUid)?.name || '') : '';
+  const days = [...document.querySelectorAll('.n-day:checked')].map(c => c.value);
+  const autoAssign = document.getElementById('n-autoAssign').checked;
+  if (!name || !phone) { showMsg('createMsg','이름과 전화번호를 입력해주세요.','error'); return; }
+
+  try {
+    const email = name + '@songmath.kr';
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, phone);
+    const assignedVideos = autoAssign ? getAutoAssignVideos(grade) : [];
+    await setDoc(doc(db, 'students', cred.user.uid), {
+      name, phone, grade, branch, assignedVideos,
+      teacherUid, teacherName, days,
+      createdAt: new Date().toISOString()
+    });
+    showMsg('createMsg', `${name} 학생 등록 완료! (강의 ${assignedVideos.length}개 자동 배정)`, 'success');
+    document.getElementById('n-name').value = '';
+    document.getElementById('n-phone').value = '';
+    await loadStudents();
+  } catch(e) {
+    showMsg('createMsg', e.code === 'auth/email-already-in-use' ? '이미 등록된 학생입니다.' : '오류: '+e.message, 'error');
+  }
+};
+
+window.deleteStudent = async (uid, name) => {
+  if (!confirm(`${name} 학생을 삭제하시겠습니까?`)) return;
+  await deleteDoc(doc(db, 'students', uid));
+  await loadStudents();
+};
+
+window.deleteAllStudents = async () => {
+  if (!confirm(`⚠️ 등록된 학생 ${studentsCache.length}명을 모두 삭제합니다.
+
+Firestore 데이터만 삭제되며, Firebase Auth 계정은 Firebase Console → Authentication에서 별도로 삭제해야 합니다.
+
+계속하시겠습니까?`)) return;
+  if (!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.')) return;
+
+  const btn = document.querySelector('[onclick="deleteAllStudents()"]');
+  btn.disabled = true; btn.textContent = '삭제 중...';
+
+  let count = 0;
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < studentsCache.length; i += BATCH_SIZE) {
+    const batch = studentsCache.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(s => deleteDoc(doc(db, 'students', s.id))));
+    count += batch.length;
+    btn.textContent = `삭제 중... (${count}/${studentsCache.length})`;
+  }
+
+  btn.disabled = false; btn.textContent = '🗑 전체 학생 삭제';
+  showMsg('createMsg', `✅ ${count}명 삭제 완료! Auth 계정은 Firebase Console에서 삭제하세요.`, 'success');
+  await loadStudents();
+};
+
+// ── 엑셀 업로드 ──
+let excelData = [];
+
+function setupExcelDrop() {
+  const input = document.getElementById('excelFileInput');
+  input.addEventListener('change', e => parseExcel(e.target.files[0]));
+
+  // 드래그 이벤트는 document에 위임 (탭 전환 후에도 동작)
+  document.addEventListener('dragover', e => {
+    const drop = document.getElementById('excelDrop');
+    if (drop && drop.contains(e.target)) {
+      e.preventDefault();
+      drop.classList.add('drag');
+    }
+  });
+
+  document.addEventListener('dragleave', e => {
+    const drop = document.getElementById('excelDrop');
+    if (drop && !drop.contains(e.relatedTarget)) {
+      drop.classList.remove('drag');
+    }
+  });
+
+  document.addEventListener('drop', e => {
+    const drop = document.getElementById('excelDrop');
+    if (drop && drop.contains(e.target)) {
+      e.preventDefault();
+      drop.classList.remove('drag');
+      parseExcel(e.dataTransfer.files[0]);
+    }
+  });
+}
+
+function parseExcel(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+
+    // 헤더 제거 후 파싱
+    excelData = rows.slice(1).filter(r => r[0]).map(r => {
+      const teacherName = String(r[4]||'').trim();
+      const dayStr      = String(r[5]||'').trim();
+      // 요일 파싱: "월수금" → ["월","수","금"]
+      const dayMap = {'월':'월','화':'화','수':'수','목':'목','금':'금','토':'토'};
+      const days = dayStr.split('').filter(ch => dayMap[ch]);
+      // 선생님 UID 매칭
+      const teacher = teachersCache.find(t => t.name === teacherName);
+      return {
+        name: String(r[0]||'').trim(),
+        phone: String(r[1]||'').trim().replace(/-/g,''),
+        grade: String(r[2]||'').trim(),
+        branch: String(r[3]||'').trim() || '평촌관',
+        teacherName, teacherUid: teacher?.id || '',
+        days,
+      };
+    });
+
+    document.getElementById('previewCount').textContent = `총 ${excelData.length}명`;
+    document.getElementById('previewTable').innerHTML = `
+      <tr><th>이름</th><th>전화번호</th><th>학년</th><th>관할</th><th>담당선생님</th><th>요일</th><th>강의</th></tr>
+      ${excelData.map(r => `<tr>
+        <td>${r.name}</td>
+        <td>${r.phone}</td>
+        <td><span class="preview-badge">${r.grade}</span></td>
+        <td>${r.branch}</td>
+        <td style="color:${r.teacherUid?'var(--gold)':'#ff9090'};">${r.teacherName||'-'} ${r.teacherUid?'✅':'⚠️미매칭'}</td>
+        <td>${r.days.join('·')||'-'}</td>
+        <td style="color:var(--gold);">${getAutoAssignVideos(r.grade).length}개</td>
+      </tr>`).join('')}`;
+    document.getElementById('excelPreview').style.display = 'block';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+window.uploadExcel = async () => {
+  if (!excelData.length) return;
+  const autoAssign = document.getElementById('e-autoAssign').checked;
+  const btn = document.querySelector('#tab-excel .btn-primary');
+  btn.disabled = true;
+  let ok = 0, skip = 0;
+  const failList = [];
+
+  for (let i = 0; i < excelData.length; i++) {
+    const row = excelData[i];
+    if (!row.name || !row.phone) continue;
+    btn.textContent = `등록 중... (${i+1}/${excelData.length}) 성공:${ok}`;
+
+    const phone = row.phone.replace(/-/g,'').replace(/\s/g,'');
+
+    // 비밀번호 최소 6자리 체크
+    if (phone.length < 6) {
+      failList.push(`${row.name}: 전화번호 짧음(${phone})`);
+      continue;
+    }
+
+    try {
+      const email = row.name + '@songmath.kr';
+      const cred = await createUserWithEmailAndPassword(secondaryAuth, email, phone);
+      const assignedVideos = autoAssign ? getAutoAssignVideos(row.grade) : [];
+      await setDoc(doc(db, 'students', cred.user.uid), {
+        name: row.name, phone: phone,
+        grade: row.grade, branch: row.branch,
+        teacherUid: row.teacherUid || '',
+        teacherName: row.teacherName || '',
+        days: row.days || [],
+        assignedVideos, createdAt: new Date().toISOString()
+      });
+      ok++;
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        skip++;
+      } else if (e.code === 'auth/too-many-requests') {
+        // rate limit → 3초 대기 후 재시도
+        await new Promise(r => setTimeout(r, 3000));
+        i--; // 현재 항목 재시도
+        continue;
+      } else {
+        failList.push(`${row.name}: ${e.code}`);
+      }
+    }
+    // 매 3명마다 500ms 대기
+    if ((i + 1) % 3 === 0) await new Promise(r => setTimeout(r, 500));
+  }
+
+  let msg = `완료! 신규 ${ok}명 / 중복(스킵) ${skip}명`;
+  if (failList.length > 0) msg += ` / 실패 ${failList.length}명: ${failList.join(', ')}`;
+  showMsg('excelMsg', msg, ok > 0 ? 'success' : 'error');
+  btn.disabled = false; btn.textContent = '일괄 등록';
+  await loadStudents();
+};
+
+window.downloadTemplate = () => {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['이름','전화번호','학년','관할','담당선생님','요일'],
+    ['홍길동','01012345678','고1','평촌관','송문찬','월수금'],
+    ['김철수','01087654321','중3','산본관','송우찬','화목'],
+    ['이영희','01011112222','고2','평촌관','송문찬','월화수목금'],
+  ]);
+  // 컬럼 너비
+  ws['!cols'] = [{wch:10},{wch:14},{wch:6},{wch:8},{wch:10},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '학생목록');
+  XLSX.writeFile(wb, '학생등록양식_v2.xlsx');
+};
+
+// ── 강의 배정 ──
+window.loadStudentVideos = async () => {
+  const uid = document.getElementById('assignStudent').value;
+  if (!uid) return;
+  const sd = await getDoc(doc(db, 'students', uid));
+  const assigned = sd.data()?.assignedVideos || [];
+  const el = document.getElementById('assignVideoList');
+  if (!videosCache.length) { el.innerHTML = '<div style="color:var(--muted);">강의 목록을 먼저 추가해주세요.</div>'; return; }
+  el.innerHTML = videosCache.map(v => `
+    <div class="assign-item">
+      <input type="checkbox" id="vc_${v.id}" value="${v.id}" ${assigned.includes(v.id)?'checked':''}>
+      <label for="vc_${v.id}" class="assign-title">${v.title}</label>
+      <span class="assign-tag">${v.tag}</span>
+    </div>`).join('');
+};
+
+window.saveAssign = async () => {
+  const uid = document.getElementById('assignStudent').value;
+  if (!uid) { showMsg('assignMsg','학생을 먼저 선택해주세요.','error'); return; }
+  const checked = [...document.querySelectorAll('#assignVideoList input:checked')].map(i => i.value);
+  await updateDoc(doc(db, 'students', uid), {assignedVideos: checked});
+  showMsg('assignMsg','강의 배정 저장 완료!','success');
+  await loadStudents();
+};
+
+window.bulkAutoAssign = async () => {
+  const grade = document.getElementById('bulkGrade').value;
+  const targets = grade === 'all' ? studentsCache : studentsCache.filter(s => s.grade === grade);
+  if (!targets.length) { showMsg('bulkMsg','해당 학년 학생이 없습니다.','error'); return; }
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '배정 중...';
+  let count = 0;
+  for (const s of targets) {
+    const vids = getAutoAssignVideos(s.grade);
+    await updateDoc(doc(db, 'students', s.id), {assignedVideos: vids});
+    count++;
+  }
+  showMsg('bulkMsg', `${count}명 자동 배정 완료!`, 'success');
+  btn.disabled = false; btn.textContent = '자동 배정 실행';
+  await loadStudents();
+};
+
+// ── 강의 목록 ──
+async function loadVideos() {
+  const snap = await getDocs(collection(db, 'videos'));
+  videosCache = [];
+  snap.forEach(d => videosCache.push({id: d.id, ...d.data()}));
+  renderVideos();
+  document.getElementById('videoCount').textContent = videosCache.length;
+}
+
+// 카테고리 그룹 정의
+const EXAM_YEARS = ['2025','2024','2023','2022','2021'];
+const TEACHERS_ADMIN = {
+  '평촌관': ['송우찬 원장T','송문찬 원장T','김영진T','신민훈T'],
+  '산본관': ['송우찬 원장T','송문찬 원장T','공민정T','장미현T'],
+};
+
+const BOOK_LABEL = {
+  '세쌍둥이개념':'개념편','세쌍둥이심화':'심화편',
+  '세쌍둥이라이트':'라이트','세쌍둥이파이널':'파이널',
+};
+
+function genGroups(subject, grade, teachers, books) {
+  const groups = [];
+  for (const book of books) {
+    for (const teacher of teachers) {
+      const tag = `${subject}_${book}_${teacher}`;
+      groups.push({ label:`고등 — ${grade} — ${subject} — ${BOOK_LABEL[book]} - ${teacher}`, tags:[tag] });
+    }
+  }
+  groups.push({ label:`고등 — ${grade} — ${subject} — 파이널`, tags:[`${subject}_세쌍둥이파이널`] });
+  return groups;
+}
+
+const SUBJ_T1 = ['송우찬 원장T','송문찬 원장T','공민정T'];
+const SUBJ_T2 = ['송우찬 원장T','송문찬 원장T'];
+const BOOKS_F = ['세쌍둥이개념','세쌍둥이심화','세쌍둥이라이트'];
+const BOOKS_L = ['세쌍둥이개념'];
+
+const VIDEO_GROUPS = [
+  { label: '중등', tags: ['중1','중2','중3'] },
+  ...genGroups('공통수학1','고1', SUBJ_T1, BOOKS_F),
+  ...genGroups('공통수학2','고1', SUBJ_T1, BOOKS_F),
+  ...genGroups('대수',     '고2', SUBJ_T2, BOOKS_F),
+  ...genGroups('미적분',   '고2', SUBJ_T2, BOOKS_F),
+  ...genGroups('확통',     '고2', SUBJ_T2, BOOKS_L),
+  ...genGroups('미적분2',  '고3', SUBJ_T2, BOOKS_F),
+  ...genGroups('기하',     '고3', SUBJ_T2, BOOKS_L),
+  ...EXAM_YEARS.map(y => ({ label:`기출해설 — 고1 (${y})`, tags:[`기출_고1_${y}`] })),
+  ...EXAM_YEARS.map(y => ({ label:`기출해설 — 고2 (${y})`, tags:[`기출_고2_${y}`] })),
+  ...EXAM_YEARS.map(y => ({ label:`기출해설 — 고3 (${y})`, tags:[`기출_고3_${y}`] })),
+  { label:'기출해설 (구형)', tags:['기출_공통수학1','기출_공통수학2','기출_대수','기출_미적분','기출_확통','기출_미적분2','기출_기하','기출해설'] },
+  { label:'수리논술', tags:['수리논술'] },
+  ...TEACHERS_ADMIN['평촌관'].map(t => ({ label:`보충강의실 — 평촌관 ${t}`, tags:[`보충_평촌_${t}`] })),
+  ...TEACHERS_ADMIN['산본관'].map(t => ({ label:`보충강의실 — 산본관 ${t}`, tags:[`보충_산본_${t}`] })),
+  { label:'⚠️ 태그 없음 (미분류)', tags:['', null, undefined] },
+];
+const VIDEO_CAT_TAGS = {
+  '중등':    ['중1','중2','중3'],
+  '고등':    ['공통수학1','공통수학2','대수','미적분','확통','미적분2','기하'],
+  '기출해설': [
+    ...EXAM_YEARS.flatMap(y => ['고1','고2','고3'].map(g => `기출_${g}_${y}`)),
+    '기출해설','기출_공통수학1','기출_공통수학2','기출_대수','기출_미적분','기출_확통','기출_미적분2','기출_기하',
+  ],
+  '수리논술':['수리논술'],
+  '보충강의실': [
+    ...TEACHERS_ADMIN['평촌관'].map(t => `보충_평촌_${t}`),
+    ...TEACHERS_ADMIN['산본관'].map(t => `보충_산본_${t}`),
+  ],
+};
+let currentVideoFilter = ''; // '' = 전체
+
+window.filterAdminVideos = function(cat, btn) {
+  currentVideoFilter = cat;
+  document.querySelectorAll('#videoFilterBtns button').forEach(b => {
+    b.className = 'btn btn-secondary btn-sm';
+  });
+  btn.className = 'btn btn-primary btn-sm';
+  renderVideos();
+};
+
+function renderVideos() {
+  const el = document.getElementById('videoAdminList');
+  if (!videosCache.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;">등록된 강의가 없습니다.</div>';
+    return;
+  }
+
+  const TAG_OPTIONS = [
+    { group:'중등',           value:'중1' },
+    { group:'중등',           value:'중2' },
+    { group:'중등',           value:'중3' },
+    { group:'고등 — 고1',     value:'공통수학1' },
+    { group:'고등 — 고1',     value:'공통수학2' },
+    { group:'고등 — 고2',     value:'대수' },
+    { group:'고등 — 고2',     value:'미적분' },
+    { group:'고등 — 고2',     value:'확통' },
+    { group:'고등 — 고3',     value:'미적분2' },
+    { group:'고등 — 고3',     value:'기하' },
+    ...EXAM_YEARS.flatMap(y => [
+      { group:`기출해설 — 고1 (${y})`, value:`기출_고1_${y}` },
+      { group:`기출해설 — 고2 (${y})`, value:`기출_고2_${y}` },
+      { group:`기출해설 — 고3 (${y})`, value:`기출_고3_${y}` },
+    ]),
+    { group:'기타',           value:'수리논술' },
+    ...TEACHERS_ADMIN['평촌관'].map(t => ({ group:'보충강의실 — 평촌관', value:`보충_평촌_${t}` })),
+    ...TEACHERS_ADMIN['산본관'].map(t => ({ group:'보충강의실 — 산본관', value:`보충_산본_${t}` })),
+  ];
+
+  // 그룹별 optgroup HTML 생성
+  const groups = [...new Set(TAG_OPTIONS.map(t => t.group))];
+  const optgroupHtml = groups.map(g => `
+    <optgroup label="${g}">
+      ${TAG_OPTIONS.filter(t => t.group === g).map(t =>
+        `<option value="${t.value}">${t.value}</option>`
+      ).join('')}
+    </optgroup>`).join('');
+
+  // 필터 적용
+  const allowedTags = currentVideoFilter ? VIDEO_CAT_TAGS[currentVideoFilter] : null;
+  const filtered = allowedTags ? videosCache.filter(v => allowedTags.includes(v.tag)) : videosCache;
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;">해당 카테고리의 강의가 없습니다.</div>';
+    return;
+  }
+
+  // 그룹별로 묶어서 렌더
+  const allKnownTags = VIDEO_GROUPS.flatMap(g => g.tags).filter(t => t);
+  let html = '';
+
+  // 일괄 처리 툴바
+  html += `
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      padding:10px 14px;background:rgba(240,192,64,0.06);border:1px solid rgba(240,192,64,0.2);
+      border-radius:8px;margin-bottom:12px;">
+      <span id="checkedCount" style="font-size:12px;color:var(--gold);min-width:60px;"></span>
+      <div style="position:relative;flex:1;min-width:200px;">
+        <input id="bulkTagSearch" type="text" placeholder="카테고리 검색..."
+          oninput="filterBulkTagOptions()"
+          onfocus="document.getElementById('bulkTagDropdown').style.display='block'"
+          onblur="setTimeout(()=>document.getElementById('bulkTagDropdown').style.display='none',200)"
+          style="width:100%;box-sizing:border-box;padding:6px 10px;background:#1A1230;
+            border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:var(--off-white);
+            font-size:12px;font-family:inherit;color-scheme:dark;"
+          data-selected-value="">
+        <div id="bulkTagDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;
+          max-height:200px;overflow-y:auto;background:#1A1230;border:1px solid rgba(255,255,255,0.2);
+          border-radius:6px;z-index:100;margin-top:2px;"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="bulkChangeTag()">일괄 카테고리 변경</button>
+      <button class="btn btn-secondary btn-sm" onclick="bulkSaveOrder()" style="background:rgba(240,192,64,0.15);border-color:var(--gold);color:var(--gold);">📋 순서·제목 일괄 저장</button>
+      <button class="btn btn-danger btn-sm" onclick="bulkDelete()">일괄 삭제</button>
+    </div>`;
+
+  // 그룹별 아코디언
+  VIDEO_GROUPS.forEach(group => {
+    if (allowedTags && !group.tags.some(t => allowedTags.includes(t))) return;
+    let items;
+    if (group.tags.includes('') || group.tags.includes(null)) {
+      items = filtered.filter(v => !allKnownTags.includes(v.tag));
+    } else {
+      items = filtered.filter(v => group.tags.includes(v.tag));
+    }
+    if (!items.length) return;
+    items = [...items].sort((a, b) => {
+      const oa = a.order != null ? Number(a.order) : 9999;
+      const ob = b.order != null ? Number(b.order) : 9999;
+      return oa - ob;
+    });
+
+    const groupId = 'vgrp-' + group.label.replace(/[^a-zA-Z0-9가-힣]/g,'_');
+
+    html += `
+      <div style="margin-bottom:8px;border:1px solid rgba(255,255,255,0.07);border-radius:8px;overflow:hidden;">
+        <!-- 그룹 헤더 -->
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+          background:rgba(255,255,255,0.03);cursor:pointer;"
+          onclick="toggleAdminGroup('${groupId}')">
+          <input type="checkbox" class="group-check" data-group="${groupId}"
+            onclick="event.stopPropagation();toggleGroupCheck(this,'${groupId}')"
+            style="width:15px;height:15px;cursor:pointer;accent-color:var(--gold);flex-shrink:0;">
+          <span style="font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;
+            text-transform:uppercase;flex:1;">${group.label}</span>
+          <span style="font-size:11px;color:var(--muted);">${items.length}개</span>
+          <span id="arrow-${groupId}" style="color:var(--gold);font-size:11px;transition:transform 0.2s;">▼</span>
+        </div>
+        <!-- 그룹 내용 (기본 접힘) -->
+        <div id="${groupId}" style="display:none;">
+          ${items.map(v => `
+            <div class="assign-item" style="flex-wrap:wrap;gap:8px;align-items:center;
+              border-top:1px solid rgba(255,255,255,0.04);">
+              <input type="checkbox" class="video-check" data-id="${v.id}" data-group="${groupId}"
+                onchange="updateCheckedCount()"
+                style="width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:var(--gold);">
+              <input id="order-${v.id}" type="number" min="1" value="${v.order != null ? v.order : ''}"
+                placeholder="순서"
+                style="width:52px;padding:4px 6px;background:#1A1230;border:1px solid rgba(255,255,255,0.15);
+                  border-radius:6px;color:var(--gold);font-size:12px;font-family:inherit;text-align:center;
+                  -moz-appearance:textfield;color-scheme:dark;">
+              <input id="title-${v.id}" type="text" value="${(v.title||'').replace(/"/g,'&quot;')}"
+                style="flex:1;min-width:160px;padding:4px 8px;background:#1A1230;border:1px solid rgba(255,255,255,0.15);
+                  border-radius:6px;color:var(--off-white);font-size:12px;font-family:inherit;color-scheme:dark;">
+              <span style="font-size:11px;color:var(--muted);flex-shrink:0;">${v.date||''}</span>
+              <select id="tag-sel-${v.id}" style="padding:4px 8px;background:#1A1230;border:1px solid rgba(255,255,255,0.15);
+                border-radius:6px;color:var(--off-white);font-size:12px;font-family:inherit;cursor:pointer;flex-shrink:0;color-scheme:dark;">
+                ${optgroupHtml}
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="saveRow('${v.id}')" style="background:rgba(240,192,64,0.15);border-color:var(--gold);color:var(--gold);">저장</button>
+              <button class="btn btn-secondary btn-sm" onclick="changeVideoTag('${v.id}')">태그변경</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteVideo('${v.id}')">삭제</button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html;
+  initBulkTagSearch();
+  filtered.forEach(v => {
+    const sel = document.getElementById('tag-sel-' + v.id);
+    if (sel) sel.value = v.tag;
+  });
+}
+
+// ── 그룹 이름 관리 ──
+let groupNamesCache = {}; // tag → displayName
+
+async function loadGroupNames() {
+  const snap = await getDocs(collection(db, 'videoGroups'));
+  groupNamesCache = {};
+  snap.forEach(d => { groupNamesCache[d.id] = d.data().displayName || ''; });
+  renderGroupNameList();
+  // 태그 드롭다운 채우기
+  const sel = document.getElementById('groupTagSel');
+  if (sel) {
+    sel.innerHTML = '<option value="">-- 태그 선택 --</option>'
+      + KNOWN_TAGS_SYNC.map(t => `<option value="${t}">${t}</option>`).join('');
+  }
+  // 태그 선택 시 기존 이름 자동 입력
+  sel?.addEventListener('change', () => {
+    const input = document.getElementById('groupNameInput');
+    if (input) input.value = groupNamesCache[sel.value] || '';
+  });
+}
+
+function renderGroupNameList() {
+  const el = document.getElementById('groupNameList');
+  if (!el) return;
+  const entries = Object.entries(groupNamesCache);
+  if (!entries.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;">등록된 그룹 이름이 없습니다.</div>'; return; }
+  el.innerHTML = entries.map(([tag, name]) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
+      <span style="color:var(--muted);font-size:11px;min-width:260px;flex-shrink:0;">${tag}</span>
+      <span style="color:var(--gold);flex:1;">→ ${name}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteGroupName('${tag.replace(/'/g,"\\'")}')">삭제</button>
+    </div>`).join('');
+}
+
+window.saveGroupName = async () => {
+  const tag  = document.getElementById('groupTagSel')?.value;
+  const name = document.getElementById('groupNameInput')?.value.trim();
+  if (!tag)  { showMsg('groupNameMsg', '태그를 선택해주세요.', 'error'); return; }
+  if (!name) { showMsg('groupNameMsg', '이름을 입력해주세요.', 'error'); return; }
+  try {
+    await setDoc(doc(db, 'videoGroups', tag), { displayName: name, tag });
+    groupNamesCache[tag] = name;
+    renderGroupNameList();
+    document.getElementById('groupNameInput').value = '';
+    showMsg('groupNameMsg', `✅ "${name}" 저장 완료`, 'success');
+  } catch(e) {
+    showMsg('groupNameMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+window.deleteGroupName = async (tag) => {
+  if (!confirm(`"${tag}" 그룹 이름을 삭제할까요?`)) return;
+  try {
+    await deleteDoc(doc(db, 'videoGroups', tag));
+    delete groupNamesCache[tag];
+    renderGroupNameList();
+    showMsg('groupNameMsg', '삭제 완료', 'success');
+  } catch(e) {
+    showMsg('groupNameMsg', '오류: ' + e.message, 'error');
+  }
+};
+// 일괄 카테고리 검색 드롭다운
+function initBulkTagSearch() {
+  renderBulkTagOptions('');
+}
+
+// 계층 구조 태그 목록
+const BULK_TAG_TREE = [
+  { grade:'고1', subjects:['공통수학1','공통수학2'] },
+  { grade:'고2', subjects:['대수','미적분'] },
+  { grade:'고3', subjects:['확통','기하','미적분2'] },
+];
+const BOOKS_WT = ['세쌍둥이개념','세쌍둥이심화','세쌍둥이라이트'];
+const TEACHERS_TREE = {
+  '공통수학1':['송우찬 원장T','송문찬 원장T','공민정T'],
+  '공통수학2':['송우찬 원장T','송문찬 원장T','공민정T'],
+  '대수':['송우찬 원장T','송문찬 원장T'],
+  '미적분':['송우찬 원장T','송문찬 원장T'],
+  '확통':['송우찬 원장T','송문찬 원장T'],
+  '미적분2':['송우찬 원장T','송문찬 원장T'],
+  '기하':['송우찬 원장T','송문찬 원장T'],
+};
+const BOOKS_NO_T_TREE = '세쌍둥이파이널';
+const BOOKS_LIMITED = { '확통':['세쌍둥이개념'], '기하':['세쌍둥이개념'] };
+
+function buildTagTree() {
+  const items = [];
+  for (const { grade, subjects } of BULK_TAG_TREE) {
+    items.push({ label: `── ${grade} ──`, value: null, indent: 0 });
+    for (const subject of subjects) {
+      items.push({ label: `  ${subject}`, value: null, indent: 1 });
+      const books = BOOKS_LIMITED[subject] || BOOKS_WT;
+      const teachers = TEACHERS_TREE[subject] || [];
+      for (const book of books) {
+        const bookLabel = book.replace('세쌍둥이개념','개념편').replace('세쌍둥이심화','심화편').replace('세쌍둥이라이트','라이트');
+        for (const teacher of teachers) {
+          items.push({
+            label: `    ${bookLabel} - ${teacher}`,
+            value: `${subject}_${book}_${teacher}`,
+            indent: 2
+          });
+        }
+      }
+      items.push({ label: `    파이널`, value: `${subject}_${BOOKS_NO_T_TREE}`, indent: 2 });
+    }
+  }
+  // 기출해설
+  items.push({ label: '── 기출해설 ──', value: null, indent: 0 });
+  for (const g of ['고1','고2','고3']) {
+    for (const y of ['2025','2024','2023','2022','2021']) {
+      items.push({ label: `  ${g} - ${y}`, value:`기출_${g}_${y}`, indent:1 });
+    }
+  }
+  // 수리논술
+  items.push({ label: '── 수리논술 ──', value: null, indent: 0 });
+  items.push({ label: '  수리논술', value: '수리논술', indent: 1 });
+  // 중등
+  items.push({ label: '── 중등 ──', value: null, indent: 0 });
+  for (const g of ['중1','중2','중3']) {
+    items.push({ label: `  ${g}`, value: g, indent: 1 });
+  }
+  // 보충강의실
+  items.push({ label: '── 보충강의실 ──', value: null, indent: 0 });
+  for (const t of ['송우찬 원장T','송문찬 원장T','김영진T','신민훈T']) {
+    items.push({ label: `  평촌 - ${t}`, value: `보충_평촌_${t}`, indent: 1 });
+  }
+  for (const t of ['송우찬 원장T','송문찬 원장T','공민정T','장미현T']) {
+    items.push({ label: `  산본 - ${t}`, value: `보충_산본_${t}`, indent: 1 });
+  }
+  return items;
+}
+
+const TAG_TREE = buildTagTree();
+
+function renderBulkTagOptions(q) {
+  const dropdown = document.getElementById('bulkTagDropdown');
+  if (!dropdown) return;
+  const ql = q.toLowerCase();
+  const filtered = q
+    ? TAG_TREE.filter(item => item.value && item.label.toLowerCase().includes(ql))
+    : TAG_TREE;
+
+  dropdown.innerHTML = filtered.map(item => {
+    if (!item.value) {
+      // 헤더
+      return `<div style="padding:5px 10px;font-size:10px;font-weight:700;color:var(--gold);
+        letter-spacing:1px;background:rgba(240,192,64,0.06);border-bottom:1px solid rgba(240,192,64,0.1);">
+        ${item.label.trim()}
+      </div>`;
+    }
+    return `<div onclick="selectBulkTag('${item.value.replace(/'/g,"\\'")}','${item.label.trim().replace(/'/g,"\\'")}')"
+      style="padding:7px 10px 7px ${12 + item.indent*8}px;font-size:12px;cursor:pointer;color:var(--off-white);
+        border-bottom:1px solid rgba(255,255,255,0.04);"
+      onmouseover="this.style.background='rgba(240,192,64,0.1)'"
+      onmouseout="this.style.background=''">
+      ${item.label.trim()}
+    </div>`;
+  }).join('') || '<div style="padding:8px 12px;font-size:12px;color:var(--muted);">결과 없음</div>';
+}
+
+window.filterBulkTagOptions = function() {
+  const q = document.getElementById('bulkTagSearch')?.value || '';
+  const dropdown = document.getElementById('bulkTagDropdown');
+  if (dropdown) dropdown.style.display = 'block';
+  renderBulkTagOptions(q);
+};
+
+window.selectBulkTag = function(value, label) {
+  const input = document.getElementById('bulkTagSearch');
+  if (input) {
+    input.value = label;
+    input.dataset.selectedValue = value;
+    input.style.borderColor = 'var(--gold)';
+  }
+  const dropdown = document.getElementById('bulkTagDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+};
+
+window.bulkChangeTag = async () => {
+  const ids = getCheckedIds();
+  const input = document.getElementById('bulkTagSearch');
+  const tag = (input?.dataset.selectedValue || input?.value || '').trim();
+  if (!ids.length) { showMsg('videoMsg', '선택된 강의가 없습니다.', 'error'); return; }
+  if (!tag) { showMsg('videoMsg', '카테고리를 선택해주세요.', 'error'); return; }
+  if (!confirm(`선택한 ${ids.length}개 강의의 카테고리를\n"${tag}"\n로 변경할까요?`)) return;
+  try {
+    await Promise.all(ids.map(id => updateDoc(doc(db, 'videos', id), { tag })));
+    if (input) { input.value = ''; input.dataset.selectedValue = ''; input.style.borderColor = ''; }
+    showMsg('videoMsg', `✅ ${ids.length}개 카테고리 변경 완료`, 'success');
+    await loadVideos();
+  } catch(e) {
+    showMsg('videoMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+window.toggleAdminGroup = (groupId) => {
+  const el    = document.getElementById(groupId);
+  const arrow = document.getElementById('arrow-' + groupId);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+// 그룹 헤더 체크박스 — 해당 그룹 전체 선택/해제
+window.toggleGroupCheck = (master, groupId) => {
+  const el = document.getElementById(groupId);
+  if (el && el.style.display === 'none') {
+    // 접혀있으면 먼저 펼치기
+    el.style.display = 'block';
+    const arrow = document.getElementById('arrow-' + groupId);
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+  }
+  document.querySelectorAll(`.video-check[data-group="${groupId}"]`)
+    .forEach(cb => { cb.checked = master.checked; });
+  updateCheckedCount();
+};
+
+window.updateCheckedCount = () => {
+  const count = document.querySelectorAll('.video-check:checked').length;
+  const el = document.getElementById('checkedCount');
+  if (el) el.textContent = count ? `${count}개 선택됨` : '';
+  const master = document.getElementById('checkAll');
+  const all = document.querySelectorAll('.video-check').length;
+  if (master) master.indeterminate = count > 0 && count < all;
+};
+
+function getCheckedIds() {
+  return [...document.querySelectorAll('.video-check:checked')].map(cb => cb.dataset.id);
+}
+
+window.bulkDelete = async () => {
+  const ids = getCheckedIds();
+  if (!ids.length) { showMsg('videoMsg', '선택된 강의가 없습니다.', 'error'); return; }
+  if (!confirm(`선택한 ${ids.length}개 강의를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  try {
+    await Promise.all(ids.map(id => deleteDoc(doc(db, 'videos', id))));
+    showMsg('videoMsg', `✅ ${ids.length}개 삭제 완료`, 'success');
+    await loadVideos();
+  } catch(e) {
+    showMsg('videoMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+// 토스트 알림
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// 행 저장 (순서 + 제목 함께)
+window.saveRow = async (id) => {
+  const orderInput = document.getElementById('order-' + id);
+  const titleInput = document.getElementById('title-' + id);
+  const orderVal = orderInput ? orderInput.value.trim() : '';
+  const orderNum = orderVal === '' ? null : Number(orderVal);
+  const title = titleInput ? titleInput.value.trim() : '';
+
+  if (!title) { showToast('❌ 제목을 입력해주세요.'); return; }
+
+  try {
+    await updateDoc(doc(db, 'videos', id), { order: orderNum, title });
+    const cached = videosCache.find(v => v.id === id);
+    if (cached) { cached.order = orderNum; cached.title = title; }
+    showToast('✅ 저장 완료');
+
+    const checkbox = document.querySelector(`.video-check[data-id="${id}"]`);
+    if (checkbox) {
+      const groupEl = document.getElementById(checkbox.dataset.group);
+      if (groupEl) {
+        const rows = [...groupEl.querySelectorAll('.assign-item')];
+        rows.sort((a, b) => {
+          const vA = videosCache.find(v => v.id === a.querySelector('.video-check')?.dataset.id);
+          const vB = videosCache.find(v => v.id === b.querySelector('.video-check')?.dataset.id);
+          const oa = vA?.order != null ? Number(vA.order) : 9999;
+          const ob = vB?.order != null ? Number(vB.order) : 9999;
+          return oa - ob;
+        });
+        rows.forEach(row => groupEl.appendChild(row));
+      }
+    }
+  } catch(e) {
+    showToast('❌ 저장 실패: ' + e.message);
+  }
+};
+
+window.saveOrder = async (id) => {
+  const input = document.getElementById('order-' + id);
+  if (!input) return;
+  const val = input.value.trim();
+  const orderNum = val === '' ? null : Number(val);
+  try {
+    await updateDoc(doc(db, 'videos', id), { order: orderNum });
+    // videosCache 업데이트
+    const cached = videosCache.find(v => v.id === id);
+    if (cached) cached.order = orderNum;
+    showToast(`✅ 순서 저장 완료 (${orderNum != null ? orderNum + '번' : '미지정'})`);
+
+    // 해당 아이템이 속한 그룹 컨테이너 찾아서 내부 순서만 재정렬
+    const checkbox = document.querySelector(`.video-check[data-id="${id}"]`);
+    if (checkbox) {
+      const groupId = checkbox.dataset.group;
+      const groupEl = document.getElementById(groupId);
+      if (groupEl) {
+        // 그룹 내 모든 아이템을 order 기준으로 재정렬
+        const rows = [...groupEl.querySelectorAll('.assign-item')];
+        rows.sort((a, b) => {
+          const idA = a.querySelector('.video-check')?.dataset.id;
+          const idB = b.querySelector('.video-check')?.dataset.id;
+          const vA = videosCache.find(v => v.id === idA);
+          const vB = videosCache.find(v => v.id === idB);
+          const oa = vA?.order != null ? Number(vA.order) : 9999;
+          const ob = vB?.order != null ? Number(vB.order) : 9999;
+          return oa - ob;
+        });
+        rows.forEach(row => groupEl.appendChild(row));
+      }
+    }
+  } catch(e) {
+    showToast('❌ 저장 실패: ' + e.message);
+  }
+};
+
+// 일괄 저장 (펼쳐진 그룹 내 순서 + 제목 한번에 저장)
+window.bulkSaveOrder = async () => {
+  const inputs = document.querySelectorAll('input[id^="order-"]');
+  if (!inputs.length) { showToast('저장할 항목이 없습니다.'); return; }
+  let saved = 0;
+  const promises = [];
+  inputs.forEach(input => {
+    const id = input.id.replace('order-', '');
+    const val = input.value.trim();
+    const orderNum = val === '' ? null : Number(val);
+    const titleInput = document.getElementById('title-' + id);
+    const title = titleInput ? titleInput.value.trim() : null;
+    const cached = videosCache.find(v => v.id === id);
+    // 변경 없으면 스킵
+    if (cached && cached.order === orderNum && (title === null || cached.title === title)) return;
+    const updateData = { order: orderNum };
+    if (title) updateData.title = title;
+    promises.push(
+      updateDoc(doc(db, 'videos', id), updateData)
+        .then(() => {
+          if (cached) { cached.order = orderNum; if (title) cached.title = title; }
+          saved++;
+        })
+    );
+  });
+  try {
+    await Promise.all(promises);
+    document.querySelectorAll('[id^="vgrp-"]').forEach(groupEl => {
+      if (groupEl.style.display === 'none') return;
+      const rows = [...groupEl.querySelectorAll('.assign-item')];
+      rows.sort((a, b) => {
+        const idA = a.querySelector('.video-check')?.dataset.id;
+        const idB = b.querySelector('.video-check')?.dataset.id;
+        const vA = videosCache.find(v => v.id === idA);
+        const vB = videosCache.find(v => v.id === idB);
+        const oa = vA?.order != null ? Number(vA.order) : 9999;
+        const ob = vB?.order != null ? Number(vB.order) : 9999;
+        return oa - ob;
+      });
+      rows.forEach(row => groupEl.appendChild(row));
+    });
+    showToast(`✅ ${saved}개 일괄 저장 완료`);
+  } catch(e) {
+    showToast('❌ 일부 저장 실패: ' + e.message);
+  }
+};
+
+window.changeVideoTag = async (id) => {
+  const sel = document.getElementById('tag-sel-' + id);
+  if (!sel) return;
+  const newTag = sel.value;
+  try {
+    await updateDoc(doc(db, 'videos', id), { tag: newTag });
+    showMsg('videoMsg', `✅ 태그가 "${newTag}"로 변경되었습니다.`, 'success');
+    await loadVideos();
+  } catch(e) {
+    showMsg('videoMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+// ── 폴더 선택기 ──
+const FOLDER_TREE = [
+  { group:'고1', folders:['공통수학1_세쌍둥이개념_송우찬 원장T','공통수학1_세쌍둥이개념_송문찬 원장T','공통수학1_세쌍둥이개념_공민정T','공통수학1_세쌍둥이심화_송우찬 원장T','공통수학1_세쌍둥이심화_송문찬 원장T','공통수학1_세쌍둥이심화_공민정T','공통수학1_세쌍둥이라이트_송우찬 원장T','공통수학1_세쌍둥이라이트_송문찬 원장T','공통수학1_세쌍둥이라이트_공민정T','공통수학1_세쌍둥이파이널','공통수학2_세쌍둥이개념_송우찬 원장T','공통수학2_세쌍둥이개념_송문찬 원장T','공통수학2_세쌍둥이개념_공민정T','공통수학2_세쌍둥이심화_송우찬 원장T','공통수학2_세쌍둥이심화_송문찬 원장T','공통수학2_세쌍둥이심화_공민정T','공통수학2_세쌍둥이라이트_송우찬 원장T','공통수학2_세쌍둥이라이트_송문찬 원장T','공통수학2_세쌍둥이라이트_공민정T','공통수학2_세쌍둥이파이널'] },
+  { group:'고2', folders:['대수_세쌍둥이개념_송우찬 원장T','대수_세쌍둥이개념_송문찬 원장T','대수_세쌍둥이심화_송우찬 원장T','대수_세쌍둥이심화_송문찬 원장T','대수_세쌍둥이라이트_송우찬 원장T','대수_세쌍둥이라이트_송문찬 원장T','대수_세쌍둥이파이널','미적분_세쌍둥이개념_송우찬 원장T','미적분_세쌍둥이개념_송문찬 원장T','미적분_세쌍둥이심화_송우찬 원장T','미적분_세쌍둥이심화_송문찬 원장T','미적분_세쌍둥이라이트_송우찬 원장T','미적분_세쌍둥이라이트_송문찬 원장T','미적분_세쌍둥이파이널','확통_세쌍둥이개념_송우찬 원장T','확통_세쌍둥이개념_송문찬 원장T','확통_세쌍둥이파이널'] },
+  { group:'고3', folders:['미적분2_세쌍둥이개념_송우찬 원장T','미적분2_세쌍둥이개념_송문찬 원장T','미적분2_세쌍둥이심화_송우찬 원장T','미적분2_세쌍둥이심화_송문찬 원장T','미적분2_세쌍둥이라이트_송우찬 원장T','미적분2_세쌍둥이라이트_송문찬 원장T','미적분2_세쌍둥이파이널','기하_세쌍둥이개념_송우찬 원장T','기하_세쌍둥이개념_송문찬 원장T','기하_세쌍둥이파이널'] },
+  { group:'기출해설', folders:['기출_고1_2025','기출_고1_2024','기출_고1_2023','기출_고1_2022','기출_고1_2021','기출_고2_2025','기출_고2_2024','기출_고2_2023','기출_고2_2022','기출_고2_2021','기출_고3_2025','기출_고3_2024','기출_고3_2023','기출_고3_2022','기출_고3_2021'] },
+  { group:'수리논술', folders:['수리논술'] },
+  { group:'중등', folders:['중1','중2','중3'] },
+  { group:'보충강의실', folders:['보충_평촌_송우찬 원장T','보충_평촌_송문찬 원장T','보충_평촌_김영진T','보충_평촌_신민훈T','보충_산본_송우찬 원장T','보충_산본_송문찬 원장T','보충_산본_공민정T','보충_산본_장미현T'] },
+];
+
+let _checkedFolders = new Set();
+window._checkedFolders = _checkedFolders;
+
+function isFolderChecked(f) { return _checkedFolders.has(f); }
+
+function renderFolderAccordion(q='') {
+  const el = document.getElementById('folderAccordion');
+  if (!el) return;
+  const ql = q.toLowerCase();
+  let html = '';
+  FOLDER_TREE.forEach((group, gi) => {
+    const filtered = q ? group.folders.filter(f => f.toLowerCase().includes(ql)) : group.folders;
+    if (!filtered.length) return;
+    const groupId = 'fgrp' + gi;
+    const allChecked = filtered.every(f => isFolderChecked(f));
+    html += `
+      <div style="border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div onclick="toggleFolderGroup('${groupId}')"
+          style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;
+            background:rgba(255,255,255,0.02);"
+          onmouseover="this.style.background='rgba(240,192,64,0.06)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+          <input type="checkbox" class="folder-group-check" data-gi="${gi}"
+            ${allChecked&&filtered.length?'checked':''}
+            onclick="event.stopPropagation();toggleFolderGroupCheck(this,${gi})"
+            style="accent-color:var(--gold);">
+          <span style="font-size:12px;font-weight:700;color:var(--gold);flex:1;">${group.group}</span>
+          <span style="font-size:11px;color:var(--muted);">${filtered.length}개</span>
+          <span id="arrow-${groupId}" style="color:var(--gold);font-size:10px;transition:transform 0.2s;">▼</span>
+        </div>
+        <div id="${groupId}" style="display:${q?'block':'none'};">
+          ${filtered.map(f => `
+            <label style="display:flex;align-items:center;gap:8px;padding:6px 12px 6px 28px;
+              cursor:pointer;border-top:1px solid rgba(255,255,255,0.04);font-size:12px;"
+              onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+              onmouseout="this.style.background=''">
+              <input type="checkbox" class="folder-check" value="${f}"
+                ${isFolderChecked(f)?'checked':''}
+                onchange="onFolderCheckChange(this)"
+                style="accent-color:var(--gold);flex-shrink:0;">
+              <span style="color:var(--off-white);">${f}</span>
+            </label>`).join('')}
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html || '<div style="padding:12px;font-size:12px;color:var(--muted);">검색 결과 없음</div>';
+  updateFolderCount();
+}
+
+function onFolderCheckChange(cb) {
+  if (cb.checked) _checkedFolders.add(cb.value);
+  else _checkedFolders.delete(cb.value);
+  updateFolderCount();
+}
+
+window.toggleFolderGroup = (id) => {
+  const el = document.getElementById(id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(180deg)';
+};
+
+window.toggleFolderGroupCheck = (master, gi) => {
+  const group = FOLDER_TREE[gi];
+  if (!group) return;
+  group.folders.forEach(f => { if (master.checked) _checkedFolders.add(f); else _checkedFolders.delete(f); });
+  renderFolderAccordion(document.getElementById('folderSearchInput')?.value || '');
+};
+
+window.toggleAllFolders = (master) => {
+  FOLDER_TREE.forEach(g => g.folders.forEach(f => { if (master.checked) _checkedFolders.add(f); else _checkedFolders.delete(f); }));
+  renderFolderAccordion(document.getElementById('folderSearchInput')?.value || '');
+};
+
+window.filterFolderList = () => {
+  renderFolderAccordion(document.getElementById('folderSearchInput')?.value || '');
+};
+
+function updateFolderCount() {
+  const el = document.getElementById('folderSelectedCount');
+  if (el) el.textContent = _checkedFolders.size ? `${_checkedFolders.size}개 선택` : '';
+}
+
+// ── Vimeo 동기화 (폴더 기준) ──
+const VIMEO_TOKEN = '91f67f8f7f387216004dd35ec5136f8e';
+
+const KNOWN_TAGS_SYNC = [
+  '중1','중2','중3',
+  // 공통수학1
+  '공통수학1_세쌍둥이개념_송우찬 원장T','공통수학1_세쌍둥이개념_송문찬 원장T','공통수학1_세쌍둥이개념_공민정T',
+  '공통수학1_세쌍둥이심화_송우찬 원장T','공통수학1_세쌍둥이심화_송문찬 원장T','공통수학1_세쌍둥이심화_공민정T',
+  '공통수학1_세쌍둥이라이트_송우찬 원장T','공통수학1_세쌍둥이라이트_송문찬 원장T','공통수학1_세쌍둥이라이트_공민정T',
+  '공통수학1_세쌍둥이파이널',
+  // 공통수학2
+  '공통수학2_세쌍둥이개념_송우찬 원장T','공통수학2_세쌍둥이개념_송문찬 원장T','공통수학2_세쌍둥이개념_공민정T',
+  '공통수학2_세쌍둥이심화_송우찬 원장T','공통수학2_세쌍둥이심화_송문찬 원장T','공통수학2_세쌍둥이심화_공민정T',
+  '공통수학2_세쌍둥이라이트_송우찬 원장T','공통수학2_세쌍둥이라이트_송문찬 원장T','공통수학2_세쌍둥이라이트_공민정T',
+  '공통수학2_세쌍둥이파이널',
+  // 대수
+  '대수_세쌍둥이개념_송우찬 원장T','대수_세쌍둥이개념_송문찬 원장T',
+  '대수_세쌍둥이심화_송우찬 원장T','대수_세쌍둥이심화_송문찬 원장T',
+  '대수_세쌍둥이라이트_송우찬 원장T','대수_세쌍둥이라이트_송문찬 원장T',
+  '대수_세쌍둥이파이널',
+  // 미적분
+  '미적분_세쌍둥이개념_송우찬 원장T','미적분_세쌍둥이개념_송문찬 원장T',
+  '미적분_세쌍둥이심화_송우찬 원장T','미적분_세쌍둥이심화_송문찬 원장T',
+  '미적분_세쌍둥이라이트_송우찬 원장T','미적분_세쌍둥이라이트_송문찬 원장T',
+  '미적분_세쌍둥이파이널',
+  // 확통
+  '확통_세쌍둥이개념_송우찬 원장T','확통_세쌍둥이개념_송문찬 원장T',
+  '확통_세쌍둥이파이널',
+  // 미적분2
+  '미적분2_세쌍둥이개념_송우찬 원장T','미적분2_세쌍둥이개념_송문찬 원장T',
+  '미적분2_세쌍둥이심화_송우찬 원장T','미적분2_세쌍둥이심화_송문찬 원장T',
+  '미적분2_세쌍둥이라이트_송우찬 원장T','미적분2_세쌍둥이라이트_송문찬 원장T',
+  '미적분2_세쌍둥이파이널',
+  // 기하
+  '기하_세쌍둥이개념_송우찬 원장T','기하_세쌍둥이개념_송문찬 원장T',
+  '기하_세쌍둥이파이널',
+  // 기출해설
+  '기출_고1_2025','기출_고1_2024','기출_고1_2023','기출_고1_2022','기출_고1_2021',
+  '기출_고2_2025','기출_고2_2024','기출_고2_2023','기출_고2_2022','기출_고2_2021',
+  '기출_고3_2025','기출_고3_2024','기출_고3_2023','기출_고3_2022','기출_고3_2021',
+  '수리논술',
+  '보충_평촌_송우찬 원장T','보충_평촌_송문찬 원장T','보충_평촌_김영진T','보충_평촌_신민훈T',
+  '보충_산본_송우찬 원장T','보충_산본_송문찬 원장T','보충_산본_공민정T','보충_산본_장미현T',
+];
+
+let syncCandidates = [];
+
+// Vimeo 폴더(folder) 목록 가져오기
+async function fetchVimeoFolders() {
+  let folders = [];
+
+  // 개인 라이브러리 폴더
+  let url = 'https://api.vimeo.com/me/projects?per_page=100&page=1';
+  while (url) {
+    const res = await fetch(url, { headers: { Authorization: `bearer ${VIMEO_TOKEN}` } });
+    if (!res.ok) break;
+    const data = await res.json();
+    folders = folders.concat(data.data || []);
+    url = data.paging?.next ? `https://api.vimeo.com${data.paging.next}` : null;
+  }
+
+  // 팀 라이브러리 폴더
+  try {
+    // 팀 목록 가져오기
+    const teamRes = await fetch('https://api.vimeo.com/me/teams?per_page=10', {
+      headers: { Authorization: `bearer ${VIMEO_TOKEN}` }
+    });
+    if (teamRes.ok) {
+      const teamData = await teamRes.json();
+      const teams = teamData.data || [];
+      for (const team of teams) {
+        const teamUri = team.uri; // 예: /teams/12345
+        // 팀 라이브러리 폴더 목록
+        let teamUrl = `https://api.vimeo.com${teamUri}/folders?per_page=100&page=1`;
+        while (teamUrl) {
+          const res = await fetch(teamUrl, { headers: { Authorization: `bearer ${VIMEO_TOKEN}` } });
+          if (!res.ok) {
+            // folders 안되면 projects로 시도
+            let altUrl = `https://api.vimeo.com${teamUri}/projects?per_page=100&page=1`;
+            const res2 = await fetch(altUrl, { headers: { Authorization: `bearer ${VIMEO_TOKEN}` } });
+            if (res2.ok) {
+              const data2 = await res2.json();
+              folders = folders.concat(data2.data || []);
+            }
+            break;
+          }
+          const data = await res.json();
+          folders = folders.concat(data.data || []);
+          teamUrl = data.paging?.next ? `https://api.vimeo.com${data.paging.next}` : null;
+        }
+      }
+    }
+  } catch(e) {
+    console.log('팀 라이브러리 폴더 로드 실패:', e.message);
+  }
+
+  return folders;
+}
+
+// 특정 폴더의 영상 목록 가져오기
+async function fetchFolderVideos(folderUri) {
+  let videos = [];
+  // folderUri 예: /users/12345678/projects/9876543
+  let url = `https://api.vimeo.com${folderUri}/videos?fields=uri,name,created_time&per_page=100&page=1`;
+  while (url) {
+    const res = await fetch(url, {
+      headers: { Authorization: `bearer ${VIMEO_TOKEN}` }
+    });
+    if (!res.ok) break;
+    const data = await res.json();
+    videos = videos.concat(data.data || []);
+    url = data.paging?.next ? `https://api.vimeo.com${data.paging.next}` : null;
+  }
+  return videos;
+}
+
+// 계정 전체 영상 목록 가져오기 (폴더 무관)
+async function fetchAllAccountVideos() {
+  let videos = [];
+  let url = 'https://api.vimeo.com/me/videos?fields=uri,name,created_time&per_page=100&page=1';
+  while (url) {
+    const res = await fetch(url, {
+      headers: { Authorization: `bearer ${VIMEO_TOKEN}` }
+    });
+    if (!res.ok) break;
+    const data = await res.json();
+    videos = videos.concat(data.data || []);
+    url = data.paging?.next ? `https://api.vimeo.com${data.paging.next}` : null;
+  }
+  return videos;
+}
+
+window.syncVimeo = async () => {
+  const statusEl  = document.getElementById('syncStatus');
+  const previewEl = document.getElementById('syncPreview');
+  previewEl.style.display = 'none';
+  syncCandidates = [];
+
+  // 선택된 폴더 목록 (없으면 전체)
+  // 체크된 폴더 DOM에서 직접 읽기
+  const checkedBoxes = [...document.querySelectorAll('.folder-check:checked')].map(cb => cb.value);
+  const targetFolders = checkedBoxes.length > 0 ? checkedBoxes : null;
+
+  statusEl.textContent = '⏳ Vimeo 폴더 목록 불러오는 중...';
+
+  try {
+    const allFolders = await fetchVimeoFolders();
+
+    // 지정된 폴더명만 필터 (미입력 시 KNOWN_TAGS_SYNC 전체)
+    const matchedFolders = allFolders.filter(f =>
+      targetFolders
+        ? targetFolders.includes(f.name)
+        : KNOWN_TAGS_SYNC.includes(f.name)
+    );
+
+    if (!matchedFolders.length) {
+      statusEl.textContent = '⚠️ 입력한 폴더명과 일치하는 Vimeo 폴더가 없습니다.';
+      return;
+    }
+
+    const existingIds = new Set(videosCache.map(v => v.vimeoId));
+    const foundIds = new Set();
+
+    // 지정 폴더 영상
+    for (const folder of matchedFolders) {
+      statusEl.textContent = `⏳ "${folder.name}" 확인 중...`;
+      const videos = await fetchFolderVideos(folder.uri);
+      for (const v of videos) {
+        const vimeoId = v.uri.replace('/videos/', '');
+        foundIds.add(vimeoId);
+        if (existingIds.has(vimeoId)) continue;
+        const date = v.created_time ? v.created_time.slice(0,7).replace('-','.') : '';
+        syncCandidates.push({ vimeoId, title: v.name, tag: folder.name, date });
+      }
+    }
+
+    // 폴더 미지정 영상 (루트) — 전체 모드일 때만
+    if (!targetFolders) {
+      statusEl.textContent = '⏳ 폴더 미지정 영상 확인 중...';
+      const allVideos = await fetchAllAccountVideos();
+      for (const v of allVideos) {
+        const vimeoId = v.uri.replace('/videos/', '');
+        if (existingIds.has(vimeoId) || foundIds.has(vimeoId)) continue;
+        const date = v.created_time ? v.created_time.slice(0,7).replace('-','.') : '';
+        syncCandidates.push({ vimeoId, title: v.name, tag: '', date });
+      }
+    }
+
+    if (!syncCandidates.length) {
+      statusEl.textContent = `✅ 새로 추가할 영상이 없습니다. (${matchedFolders.length}개 폴더 확인 완료)`;
+      return;
+    }
+
+    statusEl.textContent = '';
+    renderSyncPreview(matchedFolders.length);
+
+  } catch(e) {
+    statusEl.textContent = '';
+    showMsg('syncMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+function renderSyncPreview(folderCount) {
+  const previewEl = document.getElementById('syncPreview');
+  const titleEl   = document.getElementById('syncPreviewTitle');
+  const listEl    = document.getElementById('syncPreviewList');
+
+  const unfiled = syncCandidates.filter(v => !v.tag).length;
+  titleEl.innerHTML = `신규 영상 <b>${syncCandidates.length}개</b> 발견
+    ${unfiled ? `<span style="color:#ffd060;margin-left:8px;">· 폴더 미지정 ${unfiled}개 (카테고리·제목 직접 지정)</span>` : ''}`;
+
+  // 카테고리 드롭다운 옵션 HTML
+  const catOptHtml = KNOWN_TAGS_SYNC.map(t => `<option value="${t}">${t}</option>`).join('');
+
+  // 태그별 그룹핑 (미분류는 맨 위로)
+  const groups = {};
+  syncCandidates.forEach((v, i) => {
+    const key = v.tag || '__unfiled__';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push({ ...v, idx: i });
+  });
+
+  // 미분류 먼저, 나머지는 뒤에
+  const orderedKeys = Object.keys(groups).sort((a, b) => {
+    if (a === '__unfiled__') return -1;
+    if (b === '__unfiled__') return 1;
+    return 0;
+  });
+
+  listEl.innerHTML = orderedKeys.map(key => {
+    const items = groups[key];
+    const isUnfiled = key === '__unfiled__';
+    const headerLabel = isUnfiled
+      ? `⚠️ 폴더 미지정 (직접 선택 필요)`
+      : key;
+
+    return `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:${isUnfiled ? '#ffd060' : 'var(--gold)'};letter-spacing:1px;
+        padding:5px 0;border-bottom:1px solid rgba(240,192,64,0.2);margin-bottom:4px;">
+        ${headerLabel} <span style="font-weight:400;color:var(--muted);">${items.length}개</span>
+      </div>
+      ${items.map(v => isUnfiled ? `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;
+          border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;flex-wrap:wrap;">
+          <input id="sync-title-${v.idx}" type="text" value="${(v.title||'').replace(/"/g,'&quot;')}"
+            style="flex:1;min-width:160px;padding:5px 8px;background:#1A1230;border:1px solid rgba(255,255,255,0.15);
+              border-radius:6px;color:var(--off-white);font-size:12px;font-family:inherit;color-scheme:dark;">
+          <select id="sync-tag-${v.idx}" style="padding:5px 8px;background:#1A1230;border:1px solid #ffd060;
+            border-radius:6px;color:var(--off-white);font-size:12px;font-family:inherit;color-scheme:dark;">
+            <option value="">-- 카테고리 선택 --</option>
+            ${catOptHtml}
+          </select>
+        </div>` : `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 4px;
+          border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;">
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${v.title}</span>
+          <span style="font-size:11px;color:var(--muted);flex-shrink:0;">${v.date}</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  previewEl.style.display = 'block';
+}
+
+window.syncSaveAll = async () => {
+  const today = new Date().toISOString().slice(0,7).replace('-','.');
+  let saved = 0, skipped = 0;
+
+  for (let i = 0; i < syncCandidates.length; i++) {
+    const v = syncCandidates[i];
+    let tag = v.tag;
+    let title = v.title;
+    if (!v.tag) {
+      const tagSel = document.getElementById('sync-tag-' + i);
+      const titleInput = document.getElementById('sync-title-' + i);
+      if (tagSel) tag = tagSel.value;
+      if (titleInput) title = titleInput.value.trim();
+      if (!tag) { skipped++; continue; }
+    }
+
+    try {
+      await setDoc(doc(db, 'videos', v.vimeoId), {
+        vimeoId: v.vimeoId,
+        title,
+        tag,
+        date:    v.date || today,
+        order:   null,
+        createdAt: new Date().toISOString(),
+      });
+      saved++;
+    } catch(e) {
+      console.error('저장 실패:', v.title, e);
+    }
+  }
+
+  document.getElementById('syncPreview').style.display = 'none';
+  document.getElementById('syncStatus').textContent = '';
+  showMsg('syncMsg', `✅ ${saved}개 저장 완료${skipped ? ` · 카테고리 미선택 ${skipped}개 건너뜀` : ''}`, 'success');
+  await loadVideos();
+};
+
+window.addVideo = async () => {
+  const title = document.getElementById('v-title').value.trim();
+  const vimeoId = document.getElementById('v-ytid').value.trim();
+  const tag = document.getElementById('v-tag').value;
+  const date = document.getElementById('v-date').value.trim();
+  if (!title || !vimeoId) { showMsg('videoMsg','제목과 Vimeo ID를 입력해주세요.','error'); return; }
+  await setDoc(doc(db, 'videos', Date.now().toString()), {
+    title, vimeoId, tag, date, createdAt: new Date().toISOString()
+  });
+  showMsg('videoMsg','강의 추가 완료!','success');
+  document.getElementById('v-title').value='';
+  document.getElementById('v-ytid').value='';
+  await loadVideos();
+};
+
+window.deleteVideo = async (id) => {
+  if (!confirm('강의를 삭제하시겠습니까?')) return;
+  await deleteDoc(doc(db, 'videos', id));
+  await loadVideos();
+};
+
+function showMsg(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = 'msg ' + type; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+// ══ 선생님 관리 ══
+let teachersCache = [];
+
+async function loadTeachers() {
+  const snap = await getDocs(collection(db, 'teachers'));
+  teachersCache = [];
+  snap.forEach(d => teachersCache.push({ id: d.id, ...d.data() }));
+  renderTeachers();
+  renderTeacherSelect();
+  document.getElementById('teacherCount').textContent = teachersCache.length;
+}
+
+function renderTeachers() {
+  const el = document.getElementById('teacherList');
+  if (!teachersCache.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;">등록된 선생님이 없습니다.</div>'; return;
+  }
+  el.innerHTML = teachersCache.map(t => `
+    <div class="student-item">
+      <div class="student-name">${t.name} 선생님</div>
+      <span class="student-meta">${t.branch || ''}</span>
+      <span class="student-meta">${t.subject || ''}</span>
+      <span class="student-meta" style="font-size:11px;">${t.memo || ''}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteTeacher('${t.id}','${t.name}')">삭제</button>
+    </div>`).join('');
+}
+
+function renderTeacherSelect() {
+  // 보고서 열람용
+  const sel = document.getElementById('reportTeacher');
+  if (sel) {
+    sel.innerHTML = '<option value="">선생님을 선택하세요</option>' +
+      teachersCache.map(t => `<option value="${t.id}">${t.name} (${t.branch || ''})</option>`).join('');
+  }
+  // 학생 등록용
+  const nSel = document.getElementById('n-teacher');
+  if (nSel) {
+    nSel.innerHTML = '<option value="">선생님 선택...</option>' +
+      teachersCache.map(t => `<option value="${t.id}">${t.name} (${t.branch || ''})</option>`).join('');
+  }
+  // 주간성취도 엑셀 다운로드용
+  const exSel = document.getElementById('excelTeacher');
+  if (exSel) {
+    exSel.innerHTML = '<option value="">전체 선생님</option>' +
+      teachersCache.map(t => `<option value="${t.id}">${t.name} (${t.branch || ''})</option>`).join('');
+  }
+  // 반별 진도 엑셀 다운로드용
+  const prSel = document.getElementById('progressTeacher');
+  if (prSel) {
+    prSel.innerHTML = '<option value="">전체 선생님</option>' +
+      teachersCache.map(t => `<option value="${t.id}">${t.name} (${t.branch || ''})</option>`).join('');
+  }
+  // 이번 주 기본값 설정 (공통 유틸)
+  function setThisWeek(inputId) {
+    const el = document.getElementById(inputId);
+    if (el && !el.value) {
+      const now = new Date();
+      const y = now.getFullYear();
+      const start = new Date(y, 0, 1);
+      const w = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+      el.value = `${y}-W${String(w).padStart(2,'0')}`;
+    }
+  }
+  setThisWeek('excelWeek');
+  setThisWeek('progressWeek');
+}
+
+// ── 선생님 엑셀 일괄 등록 ──
+let teacherExcelData = [];
+
+function setupTeacherExcelDrop() {
+  const input = document.getElementById('teacherExcelInput');
+  input.addEventListener('change', e => parseTeacherExcel(e.target.files[0]));
+  const drop = document.getElementById('teacherExcelDrop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); parseTeacherExcel(e.dataTransfer.files[0]); });
+}
+
+function parseTeacherExcel(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+    teacherExcelData = rows.slice(1).filter(r => r[0]).map(r => ({
+      name:    String(r[0]||'').trim(),
+      pw:      String(r[1]||'').trim(),
+      branch:  String(r[2]||'').trim() || '평촌관',
+      subject: String(r[3]||'').trim(),
+      memo:    String(r[4]||'').trim(),
+    }));
+    document.getElementById('teacherPreviewCount').textContent = `총 ${teacherExcelData.length}명`;
+    document.getElementById('teacherPreviewTable').innerHTML = `
+      <tr><th>이름</th><th>비밀번호</th><th>담당관</th><th>담당과목</th><th>메모</th></tr>
+      ${teacherExcelData.map(r => `<tr>
+        <td>${r.name}</td>
+        <td>${r.pw.length >= 8 ? '✅' : '<span style="color:#ff9090">⚠️ 8자 미만</span>'}</td>
+        <td>${r.branch}</td><td>${r.subject}</td><td>${r.memo||'-'}</td>
+      </tr>`).join('')}`;
+    document.getElementById('teacherExcelPreview').style.display = 'block';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+window.uploadTeacherExcel = async () => {
+  if (!teacherExcelData.length) return;
+  const btn = event.target;
+  btn.disabled = true;
+  let ok = 0, skip = 0;
+  const failList = [];
+  for (const row of teacherExcelData) {
+    if (!row.name || !row.pw) continue;
+    if (row.pw.length < 8) { failList.push(`${row.name}: 비밀번호 8자 미만`); continue; }
+    try {
+      const email = row.name + '@songmath.kr';
+      const cred = await createUserWithEmailAndPassword(secondaryAuth, email, row.pw);
+      await setDoc(doc(db, 'teachers', cred.user.uid), {
+        name: row.name, branch: row.branch, subject: row.subject,
+        memo: row.memo, email, createdAt: new Date().toISOString()
+      });
+      ok++;
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') skip++;
+      else failList.push(`${row.name}: ${e.code}`);
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+  let msg = `완료! 신규 ${ok}명 / 중복 ${skip}명`;
+  if (failList.length) msg += ` / 실패: ${failList.join(', ')}`;
+  showMsg('teacherExcelMsg', msg, ok > 0 ? 'success' : 'error');
+  btn.disabled = false;
+  await loadTeachers();
+};
+
+window.downloadTeacherTemplate = () => {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['이름','비밀번호','담당관','담당과목','메모'],
+    ['송문찬','12345678','평촌관','고등','고등부 전담'],
+    ['조현주','12345678','평촌관','중등',''],
+  ]);
+  ws['!cols'] = [{wch:10},{wch:12},{wch:8},{wch:10},{wch:20}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '선생님목록');
+  XLSX.writeFile(wb, '선생님등록양식.xlsx');
+};
+
+window.createTeacher = async () => {
+  const name    = document.getElementById('t-name').value.trim();
+  const pw      = document.getElementById('t-pw').value;
+  const branch  = document.getElementById('t-branch').value;
+  const subject = document.getElementById('t-subject').value.trim();
+  const memo    = document.getElementById('t-memo').value.trim();
+  if (!name || !pw) { showMsg('teacherCreateMsg', '이름과 비밀번호를 입력해주세요.', 'error'); return; }
+  if (pw.length < 8) { showMsg('teacherCreateMsg', '비밀번호는 8자리 이상이어야 합니다.', 'error'); return; }
+  try {
+    const email = name + '@songmath.kr';
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pw);
+    await setDoc(doc(db, 'teachers', cred.user.uid), {
+      name, branch, subject, memo, email,
+      createdAt: new Date().toISOString()
+    });
+    showMsg('teacherCreateMsg', `${name} 선생님 계정 등록 완료!`, 'success');
+    document.getElementById('t-name').value = '';
+    document.getElementById('t-pw').value = '';
+    document.getElementById('t-subject').value = '';
+    document.getElementById('t-memo').value = '';
+    await loadTeachers();
+  } catch(e) {
+    const msg = e.code === 'auth/email-already-in-use' ? '이미 등록된 이름입니다.' : '오류: ' + e.message;
+    showMsg('teacherCreateMsg', msg, 'error');
+  }
+};
+
+window.deleteTeacher = async (uid, name) => {
+  if (!confirm(`${name} 선생님 계정을 삭제하시겠습니까?\n(Firestore 데이터만 삭제됩니다. Auth 계정은 Firebase Console에서 별도 삭제하세요.)`)) return;
+  await deleteDoc(doc(db, 'teachers', uid));
+  await loadTeachers();
+};
+
+// 보고서 열람
+let monthlyDocsCache = []; // ZIP용 캐시
+
+window.loadReports = async () => {
+  const teacherUid = document.getElementById('reportTeacher').value;
+  const type       = document.getElementById('reportType').value;
+  const el         = document.getElementById('reportList');
+  const zipBtn     = document.getElementById('zipBtn');
+
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;">불러오는 중...</div>';
+  zipBtn.style.display = 'none';
+  monthlyDocsCache = [];
+
+  const collName = type === 'weekly' ? 'weeklyReports' : 'monthlyReports';
+
+  try {
+    // ── orderBy 단독 사용 (복합 인덱스 불필요) ──
+    // teacherUid 필터를 Firestore 쿼리가 아닌 클라이언트에서 처리하여
+    // 복합 인덱스 미생성으로 인한 쿼리 실패를 방지합니다.
+    const q = query(collection(db, collName), orderBy('submittedAt', 'desc'));
+    const snap = await getDocs(q);
+
+    // teacherUid 클라이언트 필터
+    let docs = [];
+    snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
+    if (teacherUid) docs = docs.filter(d => d.teacherUid === teacherUid);
+
+    if (!docs.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;">제출된 보고서가 없습니다.</div>';
+      return;
+    }
+
+    let html = '';
+
+    if (type === 'weekly') {
+      docs.forEach(data => {
+        const rl = data.ratingsLabel || {};
+        html += `
+          <div class="student-item" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:6px;">
+              <b>${data.teacherName||''} T · ${data.weekLabel} — ${data.studentName} (${data.studentGrade||''})</b>
+              <span style="font-size:12px;color:var(--muted);">${data.topic || ''}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);">
+              과제 ${rl.homework||'-'} &nbsp;·&nbsp; 수업태도 ${rl.attitude||'-'} &nbsp;·&nbsp; 클리닉 ${rl.clinic||'-'}
+            </div>
+            ${data.memo ? `<div style="font-size:12px;">📌 ${data.memo}</div>` : ''}
+          </div>`;
+      });
+    } else {
+      // 월말 PDF
+      docs.forEach(data => {
+        monthlyDocsCache.push(data);
+        const size = data.fileSize ? `(${(data.fileSize/1024/1024).toFixed(1)}MB)` : '';
+        // ── 다운로드: fetch→blob 방식 (Firebase Storage CORS 우회) ──
+        const safeURL      = (data.downloadURL||'').replace(/'/g, "\\'");
+        const safeName     = (data.teacherName||'').replace(/'/g, "\\'");
+        const safeMonth    = (data.month||'').replace(/'/g, "\\'");
+        const safeFileName = (data.fileName||'report.pdf').replace(/'/g, "\\'");
+        html += `
+          <div class="student-item" style="flex-wrap:wrap;gap:10px;">
+            <div style="flex:1;min-width:180px;">
+              <div style="font-weight:600;margin-bottom:4px;">${data.teacherName||''} T · ${data.month} 보고서</div>
+              <div style="font-size:12px;color:var(--muted);">📄 ${data.fileName||''} ${size}</div>
+              ${data.memo ? `<div style="font-size:12px;color:var(--muted);">${data.memo}</div>` : ''}
+            </div>
+            <button onclick="downloadPDF('${safeURL}','${safeName}','${safeMonth}','${safeFileName}')"
+              style="align-self:center;font-size:12px;color:var(--gold);background:none;padding:6px 14px;border:1px solid rgba(240,192,64,0.4);border-radius:6px;white-space:nowrap;cursor:pointer;font-family:inherit;">
+              ⬇ 다운로드
+            </button>
+          </div>`;
+      });
+      if (monthlyDocsCache.length > 0) zipBtn.style.display = 'inline-flex';
+    }
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div style="color:#ff9090;font-size:13px;">오류: ${e.message}</div>`;
+  }
+};
+
+// ── 개별 PDF 다운로드 (fetch→blob, CORS 우회) ──
+// Firebase Storage URL → Blob 변환 (XHR, CORS 우회)
+function fetchBlob(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.onload = () => xhr.status === 200 ? resolve(xhr.response) : reject(new Error('status ' + xhr.status));
+    xhr.onerror = () => reject(new Error('network error'));
+    xhr.open('GET', url);
+    xhr.send();
+  });
+}
+
+window.downloadPDF = async (url, teacherName, month, fileName) => {
+  try {
+    const blob = await fetchBlob(url);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${teacherName}_${month}_${fileName}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('다운로드 실패: ' + e.message + '\n새 탭에서 직접 열려면 아래 URL을 복사해 주세요.\n' + url);
+  }
+};
+
+// ── 주간성취도 엑셀 다운로드 ──
+window.downloadWeeklyExcel = async () => {
+  const weekVal    = document.getElementById('excelWeek').value;
+  const teacherUid = document.getElementById('excelTeacher').value;
+  const msgEl      = document.getElementById('excelWeeklyMsg');
+
+  if (!weekVal) { showMsg('excelWeeklyMsg', '조회할 주차를 선택해주세요.', 'error'); return; }
+
+  // week 값 파싱 (예: 2025-W03)
+  const [yearStr, weekStr] = weekVal.split('-W');
+  const weekKey = `${yearStr}-W${weekStr}`;
+
+  // 주차 라벨 계산
+  const weekNum = parseInt(weekStr);
+  const weekLabel = `${yearStr}년 ${weekNum}주차`;
+
+  showMsg('excelWeeklyMsg', '데이터 조회 중...', 'success');
+
+  try {
+    let q;
+    if (teacherUid) {
+      q = query(collection(db, 'weeklyReports'),
+        where('weekKey', '==', weekKey),
+        where('teacherUid', '==', teacherUid));
+    } else {
+      q = query(collection(db, 'weeklyReports'),
+        where('weekKey', '==', weekKey));
+    }
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      showMsg('excelWeeklyMsg', `${weekLabel} 제출된 성취도가 없습니다.`, 'error');
+      return;
+    }
+
+    // 데이터 수집
+    const rows = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const rl = data.ratingsLabel || {};
+      rows.push({
+        선생님:        data.teacherName || '',
+        학생명:        data.studentName || '',
+        과제충실도:    rl.homework || '',
+        수업태도:      rl.attitude || '',
+        클리닉참여도:  rl.clinic || '',
+        담임말씀:      data.memo || '',
+        제출일시:      data.submittedAt?.toDate?.()?.toLocaleDateString('ko-KR') || '',
+      });
+    });
+
+    // 선생님 → 학생명 순 정렬
+    rows.sort((a, b) => {
+      if (a.선생님 !== b.선생님) return a.선생님.localeCompare(b.선생님, 'ko');
+      return a.학생명.localeCompare(b.학생명, 'ko');
+    });
+
+    // SheetJS로 엑셀 생성
+    const ws = XLSX.utils.json_to_sheet(rows, {
+      header: ['선생님','학생명','과제충실도','수업태도','클리닉참여도','담임말씀','제출일시']
+    });
+
+    // 컬럼 너비 설정
+    ws['!cols'] = [
+      {wch:10},{wch:8},
+      {wch:10},{wch:10},{wch:12},{wch:40},{wch:12}
+    ];
+
+    // 헤더 행 스타일 (배경색)
+    const headerRange = XLSX.utils.decode_range(ws['!ref']);
+    for (let c = headerRange.s.c; c <= headerRange.e.c; c++) {
+      const cellAddr = XLSX.utils.encode_cell({r: 0, c});
+      if (!ws[cellAddr]) continue;
+      ws[cellAddr].s = {
+        font: { bold: true, color: { rgb: '1A1230' } },
+        fill: { fgColor: { rgb: 'F0C040' } },
+        alignment: { horizontal: 'center' }
+      };
+    }
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, weekLabel);
+    XLSX.writeFile(wb, `주간성취도_${weekLabel}_${teacherUid ? (teachersCache.find(t=>t.id===teacherUid)?.name||'') + '_' : ''}${new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','')}.xlsx`);
+
+    showMsg('excelWeeklyMsg', `✅ ${rows.length}명 데이터 다운로드 완료!`, 'success');
+  } catch(e) {
+    showMsg('excelWeeklyMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+// ── 반별 진도 엑셀 다운로드 ──
+window.downloadProgressExcel = async () => {
+  const weekVal    = document.getElementById('progressWeek').value;
+  const teacherUid = document.getElementById('progressTeacher').value;
+
+  if (!weekVal) { showMsg('progressExcelMsg', '조회할 주차를 선택해주세요.', 'error'); return; }
+
+  const [yearStr, weekStr] = weekVal.split('-W');
+  const weekKey   = `${yearStr}-W${weekStr}`;
+  const weekLabel = `${yearStr}년 ${parseInt(weekStr)}주차`;
+
+  showMsg('progressExcelMsg', '데이터 조회 중...', 'success');
+
+  try {
+    let q;
+    if (teacherUid) {
+      q = query(collection(db, 'progressReports'),
+        where('weekKey', '==', weekKey),
+        where('teacherUid', '==', teacherUid));
+    } else {
+      q = query(collection(db, 'progressReports'),
+        where('weekKey', '==', weekKey));
+    }
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      showMsg('progressExcelMsg', `${weekLabel} 제출된 반별 진도가 없습니다.`, 'error');
+      return;
+    }
+
+    const rows = [];
+    snap.forEach(d => {
+      const r = d.data();
+      rows.push({
+        선생님:         r.teacherName || '',
+        반명:           r.classname || '',
+        사용교재:       r.textbook || '',
+        현진도:         r.curprogress || '',
+        새진도:         r.newprogress || '',
+        현진도반복단계: r.repeatstep || '',
+        반별성취도:     r.classAchieveLabel || '',
+        제출일시:       r.submittedAt?.toDate?.()?.toLocaleDateString('ko-KR') || '',
+      });
+    });
+
+    // 선생님 → 반명 순 정렬
+    rows.sort((a, b) => {
+      if (a.선생님 !== b.선생님) return a.선생님.localeCompare(b.선생님, 'ko');
+      return a.반명.localeCompare(b.반명, 'ko');
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows, {
+      header: ['선생님','반명','사용교재','현진도','새진도','현진도반복단계','반별성취도','제출일시']
+    });
+    ws['!cols'] = [
+      {wch:10},{wch:14},{wch:18},{wch:20},{wch:20},{wch:14},{wch:10},{wch:12}
+    ];
+
+    // 헤더 스타일
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      const addr = XLSX.utils.encode_cell({r:0, c});
+      if (!ws[addr]) continue;
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: '1A1230' } },
+        fill: { fgColor: { rgb: 'F0C040' } },
+        alignment: { horizontal: 'center' }
+      };
+    }
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, weekLabel);
+    const teacherName = teacherUid ? (teachersCache.find(t => t.id === teacherUid)?.name || '') + '_' : '';
+    XLSX.writeFile(wb, `반별진도_${weekLabel}_${teacherName}${new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','')}.xlsx`);
+
+    showMsg('progressExcelMsg', `✅ ${rows.length}건 데이터 다운로드 완료!`, 'success');
+  } catch(e) {
+    showMsg('progressExcelMsg', '오류: ' + e.message, 'error');
+  }
+};
+window.downloadAllZip = async () => {
+  if (!monthlyDocsCache.length) return;
+  const btn = document.getElementById('zipBtn');
+  btn.disabled = true; btn.textContent = '압축 중...';
+
+  const zip = new JSZip();
+  const folder = zip.folder('월말보고서');
+
+  for (const data of monthlyDocsCache) {
+    try {
+      const blob = await fetchBlob(data.downloadURL);
+      const safeName = `${data.teacherName}_${data.month}_${data.fileName||'report.pdf'}`;
+      folder.file(safeName, blob);
+    } catch(e) {
+      console.warn('파일 가져오기 실패:', data.fileName, e);
+    }
+  }
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(content);
+  a.download = `월말보고서_${new Date().toISOString().slice(0,7)}.zip`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  btn.disabled = false; btn.textContent = '📦 전체 ZIP 다운로드';
+};
+
+// ══════════════════════════════════════
+// ── 월말보고서 탭 전용 로직 ──
+// ══════════════════════════════════════
+
+let monthlyAdminCache = [];   // 전체 조회 결과
+let monthlySelectedUid = '';  // 현재 선택된 선생님 UID
+
+// 탭 첫 진입 시 선생님 버튼 초기화
+window.initMonthlyTab = () => {
+  const wrap = document.getElementById('monthlyTeacherBtns');
+  if (!wrap) return;
+  // 이미 모든 선생님 버튼이 렌더링된 경우 중복 방지
+  if (wrap.children.length >= teachersCache.length + 1) return;
+  wrap.innerHTML = '<button class="monthly-filter-btn active" data-uid="" onclick="selectMonthlyTeacher(this)">전체</button>';
+  teachersCache.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'monthly-filter-btn';
+    btn.dataset.uid = t.id;
+    btn.textContent = t.name + ' T';
+    btn.onclick = function() { selectMonthlyTeacher(this); };
+    wrap.appendChild(btn);
+  });
+
+  // 연도 드롭다운: 현재 연도 기준 ±2년 채우기
+  const yearSel = document.getElementById('monthlyYear');
+  if (yearSel && yearSel.options.length === 1) {
+    const curYear = new Date().getFullYear();
+    for (let y = curYear + 1; y >= curYear - 2; y--) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = y + '년';
+      yearSel.appendChild(opt);
+    }
+    // 현재 연도 기본 선택
+    yearSel.value = String(curYear);
+  }
+};
+
+// 선생님 필터 버튼 선택
+window.selectMonthlyTeacher = (btn) => {
+  document.querySelectorAll('.monthly-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  monthlySelectedUid = btn.dataset.uid || '';
+  renderMonthlyResult();
+};
+
+// Firestore 조회
+window.loadMonthlyAdmin = async () => {
+  const year  = document.getElementById('monthlyYear').value;   // 'YYYY' or ''
+  const month = document.getElementById('monthlyMonth').value;  // 'MM' or ''
+  const msgEl = document.getElementById('monthlyAdminMsg');
+  const resultEl = document.getElementById('monthlyAdminResult');
+  const zipBtn = document.getElementById('monthlyZipBtn');
+
+  resultEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">불러오는 중...</div>';
+  zipBtn.style.display = 'none';
+  monthlyAdminCache = [];
+
+  try {
+    const q = query(collection(db, 'monthlyReports'), orderBy('submittedAt', 'desc'));
+    const snap = await getDocs(q);
+    snap.forEach(d => monthlyAdminCache.push({ id: d.id, ...d.data() }));
+
+    // 기간 필터 (클라이언트) — d.month 형식: 'YYYY-MM'
+    if (year || month) {
+      monthlyAdminCache = monthlyAdminCache.filter(d => {
+        const m = d.month || '';             // e.g. '2025-06'
+        const [docYear, docMonth] = m.split('-');
+        if (year  && docYear  !== year)  return false;
+        if (month && docMonth !== month) return false;
+        return true;
+      });
+    }
+
+    if (!monthlyAdminCache.length) {
+      resultEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">해당 기간에 제출된 보고서가 없습니다.</div>';
+      return;
+    }
+
+    renderMonthlyResult();
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:#ff9090;font-size:13px;">오류: ${e.message}</div>`;
+  }
+};
+
+// 결과 렌더링 — 선생님별 섹션으로 구분
+function renderMonthlyResult() {
+  const resultEl = document.getElementById('monthlyAdminResult');
+  const zipBtn   = document.getElementById('monthlyZipBtn');
+  if (!monthlyAdminCache.length) return;
+
+  // 선생님 필터 적용
+  let filtered = monthlySelectedUid
+    ? monthlyAdminCache.filter(d => d.teacherUid === monthlySelectedUid)
+    : monthlyAdminCache;
+
+  if (!filtered.length) {
+    resultEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">해당 선생님의 보고서가 없습니다.</div>';
+    zipBtn.style.display = 'none';
+    return;
+  }
+
+  // 선생님별 그룹핑
+  const grouped = {};
+  filtered.forEach(d => {
+    const key = d.teacherUid || 'unknown';
+    if (!grouped[key]) grouped[key] = { name: d.teacherName || '이름없음', docs: [] };
+    grouped[key].docs.push(d);
+  });
+
+  let html = '';
+  Object.values(grouped).forEach(group => {
+    const teacherName = group.name;
+    const count = group.docs.length;
+    const safeTeacherName = teacherName.replace(/'/g, "\\'");
+
+    const rows = group.docs.map(d => {
+      const size = d.fileSize ? `${(d.fileSize/1024/1024).toFixed(1)}MB` : '';
+      const safeURL      = (d.downloadURL||'').replace(/'/g, "\\'");
+      const safeMonth    = (d.month||'').replace(/'/g, "\\'");
+      const safeFileName = (d.fileName||'report.pdf').replace(/'/g, "\\'");
+      return `
+        <div class="monthly-report-row">
+          <div class="monthly-report-info">
+            <div class="month-label">📅 ${d.month || '-'}</div>
+            <div class="file-label">📄 ${d.fileName||''} ${size ? `· ${size}` : ''} ${d.memo ? `· ${d.memo}` : ''}</div>
+          </div>
+          <button onclick="downloadPDF('${safeURL}','${safeTeacherName}','${safeMonth}','${safeFileName}')"
+            style="flex-shrink:0;font-size:12px;color:var(--gold);background:none;padding:6px 14px;border:1px solid rgba(240,192,64,0.4);border-radius:6px;white-space:nowrap;cursor:pointer;font-family:inherit;">
+            ⬇ 다운로드
+          </button>
+        </div>`;
+    }).join('');
+
+    // ZIP 버튼 (선생님별)
+    const teacherUidKey = group.docs[0]?.teacherUid || '';
+    html += `
+      <div class="card monthly-teacher-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <span style="font-size:15px;font-weight:700;color:var(--gold);">👤 ${teacherName} T</span>
+            <span style="font-size:12px;color:var(--muted);margin-left:10px;">${count}개 보고서</span>
+          </div>
+          <button onclick="downloadTeacherZip('${teacherUidKey}','${safeTeacherName}')"
+            style="font-size:12px;color:var(--off-white);background:rgba(255,255,255,0.07);padding:6px 14px;border:1px solid var(--border-soft);border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;">
+            📦 ${teacherName} T 전체 ZIP
+          </button>
+        </div>
+        <div class="monthly-teacher-body">${rows}</div>
+      </div>`;
+  });
+
+  resultEl.innerHTML = html;
+  zipBtn.style.display = 'inline-flex';
+}
+
+// 선생님별 ZIP 다운로드
+window.downloadTeacherZip = async (teacherUid, teacherName) => {
+  const docs = monthlyAdminCache.filter(d => d.teacherUid === teacherUid);
+  if (!docs.length) { alert('다운로드할 파일이 없습니다.'); return; }
+
+  const zip = new JSZip();
+  const folder = zip.folder(teacherName + '_월말보고서');
+  let failCount = 0;
+
+  for (const d of docs) {
+    try {
+      const blob = await fetchBlob(d.downloadURL);
+      folder.file(`${d.month}_${d.fileName||'report.pdf'}`, blob);
+    } catch(e) {
+      failCount++;
+      console.warn('다운로드 실패:', d.fileName);
+    }
+  }
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(content);
+  a.download = `${teacherName}_월말보고서.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  if (failCount) alert(`${failCount}개 파일 다운로드 실패. 나머지는 정상적으로 저장되었습니다.`);
+};
+
+// 전체 ZIP (현재 필터 기준)
+window.downloadMonthlyZip = async () => {
+  const btn = document.getElementById('monthlyZipBtn');
+  const filtered = monthlySelectedUid
+    ? monthlyAdminCache.filter(d => d.teacherUid === monthlySelectedUid)
+    : monthlyAdminCache;
+
+  if (!filtered.length) return;
+  btn.disabled = true; btn.textContent = '압축 중...';
+
+  const zip = new JSZip();
+  let failCount = 0;
+  // 선생님별 폴더로 구분
+  for (const d of filtered) {
+    const folderName = (d.teacherName || '미확인') + '_월말보고서';
+    try {
+      const blob = await fetchBlob(d.downloadURL);
+      zip.folder(folderName).file(`${d.month}_${d.fileName||'report.pdf'}`, blob);
+    } catch(e) {
+      failCount++;
+      console.warn('다운로드 실패:', d.fileName);
+    }
+  }
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(content);
+  a.download = `월말보고서_전체_${new Date().toISOString().slice(0,7)}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  btn.disabled = false; btn.textContent = '📦 ZIP 다운로드';
+  if (failCount) alert(`${failCount}개 파일 다운로드 실패. 나머지는 정상적으로 저장되었습니다.`);
+};
+
+// ══════════════════════════════════════════
+// 토요 추가클리닉 (관리자)
+// ══════════════════════════════════════════
+let satClinicData = [];
+
+window.initSatClinicTab = function() {
+  // 날짜 기본값: 이번 주 토요일
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=일 6=토
+  const diffToSat = (6 - dayOfWeek + 7) % 7 || 7;
+  const sat = new Date(today);
+  sat.setDate(today.getDate() - ((dayOfWeek === 6) ? 0 : (dayOfWeek === 0 ? 1 : dayOfWeek)));
+  // 가장 최근 토요일
+  const lastSat = new Date(today);
+  lastSat.setDate(today.getDate() - ((dayOfWeek + 1) % 7));
+
+  const toStr = d => d.toISOString().split('T')[0];
+  const fromInput = document.getElementById('clinicDateFrom');
+  const toInput   = document.getElementById('clinicDateTo');
+  if (!fromInput.value) fromInput.value = toStr(lastSat);
+  if (!toInput.value)   toInput.value   = toStr(today);
+
+  // 선생님 필터 드롭다운 채우기
+  const sel = document.getElementById('clinicTeacherFilter');
+  if (sel.options.length <= 1 && teachersCache.length > 0) {
+    teachersCache.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id; opt.textContent = t.name;
+      sel.appendChild(opt);
+    });
+  }
+};
+
+window.loadSatClinicAdmin = async function() {
+  const fromVal = document.getElementById('clinicDateFrom').value;
+  const toVal   = document.getElementById('clinicDateTo').value;
+  const tUid    = document.getElementById('clinicTeacherFilter').value;
+  const msgEl   = document.getElementById('clinicAdminMsg');
+  const resEl   = document.getElementById('clinicAdminResult');
+
+  if (!fromVal || !toVal) { showMsg('clinicAdminMsg', '날짜 범위를 선택해주세요.', 'error'); return; }
+  showMsg('clinicAdminMsg', '조회 중...', 'success');
+  resEl.innerHTML = '';
+
+  try {
+    let q = query(
+      collection(db, 'satClinicReports'),
+      where('date', '>=', fromVal),
+      where('date', '<=', toVal),
+      orderBy('date', 'asc')
+    );
+    const snap = await getDocs(q);
+
+    satClinicData = [];
+    snap.forEach(d => {
+      const r = d.data();
+      if (tUid && r.teacherUid !== tUid) return;
+      satClinicData.push({ id: d.id, ...r });
+    });
+
+    if (satClinicData.length === 0) {
+      showMsg('clinicAdminMsg', '해당 기간에 제출된 토요클리닉이 없습니다.', 'error');
+      document.getElementById('clinicExcelBtn').style.display = 'none';
+      return;
+    }
+
+    // 선생님별 그룹핑
+    const byTeacher = {};
+    satClinicData.forEach(r => {
+      if (!byTeacher[r.teacherName]) byTeacher[r.teacherName] = [];
+      byTeacher[r.teacherName].push(r);
+    });
+
+    resEl.innerHTML = Object.entries(byTeacher).map(([tName, rows]) => `
+      <div class="card" style="margin-bottom:16px;">
+        <h4 style="color:var(--gold);margin-bottom:14px;font-size:14px;">👩‍🏫 ${tName} (${rows.length}건)</h4>
+        <div style="overflow-x:auto;">
+          <table class="preview-table" style="width:100%;min-width:600px;">
+            <thead><tr>
+              <th>날짜</th><th>학생명</th><th>시간</th><th>지참교재</th><th>클리닉 내용</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map(r => `<tr>
+                <td>${r.date}</td>
+                <td style="font-weight:600;">${r.studentName}</td>
+                <td>${r.time}</td>
+                <td>${r.book}</td>
+                <td style="max-width:300px;white-space:pre-wrap;">${r.content}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `).join('');
+
+    showMsg('clinicAdminMsg', `✅ 총 ${satClinicData.length}건 조회 완료`, 'success');
+    document.getElementById('clinicExcelBtn').style.display = 'inline-flex';
+  } catch(e) {
+    showMsg('clinicAdminMsg', '오류: ' + e.message, 'error');
+  }
+};
+
+window.downloadClinicExcel = function() {
+  if (!satClinicData.length) return;
+
+  const fromVal = document.getElementById('clinicDateFrom').value;
+  const toVal   = document.getElementById('clinicDateTo').value;
+
+  const rows = satClinicData.map(r => ({
+    날짜:       r.date,
+    선생님:     r.teacherName,
+    학생명:     r.studentName,
+    시간:       r.time,
+    지참교재:   r.book,
+    클리닉내용: r.content,
+    제출일시:   r.submittedAt?.toDate?.()?.toLocaleDateString('ko-KR') || '',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows, {
+    header: ['날짜','선생님','학생명','시간','지참교재','클리닉내용','제출일시']
+  });
+  ws['!cols'] = [
+    {wch:12},{wch:10},{wch:8},{wch:16},{wch:20},{wch:50},{wch:12}
+  ];
+
+  // 헤더 스타일
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = XLSX.utils.encode_cell({r:0, c});
+    if (!ws[cell]) continue;
+    ws[cell].s = {
+      font: { bold: true, color: { rgb: '1A1230' } },
+      fill: { fgColor: { rgb: 'F0C040' } },
+      alignment: { horizontal: 'center' }
+    };
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '토요클리닉');
+  XLSX.writeFile(wb, `토요클리닉_${fromVal}_${toVal}.xlsx`);
+};
+</script>
+<div id="toast"></div>
+
+</body>
+</html>
