@@ -8,9 +8,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
 
-<!-- jsPDF + html2canvas (CDN) -->
+<!-- html2canvas (CDN) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -647,7 +646,7 @@ body {
     <!-- 액션 버튼 -->
     <div class="action-row">
       <button class="btn-preview" onclick="openPreview()">미리보기</button>
-      <button class="btn-download" id="downloadBtn" onclick="downloadPDF()">PDF 다운로드</button>
+      <button class="btn-download" id="downloadBtn" onclick="downloadImage()">이미지 다운로드</button>
     </div>
 
   </div>
@@ -665,7 +664,7 @@ body {
 
 <!-- ───── LOADING ───── -->
 <div id="loadingOverlay">
-  <div class="loading-text">PDF 생성 중…</div>
+  <div class="loading-text">이미지 생성 중…</div>
 </div>
 
 <!-- ───── 계약서 원본 (숨김) ───── -->
@@ -747,7 +746,7 @@ body {
 /* ═══════════════════════════════
    비밀번호 설정 — 여기만 바꾸면 됩니다
    ═══════════════════════════════ */
-const PASS = 'lotv2025';   // ← 원하는 비밀번호로 변경
+const PASS = '9933';   // ← 원하는 비밀번호로 변경
 
 function checkPassword() {
   const val = document.getElementById('pwInput').value;
@@ -852,8 +851,8 @@ document.getElementById('previewModal').addEventListener('click', function(e) {
   if (e.target === this) closePreview();
 });
 
-/* ─── PDF 다운로드 ─── */
-async function downloadPDF() {
+/* ─── 이미지 다운로드 ─── */
+async function downloadImage() {
   const nameVal = document.getElementById('f_name').value.trim();
   if (!nameVal) {
     alert('성함을 입력해주세요.');
@@ -870,8 +869,8 @@ async function downloadPDF() {
 
   const paper = document.getElementById('contractPaper');
 
-  // 잠시 화면 내에 두고 캡처
-  paper.style.position = 'absolute';
+  // 화면 밖에 배치해서 캡처
+  paper.style.position = 'fixed';
   paper.style.left = '-9999px';
   paper.style.top  = '0';
   paper.style.zIndex = '-1';
@@ -881,58 +880,38 @@ async function downloadPDF() {
 
   try {
     const canvas = await html2canvas(paper, {
-      scale: 2,
+      scale: 3,           // 고해상도 (원본 사진처럼 선명하게)
       useCORS: true,
       backgroundColor: '#ffffff',
       width: 595,
       windowWidth: 595
     });
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+    // JPG로 변환 후 다운로드
+    const imgData = canvas.toDataURL('image/jpeg', 0.97);
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = pdf.internal.pageSize.getHeight();
-
-    // 이미지 비율 유지
-    const canvasH = canvas.height / (canvas.width / pdfW);
-    if (canvasH <= pdfH) {
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, canvasH);
-    } else {
-      // 여러 페이지 처리
-      let yOffset = 0;
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      const ctx = pageCanvas.getContext('2d');
-
-      while (yOffset < canvas.height) {
-        const pageHeight = Math.round(pdfH * (canvas.width / pdfW));
-        pageCanvas.height = pageHeight;
-        ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-        ctx.drawImage(canvas, 0, -yOffset);
-        const pageData = pageCanvas.toDataURL('image/jpeg', 0.95);
-        if (yOffset > 0) pdf.addPage();
-        pdf.addImage(pageData, 'JPEG', 0, 0, pdfW, pdfH);
-        yOffset += pageHeight;
-      }
-    }
-
-    // 파일명: LOTV_계약서_홍길동_20250630.pdf
     const today = new Date();
     const dateStr = today.getFullYear()
       + String(today.getMonth()+1).padStart(2,'0')
       + String(today.getDate()).padStart(2,'0');
-    pdf.save(`LOTV_계약서_${nameVal}_${dateStr}.pdf`);
+    const fileName = `LOTV_계약서_${nameVal}_${dateStr}.jpg`;
+
+    const link = document.createElement('a');
+    link.href = imgData;
+    link.download = fileName;
+    link.click();
 
   } catch(err) {
-    alert('PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    alert('이미지 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
     console.error(err);
   } finally {
-    // paper 복구
-    const hiddenWrap = document.querySelector('[style*="-9999px"]');
+    // paper 복구 (숨김 영역으로)
+    const hiddenWrap = document.querySelector('div[style*="position:fixed"][style*="-9999px"]');
     if (hiddenWrap) hiddenWrap.appendChild(paper);
     paper.style.position = '';
+    paper.style.left = '';
+    paper.style.top  = '';
+    paper.style.zIndex = '';
 
     overlay.classList.remove('show');
     btn.disabled = false;
