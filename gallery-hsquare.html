@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="LOTV — H스퀘어웨딩홀 본식 스냅. 아이폰 감성, 필름 무드.">
+<meta property="og:title" content="H스퀘어웨딩홀 — LOTV Snap">
+<meta property="og:description" content="결혼식의 한 장면을 영원히. 본식 스냅 · 아이폰 감성 · 필름 무드">
+<meta property="og:url" content="https://www.lotv.co.kr/gallery-hsquare.html">
+<title>H스퀘어웨딩홀 — LOTV Snap</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F2EFE8;
+    --cream-dark: #E8E3D8;
+    --ink: #1C1A17;
+    --ink-soft: #5A5650;
+    --warm-white: #FAF8F4;
+    --accent: #9B8E7A;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.4s, padding 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(242,239,232,0.94);
+    backdrop-filter: blur(10px);
+    padding: 16px 48px;
+    border-bottom: 0.5px solid rgba(28,26,23,0.08);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 0.5px;
+    background: var(--ink);
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+  /* ── HERO ── */
+  .page-hero {
+    height: 60vh;
+    min-height: 360px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 48px 60px;
+  }
+  .page-hero-bg {
+    position: absolute;
+    inset: 0;
+  }
+  .page-hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+  .page-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(28,26,23,0.55) 0%, rgba(28,26,23,0.1) 60%, transparent 100%);
+  }
+  .page-hero-text {
+    position: relative;
+    z-index: 2;
+    color: var(--warm-white);
+  }
+  .page-hero-back {
+    position: absolute;
+    top: 100px;
+    left: 48px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: rgba(250,248,244,0.8);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .page-hero-back:hover { color: var(--warm-white); }
+  .page-hero-back::before { content: '←'; font-size: 14px; }
+  .venue-label {
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(250,248,244,0.65);
+    margin-bottom: 12px;
+  }
+  .venue-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+  .venue-title em { font-style: italic; }
+  .venue-date {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(250,248,244,0.55);
+  }
+
+  /* ── GALLERY SECTION ── */
+  .gallery-section {
+    padding: 80px 48px 120px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* CSS Columns masonry layout (기존 사이트 패턴) */
+  .masonry {
+    columns: 3;
+    column-gap: 12px;
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+  .masonry-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .masonry-item:hover img { transform: scale(1.03); }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(28,26,23,0.95);
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    display: block;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 28px; right: 36px;
+    color: rgba(250,248,244,0.6);
+    font-size: 28px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .lightbox-close:hover { color: var(--warm-white); }
+  .lightbox-prev, .lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(250,248,244,0.5);
+    font-size: 32px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 20px;
+    transition: color 0.2s;
+  }
+  .lightbox-prev:hover, .lightbox-next:hover { color: var(--warm-white); }
+  .lightbox-prev { left: 12px; }
+  .lightbox-next { right: 12px; }
+  .lightbox-counter {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(250,248,244,0.4);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 0.5px solid rgba(28,26,23,0.12);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .ft-business { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.05em; }
+  .ft-bottom { display: flex; gap: 24px; align-items: center; }
+  .ft-copy { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.05em; }
+  .ft-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: var(--accent); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    nav.scrolled { padding: 14px 24px; }
+    .nav-links { display: none; flex-direction: column; gap: 20px; position: absolute; top: 100%; left: 0; right: 0; background: rgba(242,239,232,0.97); padding: 24px; border-bottom: 0.5px solid rgba(28,26,23,0.08); }
+    .nav-links.open { display: flex; }
+    .nav-toggle { display: flex; }
+
+    .page-hero { padding: 0 24px 40px; }
+    .page-hero-back { left: 24px; top: 80px; }
+    .gallery-section { padding: 48px 16px 80px; }
+    .masonry { columns: 2; column-gap: 8px; }
+    .masonry-item { margin-bottom: 8px; }
+    footer { padding: 24px; flex-direction: column; text-align: center; gap: 8px; }
+    .ft-bottom { flex-direction: column; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="mainNav">
+  <a class="nav-logo" href="index.html">
+    <span class="logo-text">LOTV</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html#gallery">Gallery</a></li>
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#packages">Package</a></li>
+    <li><a href="index.html#reserve">Reserve</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── PAGE HERO ── -->
+<section class="page-hero">
+  <div class="page-hero-bg">
+    <img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀">
+  </div>
+  <div class="page-hero-overlay"></div>
+  <a class="page-hero-back" href="index.html#gallery">Gallery</a>
+  <div class="page-hero-text">
+    <p class="venue-label">Wedding Hall · Seoul</p>
+    <h1 class="venue-title">H Square<br><em>Wedding Hall</em></h1>
+    <p class="venue-date">2026. 06. 27</p>
+  </div>
+</section>
+
+<!-- ── GALLERY ── -->
+<div class="gallery-section">
+  <div class="masonry" id="masonryGrid">
+    <!-- 사진 순서: 촬영 시각 순 (타임스탬프 기준) -->
+    <div class="masonry-item" data-index="0"><img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀 스냅 01" loading="lazy"></div>
+    <div class="masonry-item" data-index="1"><img src="hsquare/hsquare_002.jpg" alt="H스퀘어웨딩홀 스냅 02" loading="lazy"></div>
+    <div class="masonry-item" data-index="2"><img src="hsquare/hsquare_003.jpg" alt="H스퀘어웨딩홀 스냅 03" loading="lazy"></div>
+    <div class="masonry-item" data-index="3"><img src="hsquare/hsquare_004.jpg" alt="H스퀘어웨딩홀 스냅 04" loading="lazy"></div>
+    <div class="masonry-item" data-index="4"><img src="hsquare/hsquare_005.jpg" alt="H스퀘어웨딩홀 스냅 05" loading="lazy"></div>
+    <div class="masonry-item" data-index="5"><img src="hsquare/hsquare_006.jpg" alt="H스퀘어웨딩홀 스냅 06" loading="lazy"></div>
+    <div class="masonry-item" data-index="6"><img src="hsquare/hsquare_007.jpg" alt="H스퀘어웨딩홀 스냅 07" loading="lazy"></div>
+    <div class="masonry-item" data-index="7"><img src="hsquare/hsquare_008.jpg" alt="H스퀘어웨딩홀 스냅 08" loading="lazy"></div>
+    <div class="masonry-item" data-index="8"><img src="hsquare/hsquare_009.jpg" alt="H스퀘어웨딩홀 스냅 09" loading="lazy"></div>
+    <div class="masonry-item" data-index="9"><img src="hsquare/hsquare_010.jpg" alt="H스퀘어웨딩홀 스냅 10" loading="lazy"></div>
+    <div class="masonry-item" data-index="10"><img src="hsquare/hsquare_011.jpg" alt="H스퀘어웨딩홀 스냅 11" loading="lazy"></div>
+    <div class="masonry-item" data-index="11"><img src="hsquare/hsquare_012.jpg" alt="H스퀘어웨딩홀 스냅 12" loading="lazy"></div>
+    <div class="masonry-item" data-index="12"><img src="hsquare/hsquare_013.jpg" alt="H스퀘어웨딩홀 스냅 13" loading="lazy"></div>
+    <div class="masonry-item" data-index="13"><img src="hsquare/hsquare_014.jpg" alt="H스퀘어웨딩홀 스냅 14" loading="lazy"></div>
+    <div class="masonry-item" data-index="14"><img src="hsquare/hsquare_015.jpg" alt="H스퀘어웨딩홀 스냅 15" loading="lazy"></div>
+    <div class="masonry-item" data-index="15"><img src="hsquare/hsquare_016.jpg" alt="H스퀘어웨딩홀 스냅 16" loading="lazy"></div>
+    <div class="masonry-item" data-index="16"><img src="hsquare/hsquare_017.jpg" alt="H스퀘어웨딩홀 스냅 17" loading="lazy"></div>
+    <div class="masonry-item" data-index="17"><img src="hsquare/hsquare_018.jpg" alt="H스퀘어웨딩홀 스냅 18" loading="lazy"></div>
+    <div class="masonry-item" data-index="18"><img src="hsquare/hsquare_019.jpg" alt="H스퀘어웨딩홀 스냅 19" loading="lazy"></div>
+    <div class="masonry-item" data-index="19"><img src="hsquare/hsquare_020.jpg" alt="H스퀘어웨딩홀 스냅 20" loading="lazy"></div>
+    <div class="masonry-item" data-index="20"><img src="hsquare/hsquare_021.jpg" alt="H스퀘어웨딩홀 스냅 21" loading="lazy"></div>
+    <div class="masonry-item" data-index="21"><img src="hsquare/hsquare_022.jpg" alt="H스퀘어웨딩홀 스냅 22" loading="lazy"></div>
+    <div class="masonry-item" data-index="22"><img src="hsquare/hsquare_023.jpg" alt="H스퀘어웨딩홀 스냅 23" loading="lazy"></div>
+    <div class="masonry-item" data-index="23"><img src="hsquare/hsquare_024.jpg" alt="H스퀘어웨딩홀 스냅 24" loading="lazy"></div>
+  </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lbClose">×</button>
+  <button class="lightbox-prev" id="lbPrev">‹</button>
+  <img class="lightbox-img" id="lbImg" src="" alt="">
+  <button class="lightbox-next" id="lbNext">›</button>
+  <div class="lightbox-counter" id="lbCounter"></div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="ft-business">
+    <span>상호명 : 엘오티브이(LOTV) &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 사업자등록번호 : 349-29-02113</span>
+  </div>
+  <div class="ft-bottom">
+    <span class="ft-copy">© 2026 LOTV SNAP. All Rights Reserved.</span>
+    <span class="ft-tagline">Every moment we capture becomes a memory that lingers.</span>
+  </div>
+</footer>
+
+<script>
+  /* ── NAV ── */
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+  const toggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    navLinks.classList.toggle('open');
+  });
+
+  /* ── LIGHTBOX ── */
+  const items = document.querySelectorAll('.masonry-item');
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCounter = document.getElementById('lbCounter');
+  const total = items.length;
+  let current = 0;
+
+  function openLb(idx) {
+    current = idx;
+    const src = items[idx].querySelector('img').src;
+    lbImg.src = src;
+    lbCounter.textContent = `${idx + 1} / ${total}`;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function prevImg() { openLb((current - 1 + total) % total); }
+  function nextImg() { openLb((current + 1) % total); }
+
+  items.forEach(item => {
+    item.addEventListener('click', () => openLb(parseInt(item.dataset.index)));
+  });
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  document.getElementById('lbPrev').addEventListener('click', prevImg);
+  document.getElementById('lbNext').addEventListener('click', nextImg);
+  lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLb();
+    if (e.key === 'ArrowLeft') prevImg();
+    if (e.key === 'ArrowRight') nextImg();
+  });
+</script>
+</body>
+</html>
