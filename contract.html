@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTV — 계약서</title>
+<!-- robots 차단: 검색엔진에 노출 안 되도록 -->
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+
+<!-- jsPDF + html2canvas (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #F2EFE8;
+  --cream-dark: #E8E3D8;
+  --ink: #1C1A17;
+  --ink-soft: #5A5650;
+  --warm-white: #FAF8F4;
+  --accent: #9B8E7A;
+  --accent-light: #C4B8A8;
+  --border: rgba(155,142,122,0.25);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Jost', 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ──────────────── LOCK SCREEN ──────────────── */
+#lockScreen {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.lock-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.lock-sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 56px;
+}
+
+.lock-card {
+  background: var(--warm-white);
+  border: 0.5px solid var(--border);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.lock-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.lock-desc {
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  margin-bottom: 32px;
+  line-height: 1.8;
+}
+
+.lock-input {
+  width: 100%;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 10px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  letter-spacing: 0.4em;
+  text-align: center;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.3s;
+  margin-bottom: 32px;
+}
+.lock-input:focus { border-color: var(--accent); }
+.lock-input::placeholder { color: var(--accent-light); font-size: 20px; letter-spacing: 0.3em; }
+
+.lock-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  padding: 14px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.lock-btn:hover { background: var(--ink-soft); }
+
+.lock-error {
+  font-size: 11px;
+  color: #a05050;
+  letter-spacing: 0.08em;
+  margin-top: 16px;
+  min-height: 18px;
+  transition: opacity 0.3s;
+}
+
+/* ──────────────── MAIN APP ──────────────── */
+#app {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px 80px;
+  background: var(--cream);
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 52px;
+}
+.app-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+}
+.app-logo-sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.app-divider {
+  width: 40px;
+  height: 0.5px;
+  background: var(--accent);
+  margin: 24px auto;
+  opacity: 0.5;
+}
+.app-page-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ──────────────── FORM ──────────────── */
+.form-wrap {
+  width: 100%;
+  max-width: 640px;
+  background: var(--warm-white);
+  border: 0.5px solid var(--border);
+  padding: 48px 40px;
+}
+
+.form-section-label {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.form-section-label::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+.form-row label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  padding: 8px 0;
+  font-family: 'Noto Sans KR', 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.25s;
+  letter-spacing: 0.03em;
+  width: 100%;
+}
+.form-row input:focus,
+.form-row textarea:focus,
+.form-row select:focus {
+  border-color: var(--accent);
+}
+.form-row textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.8;
+}
+.form-row select {
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.form-sep {
+  height: 0.5px;
+  background: var(--border);
+  margin: 32px 0;
+}
+
+.price-hint {
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+
+/* ──────────────── BUTTONS ──────────────── */
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.btn-preview {
+  flex: 1;
+  padding: 14px;
+  background: transparent;
+  border: 0.5px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+.btn-preview:hover {
+  background: var(--accent);
+  color: var(--cream);
+}
+
+.btn-download {
+  flex: 2;
+  padding: 14px;
+  background: var(--ink);
+  border: none;
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 160px;
+}
+.btn-download:hover { background: var(--ink-soft); }
+.btn-download:disabled { opacity: 0.5; cursor: wait; }
+
+/* ──────────────── PREVIEW MODAL ──────────────── */
+#previewModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(28,26,23,0.75);
+  backdrop-filter: blur(6px);
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+#previewModal.open { display: flex; }
+
+.modal-inner {
+  position: relative;
+  max-width: 620px;
+  width: 100%;
+  margin: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: -36px;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.8;
+}
+.modal-close:hover { opacity: 1; }
+
+/* ──────────────── CONTRACT PAPER ──────────────── */
+/* 실제 PDF로 찍히는 영역 */
+#contractPaper {
+  width: 595px;         /* A4 pt 기준 */
+  min-height: 842px;
+  background: #ffffff;
+  padding: 60px 56px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  color: #1C1A17;
+  position: relative;
+}
+
+/* 미리보기에서는 축소해서 보여줌 */
+.preview-scale-wrap {
+  transform-origin: top center;
+  /* JS로 width에 맞게 scale 적용 */
+}
+
+.cp-badge {
+  position: absolute;
+  top: 60px;
+  right: 56px;
+  background: #6B5B4E;
+  color: #fff;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+.cp-title {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 36px;
+  color: #1C1A17;
+}
+
+/* 클라이언트 블록 */
+.cp-client-block {
+  border-left: 3px solid #9B8E7A;
+  padding-left: 16px;
+  margin-bottom: 28px;
+}
+.cp-field-row {
+  display: flex;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 0.5px solid #E0DBD3;
+}
+.cp-field-row:last-child { border-bottom: none; }
+.cp-field-label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: #5A5650;
+  letter-spacing: 0.03em;
+}
+.cp-field-value {
+  font-size: 12px;
+  font-weight: 300;
+  color: #1C1A17;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 예식 정보 블록 */
+.cp-event-block {
+  border-left: 3px solid #6B5B4E;
+  padding-left: 16px;
+  margin-bottom: 28px;
+}
+
+/* 특약사항 블록 */
+.cp-special-block {
+  border-left: 3px solid #9B8E7A;
+  padding-left: 16px;
+  margin-bottom: 40px;
+  min-height: 80px;
+}
+.cp-special-label {
+  font-size: 11px;
+  font-weight: 400;
+  color: #5A5650;
+  margin-bottom: 10px;
+  letter-spacing: 0.03em;
+}
+.cp-special-content {
+  font-size: 12px;
+  color: #1C1A17;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 날짜 + 서명 영역 */
+.cp-date-row {
+  text-align: center;
+  font-size: 13px;
+  color: #1C1A17;
+  letter-spacing: 0.12em;
+  margin-bottom: 40px;
+}
+
+.cp-sig-row {
+  display: flex;
+  gap: 32px;
+}
+.cp-sig-box {
+  flex: 1;
+  border: 0.5px solid #E0DBD3;
+  padding: 20px;
+}
+.cp-sig-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  color: #1C1A17;
+}
+.cp-sig-line {
+  font-size: 11px;
+  color: #5A5650;
+  line-height: 2.2;
+  letter-spacing: 0.02em;
+}
+.cp-sig-line span {
+  display: inline-block;
+  min-width: 120px;
+  color: #1C1A17;
+  font-weight: 400;
+}
+
+.cp-seal {
+  display: inline-block;
+  border: 0.5px solid #9B8E7A;
+  color: #9B8E7A;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* PDF 생성 중 숨김 처리용 오버레이 */
+#loadingOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(242,239,232,0.92);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+#loadingOverlay.show { display: flex; }
+.loading-text {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+/* ──────────────── 반응형 ──────────────── */
+@media (max-width: 680px) {
+  .form-wrap { padding: 32px 20px; }
+  .form-row-2col { grid-template-columns: 1fr; gap: 0; }
+  #contractPaper { width: 100%; min-height: unset; }
+}
+</style>
+</head>
+<body>
+
+<!-- ───── LOCK SCREEN ───── -->
+<div id="lockScreen">
+  <div class="lock-logo">LOTV</div>
+  <div class="lock-sub">Lily of the Valley Snap</div>
+
+  <div class="lock-card">
+    <div class="lock-title">Staff Only</div>
+    <div class="lock-desc">계약서 작성 페이지입니다.<br>비밀번호를 입력해 주세요.</div>
+    <input
+      type="password"
+      class="lock-input"
+      id="pwInput"
+      maxlength="8"
+      placeholder="· · · ·"
+      autocomplete="off"
+      inputmode="numeric"
+    >
+    <button class="lock-btn" onclick="checkPassword()">입장</button>
+    <div class="lock-error" id="lockError"></div>
+  </div>
+</div>
+
+<!-- ───── MAIN APP ───── -->
+<div id="app">
+
+  <div class="app-header">
+    <a class="app-logo" href="index.html">LOTV</a>
+    <div class="app-logo-sub">Lily of the Valley Snap</div>
+    <div class="app-divider"></div>
+    <div class="app-page-title">촬영 계약서 작성</div>
+  </div>
+
+  <div class="form-wrap">
+
+    <!-- 클라이언트 정보 -->
+    <div class="form-section-label">Client</div>
+
+    <div class="form-row-2col">
+      <div class="form-row">
+        <label>성함</label>
+        <input type="text" id="f_name" placeholder="홍길동">
+      </div>
+      <div class="form-row">
+        <label>연락처</label>
+        <input type="tel" id="f_tel" placeholder="010-0000-0000">
+      </div>
+    </div>
+
+    <div class="form-sep"></div>
+
+    <!-- 예식 정보 -->
+    <div class="form-section-label">Event</div>
+
+    <div class="form-row-2col">
+      <div class="form-row">
+        <label>예식 일시</label>
+        <input type="text" id="f_date" placeholder="2025년 00월 00일 00:00">
+      </div>
+      <div class="form-row">
+        <label>장소</label>
+        <input type="text" id="f_venue" placeholder="베뉴명 (홀명)">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>상품명</label>
+      <select id="f_product">
+        <option value="">선택해주세요</option>
+        <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
+        <option value="직접입력">직접 입력</option>
+      </select>
+    </div>
+    <div class="form-row" id="productCustomWrap" style="display:none;">
+      <label>상품명 직접입력</label>
+      <input type="text" id="f_product_custom" placeholder="상품명을 입력하세요">
+    </div>
+
+    <div class="form-row">
+      <label>추가 옵션</label>
+      <input type="text" id="f_option" placeholder="예: Polaroid 추가 5장, 호텔식 2부 추가 등">
+    </div>
+
+    <div class="form-row">
+      <label>프로모션</label>
+      <input type="text" id="f_promo" placeholder="해당 없음">
+    </div>
+
+    <div class="form-row-2col">
+      <div class="form-row">
+        <label>상품 금액</label>
+        <input type="text" id="f_price" placeholder="000,000원">
+        <div class="price-hint">VAT 포함 금액으로 입력</div>
+      </div>
+      <div class="form-row" style="align-self:start">
+        <label>계약 일자</label>
+        <input type="text" id="f_contractDate" placeholder="예: 25년 06월 30일">
+      </div>
+    </div>
+
+    <div class="form-sep"></div>
+
+    <!-- 특약사항 -->
+    <div class="form-section-label">Special Terms</div>
+
+    <div class="form-row">
+      <label>특약사항</label>
+      <textarea id="f_special" rows="5" placeholder="계약 관련 특약 사항을 입력하세요.&#10;예: 예식 종료 후 30분 추가 촬영 포함 등"></textarea>
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="action-row">
+      <button class="btn-preview" onclick="openPreview()">미리보기</button>
+      <button class="btn-download" id="downloadBtn" onclick="downloadPDF()">PDF 다운로드</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ───── PREVIEW MODAL ───── -->
+<div id="previewModal">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="closePreview()">✕ &nbsp;닫기</button>
+    <div class="preview-scale-wrap" id="previewScaleWrap">
+      <!-- contractPaper가 여기로 복사됩니다 -->
+    </div>
+  </div>
+</div>
+
+<!-- ───── LOADING ───── -->
+<div id="loadingOverlay">
+  <div class="loading-text">PDF 생성 중…</div>
+</div>
+
+<!-- ───── 계약서 원본 (숨김) ───── -->
+<!-- PDF 찍을 때 사용하는 실제 DOM -->
+<div style="position:fixed; left:-9999px; top:0; z-index:-1;">
+  <div id="contractPaper">
+    <div class="cp-badge">Contract</div>
+    <div class="cp-title">LOTV 촬영 계약서(간단)</div>
+
+    <!-- 클라이언트 블록 -->
+    <div class="cp-client-block">
+      <div class="cp-field-row">
+        <div class="cp-field-label">성함</div>
+        <div class="cp-field-value" id="cp_name"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">연락처</div>
+        <div class="cp-field-value" id="cp_tel"></div>
+      </div>
+    </div>
+
+    <!-- 예식 정보 블록 -->
+    <div class="cp-event-block">
+      <div class="cp-field-row">
+        <div class="cp-field-label">예식 일시</div>
+        <div class="cp-field-value" id="cp_date"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">장소</div>
+        <div class="cp-field-value" id="cp_venue"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">상품명</div>
+        <div class="cp-field-value" id="cp_product"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">추가 옵션</div>
+        <div class="cp-field-value" id="cp_option"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">프로모션</div>
+        <div class="cp-field-value" id="cp_promo"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">상품 금액</div>
+        <div class="cp-field-value" id="cp_price"></div>
+      </div>
+    </div>
+
+    <!-- 특약사항 -->
+    <div class="cp-special-block">
+      <div class="cp-special-label">특약사항</div>
+      <div class="cp-special-content" id="cp_special"></div>
+    </div>
+
+    <!-- 날짜 -->
+    <div class="cp-date-row" id="cp_contractDate"></div>
+
+    <!-- 서명란 -->
+    <div class="cp-sig-row">
+      <div class="cp-sig-box">
+        <div class="cp-sig-title">Photographer</div>
+        <div class="cp-sig-line">회사명 : <span>엘오티브이(LOTV)</span></div>
+        <div class="cp-sig-line">사업자등록번호 : <span>349-29-02113</span></div>
+        <div class="cp-sig-line">대표자 : <span>손승희 <span class="cp-seal">인</span></span></div>
+      </div>
+      <div class="cp-sig-box">
+        <div class="cp-sig-title">Client</div>
+        <div class="cp-sig-line">성명 : <span id="cp_sig_name" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span> <span class="cp-seal">인</span></div>
+        <div class="cp-sig-line" style="margin-top:8px;">연락처 : <span id="cp_sig_tel" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+/* ═══════════════════════════════
+   비밀번호 설정 — 여기만 바꾸면 됩니다
+   ═══════════════════════════════ */
+const PASS = 'lotv2025';   // ← 원하는 비밀번호로 변경
+
+function checkPassword() {
+  const val = document.getElementById('pwInput').value;
+  const err = document.getElementById('lockError');
+  if (val === PASS) {
+    document.getElementById('lockScreen').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    // 오늘 날짜 자동 입력
+    const today = new Date();
+    const yy = String(today.getFullYear()).slice(2);
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const dd = String(today.getDate()).padStart(2,'0');
+    document.getElementById('f_contractDate').value = `${yy}년 ${mm}월 ${dd}일`;
+  } else {
+    err.textContent = '비밀번호가 올바르지 않습니다.';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+// Enter 키 입력
+document.getElementById('pwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+  document.getElementById('lockError').textContent = '';
+});
+
+// 상품명 직접입력 토글
+document.getElementById('f_product').addEventListener('change', function() {
+  document.getElementById('productCustomWrap').style.display =
+    this.value === '직접입력' ? 'flex' : 'none';
+});
+
+/* ─── 폼 → 계약서 DOM 채우기 ─── */
+function fillContract() {
+  const g = id => document.getElementById(id).value.trim();
+
+  const productSel = document.getElementById('f_product').value;
+  const productVal = productSel === '직접입력'
+    ? document.getElementById('f_product_custom').value.trim()
+    : productSel;
+
+  // 계약서 필드 채우기
+  document.getElementById('cp_name').textContent    = g('f_name')    || '—';
+  document.getElementById('cp_tel').textContent     = g('f_tel')     || '—';
+  document.getElementById('cp_date').textContent    = g('f_date')    || '—';
+  document.getElementById('cp_venue').textContent   = g('f_venue')   || '—';
+  document.getElementById('cp_product').textContent = productVal      || '—';
+  document.getElementById('cp_option').textContent  = g('f_option')  || '—';
+  document.getElementById('cp_promo').textContent   = g('f_promo')   || '—';
+  document.getElementById('cp_price').textContent   = g('f_price')   || '—';
+  document.getElementById('cp_special').textContent = g('f_special') || '';
+
+  // 날짜
+  const cd = g('f_contractDate');
+  document.getElementById('cp_contractDate').textContent = cd
+    ? `20${cd}` : `20   년      월      일`;
+
+  // 서명란
+  document.getElementById('cp_sig_name').textContent = g('f_name') || '';
+  document.getElementById('cp_sig_tel').textContent  = g('f_tel')  || '';
+}
+
+/* ─── 미리보기 모달 ─── */
+function openPreview() {
+  fillContract();
+  const paper = document.getElementById('contractPaper');
+  const clone  = paper.cloneNode(true);
+  clone.style.position = 'static';
+  clone.style.left = 'auto';
+
+  const wrap = document.getElementById('previewScaleWrap');
+  wrap.innerHTML = '';
+  wrap.appendChild(clone);
+
+  // 모달 너비에 맞게 축소
+  const modalW = Math.min(window.innerWidth - 40, 620);
+  const scale  = modalW / 595;
+  wrap.style.transform = `scale(${scale})`;
+  wrap.style.transformOrigin = 'top left';
+  wrap.style.width  = '595px';
+  wrap.style.height = (paper.offsetHeight * scale) + 'px';
+  wrap.parentElement.style.height = (paper.offsetHeight * scale + 60) + 'px';
+
+  document.getElementById('previewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // 실제 높이 반영
+  setTimeout(() => {
+    const h = clone.offsetHeight * scale;
+    wrap.style.height = h + 'px';
+    wrap.parentElement.style.height = (h + 60) + 'px';
+  }, 200);
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('previewModal').addEventListener('click', function(e) {
+  if (e.target === this) closePreview();
+});
+
+/* ─── PDF 다운로드 ─── */
+async function downloadPDF() {
+  const nameVal = document.getElementById('f_name').value.trim();
+  if (!nameVal) {
+    alert('성함을 입력해주세요.');
+    document.getElementById('f_name').focus();
+    return;
+  }
+
+  fillContract();
+
+  const overlay = document.getElementById('loadingOverlay');
+  const btn     = document.getElementById('downloadBtn');
+  overlay.classList.add('show');
+  btn.disabled = true;
+
+  const paper = document.getElementById('contractPaper');
+
+  // 잠시 화면 내에 두고 캡처
+  paper.style.position = 'absolute';
+  paper.style.left = '-9999px';
+  paper.style.top  = '0';
+  paper.style.zIndex = '-1';
+  document.body.appendChild(paper);
+
+  await new Promise(r => setTimeout(r, 300));
+
+  try {
+    const canvas = await html2canvas(paper, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: 595,
+      windowWidth: 595
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+
+    // 이미지 비율 유지
+    const canvasH = canvas.height / (canvas.width / pdfW);
+    if (canvasH <= pdfH) {
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, canvasH);
+    } else {
+      // 여러 페이지 처리
+      let yOffset = 0;
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      const ctx = pageCanvas.getContext('2d');
+
+      while (yOffset < canvas.height) {
+        const pageHeight = Math.round(pdfH * (canvas.width / pdfW));
+        pageCanvas.height = pageHeight;
+        ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(canvas, 0, -yOffset);
+        const pageData = pageCanvas.toDataURL('image/jpeg', 0.95);
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(pageData, 'JPEG', 0, 0, pdfW, pdfH);
+        yOffset += pageHeight;
+      }
+    }
+
+    // 파일명: LOTV_계약서_홍길동_20250630.pdf
+    const today = new Date();
+    const dateStr = today.getFullYear()
+      + String(today.getMonth()+1).padStart(2,'0')
+      + String(today.getDate()).padStart(2,'0');
+    pdf.save(`LOTV_계약서_${nameVal}_${dateStr}.pdf`);
+
+  } catch(err) {
+    alert('PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    console.error(err);
+  } finally {
+    // paper 복구
+    const hiddenWrap = document.querySelector('[style*="-9999px"]');
+    if (hiddenWrap) hiddenWrap.appendChild(paper);
+    paper.style.position = '';
+
+    overlay.classList.remove('show');
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
