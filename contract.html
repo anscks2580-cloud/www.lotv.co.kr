@@ -485,8 +485,7 @@ body {
   letter-spacing: 0.02em;
 }
 .cp-sig-line span {
-  display: inline-block;
-  min-width: 120px;
+  display: inline;
   color: #1C1A17;
   font-weight: 400;
 }
@@ -590,7 +589,11 @@ body {
     <div class="form-row-2col">
       <div class="form-row">
         <label>예식 일시</label>
-        <input type="text" id="f_date" placeholder="2025년 00월 00일 00:00">
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <input type="date" id="f_date_picker" style="flex:1; border:none; border-bottom:0.5px solid var(--accent-light); background:transparent; padding:8px 0; font-family:'Noto Sans KR',sans-serif; font-size:13px; color:var(--ink); outline:none; cursor:pointer;" onchange="updateDateTime()">
+          <input type="time" id="f_time_picker" style="width:100px; border:none; border-bottom:0.5px solid var(--accent-light); background:transparent; padding:8px 0; font-family:'Noto Sans KR',sans-serif; font-size:13px; color:var(--ink); outline:none; cursor:pointer;" onchange="updateDateTime()">
+        </div>
+        <input type="hidden" id="f_date">
       </div>
       <div class="form-row">
         <label>장소</label>
@@ -603,6 +606,7 @@ body {
       <select id="f_product">
         <option value="">선택해주세요</option>
         <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
+        <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
         <option value="직접입력">직접 입력</option>
       </select>
     </div>
@@ -613,13 +617,10 @@ body {
 
     <div class="form-row">
       <label>추가 옵션</label>
-      <input type="text" id="f_option" placeholder="예: Polaroid 추가 5장, 호텔식 2부 추가 등">
+      <textarea id="f_option" rows="4" placeholder="예: Polaroid 추가 5장&#10;호텔식 2부 추가 등"></textarea>
     </div>
 
-    <div class="form-row">
-      <label>프로모션</label>
-      <input type="text" id="f_promo" placeholder="해당 없음">
-    </div>
+
 
     <div class="form-row-2col">
       <div class="form-row">
@@ -702,12 +703,9 @@ body {
       </div>
       <div class="cp-field-row">
         <div class="cp-field-label">추가 옵션</div>
-        <div class="cp-field-value" id="cp_option"></div>
+        <div class="cp-field-value" id="cp_option" style="white-space:pre-wrap;"></div>
       </div>
-      <div class="cp-field-row">
-        <div class="cp-field-label">프로모션</div>
-        <div class="cp-field-value" id="cp_promo"></div>
-      </div>
+
       <div class="cp-field-row">
         <div class="cp-field-label">상품 금액</div>
         <div class="cp-field-value" id="cp_price"></div>
@@ -729,12 +727,13 @@ body {
         <div class="cp-sig-title">Photographer</div>
         <div class="cp-sig-line">회사명 : <span>엘오티브이(LOTV)</span></div>
         <div class="cp-sig-line">사업자등록번호 : <span>349-29-02113</span></div>
-        <div class="cp-sig-line">대표자 : <span>손승희 <span class="cp-seal">인</span></span></div>
+        <div class="cp-sig-line">대표자 : <span>손승희</span></div>
       </div>
       <div class="cp-sig-box">
         <div class="cp-sig-title">Client</div>
-        <div class="cp-sig-line">성명 : <span id="cp_sig_name" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span> <span class="cp-seal">인</span></div>
+        <div class="cp-sig-line">성명 : <span id="cp_sig_name" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
         <div class="cp-sig-line" style="margin-top:8px;">연락처 : <span id="cp_sig_tel" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
+        <div style="text-align:right; font-size:11px; color:#1C1A17; margin-top:10px; letter-spacing:0.04em;">(인)</div>
       </div>
     </div>
 
@@ -743,6 +742,24 @@ body {
 
 
 <script>
+/* ─── 날짜/시간 → 포맷 변환 ─── */
+const DAY_KO = ['일','월','화','수','목','금','토'];
+function updateDateTime() {
+  const dateVal = document.getElementById('f_date_picker').value; // "2026-06-29"
+  const timeVal = document.getElementById('f_time_picker').value; // "13:20"
+  let result = '';
+  if (dateVal) {
+    const d = new Date(dateVal + 'T00:00:00');
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const day = DAY_KO[d.getDay()];
+    result = `${yy}.${mm}.${dd} (${day})`;
+    if (timeVal) result += ` ${timeVal}`;
+  }
+  document.getElementById('f_date').value = result;
+}
+
 /* ═══════════════════════════════
    비밀번호 설정 — 여기만 바꾸면 됩니다
    ═══════════════════════════════ */
@@ -778,6 +795,36 @@ document.getElementById('pwInput').addEventListener('keydown', e => {
 document.getElementById('f_product').addEventListener('change', function() {
   document.getElementById('productCustomWrap').style.display =
     this.value === '직접입력' ? 'flex' : 'none';
+
+  const opt = document.getElementById('f_option');
+  const spec = document.getElementById('f_special');
+
+  if (this.value === 'Polaroid & iPhone Memory Package') {
+    opt.value = `- Polaroid Snap 폴라로이드 필름 10장/ 예식 주요 장면 중심 촬영
+- iPhone Snap Service 아이폰 및 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 20장 보정 제공`;
+    spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
+촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
+해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
+계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
+7일 이후 취소의 경우,
+LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
+단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
+지불된 금액의 2배를 배상합니다.
+또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
+  } else if (this.value === 'Polaroid & iPhone Memory Package (Promotion)') {
+    opt.value = `- Polaroid Snap 폴라로이드 필름 3장/ 예식 주요 장면 중심 촬영
+- iPhone Snap Service 아이폰 및 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 20장 보정 제공`;
+    spec.value = `본 계약 건은 별도의 촬영 비용 없이 진행되는 협찬 조건으로,
+금액은 무료로 제공됩니다.
+대신 촬영된 사진 및 결과물은
+LOTV SNAP의 인스타그램, 블로그 및 기타 홍보 채널에
+업로드 및 활용될 수 있으며,
+이에 대해 계약자는 초상권 사용에 동의한 것으로 간주됩니다.
+단, 사용 범위는 LOTV SNAP의 포트폴리오 및 홍보 목적에 한정됩니다.`;
+  } else {
+    opt.value = '';
+    spec.value = '';
+  }
 });
 
 /* ─── 폼 → 계약서 DOM 채우기 ─── */
@@ -796,7 +843,7 @@ function fillContract() {
   document.getElementById('cp_venue').textContent   = g('f_venue')   || '—';
   document.getElementById('cp_product').textContent = productVal      || '—';
   document.getElementById('cp_option').textContent  = g('f_option')  || '—';
-  document.getElementById('cp_promo').textContent   = g('f_promo')   || '—';
+
   document.getElementById('cp_price').textContent   = g('f_price')   || '—';
   document.getElementById('cp_special').textContent = g('f_special') || '';
 
