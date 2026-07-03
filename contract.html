@@ -565,6 +565,53 @@ body {
     <div class="app-page-title">촬영 계약서 작성</div>
   </div>
 
+  <!-- 방문자 통계 -->
+  <div style="max-width:420px; margin:20px auto 0; font-size:13px; color:#5A5650;">
+    <div style="display:flex; justify-content:space-between; padding:6px 0; font-weight:600; border-bottom:1px solid rgba(0,0,0,0.15);">
+      <span>페이지</span><span>방문자</span>
+    </div>
+    <div id="visitorRows">로딩중…</div>
+    <div style="margin-top:10px; text-align:right;">
+      <a href="https://lotv.goatcounter.com" target="_blank" rel="noopener"
+         style="font-size:11px; color:inherit; opacity:0.5; text-decoration:underline;">전체 통계 보기</a>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var pages = [
+      { label: '메인 (index)', path: '/' },
+      { label: '락고재 서울', path: '/gallery-rakgojai.html' },
+      { label: '라비두스', path: '/gallery-ravidus.html' },
+      { label: '드레스가든', path: '/gallery-dressgarden.html' },
+      { label: '삼성 금융캠퍼스', path: '/gallery-samsung.html' },
+      { label: '크레스트72', path: '/gallery-crest72.html' },
+      { label: '더 채플앳 대치', path: '/gallery-thechapel.html' },
+      { label: '그랜드힐 컨벤션', path: '/gallery-grandhill.html' },
+      { label: '포어클락 용인', path: '/gallery-foreclock.html' },
+      { label: '조선팰리스 강남', path: '/gallery-josunpalace.html' },
+      { label: 'H스퀘어웨딩홀', path: '/gallery-hsquare.html' },
+      { label: '계약서 (contract)', path: '/contract.html' }
+    ];
+    var rowsEl = document.getElementById('visitorRows');
+    function fetchCount(path) {
+      var encoded = path === '/' ? '//' : encodeURIComponent(path);
+      return fetch('https://lotv.goatcounter.com/counter/' + encoded + '.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) { return (d && d.count) ? d.count.replace(/&nbsp;/g,'').trim() : '0'; })
+        .catch(function() { return '—'; });
+    }
+    Promise.all(pages.map(function(p) { return fetchCount(p.path); }))
+      .then(function(counts) {
+        rowsEl.innerHTML = pages.map(function(p, i) {
+          return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.06);">' +
+                 '<span>' + p.label + '</span><strong>' + counts[i] + '명</strong></div>';
+        }).join('');
+      })
+      .catch(function() { rowsEl.textContent = '불러오기 실패'; });
+  })();
+  </script>
+
   <div class="form-wrap">
 
     <!-- 클라이언트 정보 -->
@@ -607,6 +654,7 @@ body {
         <option value="">선택해주세요</option>
         <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
         <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
+        <option value="Digital Camera Only Package (Promotion)">Digital Camera Only Package (Promotion)</option>
         <option value="직접입력">직접 입력</option>
       </select>
     </div>
@@ -814,6 +862,15 @@ LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위�
   } else if (this.value === 'Polaroid & iPhone Memory Package (Promotion)') {
     opt.value = `- Polaroid Snap 폴라로이드 필름 3장/ 예식 주요 장면 중심 촬영
 - iPhone Snap Service 아이폰 및 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 20장 보정 제공`;
+    spec.value = `본 계약 건은 별도의 촬영 비용 없이 진행되는 협찬 조건으로,
+금액은 무료로 제공됩니다.
+대신 촬영된 사진 및 결과물은
+LOTV SNAP의 인스타그램, 블로그 및 기타 홍보 채널에
+업로드 및 활용될 수 있으며,
+이에 대해 계약자는 초상권 사용에 동의한 것으로 간주됩니다.
+단, 사용 범위는 LOTV SNAP의 포트폴리오 및 홍보 목적에 한정됩니다.`;
+  } else if (this.value === 'Digital Camera Only Package (Promotion)') {
+    opt.value = `- 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `본 계약 건은 별도의 촬영 비용 없이 진행되는 협찬 조건으로,
 금액은 무료로 제공됩니다.
 대신 촬영된 사진 및 결과물은
