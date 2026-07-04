@@ -566,14 +566,19 @@ body {
   </div>
 
   <!-- 방문자 통계 -->
-  <div style="max-width:420px; margin:20px auto 0; font-size:13px; color:#5A5650;">
-    <div style="display:flex; justify-content:space-between; padding:6px 0; font-weight:600; border-bottom:1px solid rgba(0,0,0,0.15);">
-      <span>페이지</span><span>방문자</span>
+  <div style="max-width:600px; margin:20px auto 0; font-size:12px; color:#5A5650;">
+    <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; gap:0; padding:6px 4px; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.15); text-align:center;">
+      <span style="text-align:left;">페이지</span>
+      <span>오늘</span>
+      <span>이번주</span>
+      <span>누적</span>
     </div>
-    <div id="visitorRows">로딩중…</div>
-    <div style="margin-top:10px; text-align:right;">
+    <div id="visitorRows" style="min-height:40px;">
+      <div style="text-align:center; padding:12px; opacity:0.5;">로딩중…</div>
+    </div>
+    <div style="margin-top:8px; text-align:right;">
       <a href="https://lotv.goatcounter.com" target="_blank" rel="noopener"
-         style="font-size:11px; color:inherit; opacity:0.5; text-decoration:underline;">전체 통계 보기</a>
+         style="font-size:11px; color:inherit; opacity:0.45; text-decoration:underline;">대시보드 열기</a>
     </div>
   </div>
 
@@ -581,34 +586,64 @@ body {
   (function() {
     var pages = [
       { label: '메인 (index)', path: '/' },
-      { label: '락고재 서울', path: '/gallery-rakgojai.html' },
-      { label: '라비두스', path: '/gallery-ravidus.html' },
-      { label: '드레스가든', path: '/gallery-dressgarden.html' },
+      { label: '락고재 서울',   path: '/gallery-rakgojai.html' },
+      { label: '라비두스',       path: '/gallery-ravidus.html' },
+      { label: '드레스가든',     path: '/gallery-dressgarden.html' },
       { label: '삼성 금융캠퍼스', path: '/gallery-samsung.html' },
-      { label: '크레스트72', path: '/gallery-crest72.html' },
+      { label: '크레스트72',    path: '/gallery-crest72.html' },
       { label: '더 채플앳 대치', path: '/gallery-thechapel.html' },
       { label: '그랜드힐 컨벤션', path: '/gallery-grandhill.html' },
       { label: '포어클락 용인', path: '/gallery-foreclock.html' },
       { label: '조선팰리스 강남', path: '/gallery-josunpalace.html' },
       { label: 'H스퀘어웨딩홀', path: '/gallery-hsquare.html' },
-      { label: '계약서 (contract)', path: '/contract.html' }
+      { label: '계약서',         path: '/contract.html' }
     ];
+
+    // 날짜 계산
+    function toDateStr(d) {
+      return d.toISOString().slice(0, 10);
+    }
+    var now   = new Date();
+    var today = toDateStr(now);
+    var weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    var weekStartStr = toDateStr(weekStart);
+
     var rowsEl = document.getElementById('visitorRows');
-    function fetchCount(path) {
+
+    function fetchCount(path, start, end) {
       var encoded = path === '/' ? '//' : encodeURIComponent(path);
-      return fetch('https://lotv.goatcounter.com/counter/' + encoded + '.json')
+      var url = 'https://lotv.goatcounter.com/counter/' + encoded + '.json';
+      if (start) url += '?start=' + start + '&end=' + end;
+      return fetch(url)
         .then(function(r) { return r.json(); })
-        .then(function(d) { return (d && d.count) ? d.count.replace(/&nbsp;/g,'').trim() : '0'; })
+        .then(function(d) {
+          return (d && d.count) ? d.count.replace(/&nbsp;/g, '').replace(/\s/g, '') : '0';
+        })
         .catch(function() { return '—'; });
     }
-    Promise.all(pages.map(function(p) { return fetchCount(p.path); }))
-      .then(function(counts) {
-        rowsEl.innerHTML = pages.map(function(p, i) {
-          return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.06);">' +
-                 '<span>' + p.label + '</span><strong>' + counts[i] + '명</strong></div>';
-        }).join('');
-      })
-      .catch(function() { rowsEl.textContent = '불러오기 실패'; });
+
+    Promise.all(pages.map(function(p) {
+      return Promise.all([
+        fetchCount(p.path, today, today),
+        fetchCount(p.path, weekStartStr, today),
+        fetchCount(p.path)
+      ]);
+    })).then(function(results) {
+      rowsEl.innerHTML = results.map(function(r, i) {
+        var isEven = i % 2 === 0;
+        return '<div style="display:grid;grid-template-columns:1fr 60px 60px 60px;gap:0;padding:5px 4px;' +
+               'border-bottom:1px solid rgba(0,0,0,0.06);text-align:center;' +
+               (isEven ? '' : 'background:rgba(0,0,0,0.02);') + '">' +
+               '<span style="text-align:left;">' + pages[i].label + '</span>' +
+               '<span>' + r[0] + '</span>' +
+               '<span>' + r[1] + '</span>' +
+               '<strong>' + r[2] + '</strong>' +
+               '</div>';
+      }).join('');
+    }).catch(function() {
+      rowsEl.textContent = '불러오기 실패';
+    });
   })();
   </script>
 
