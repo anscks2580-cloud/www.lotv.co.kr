@@ -567,11 +567,23 @@ body {
 
   <!-- 방문자 통계 -->
   <div style="max-width:600px; margin:20px auto 0; font-size:12px; color:#5A5650;">
-    <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; gap:0; padding:6px 4px; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.15); text-align:center;">
+
+    <!-- 날짜별 조회 -->
+    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+      <input type="date" id="statsDateFrom" style="font-size:12px; padding:4px 6px; border:1px solid rgba(0,0,0,0.2); border-radius:4px; color:inherit;">
+      <span>~</span>
+      <input type="date" id="statsDateTo" style="font-size:12px; padding:4px 6px; border:1px solid rgba(0,0,0,0.2); border-radius:4px; color:inherit;">
+      <button type="button" onclick="loadCustomDateStats()"
+        style="font-size:12px; padding:4px 12px; border:1px solid rgba(0,0,0,0.25); border-radius:4px; background:transparent; color:inherit; cursor:pointer;">조회</button>
+      <span id="customDateStatus" style="font-size:11px; opacity:0.6;"></span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 60px 60px 60px 60px; gap:0; padding:6px 4px; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.15); text-align:center;">
       <span style="text-align:left;">페이지</span>
       <span>오늘</span>
       <span>이번주</span>
       <span>누적</span>
+      <span id="customDateColLabel">선택일</span>
     </div>
     <div id="visitorRows" style="min-height:40px;">
       <div style="text-align:center; padding:12px; opacity:0.5;">로딩중…</div>
@@ -599,9 +611,12 @@ body {
       { label: '계약서',         path: '/contract.html' }
     ];
 
-    // 날짜 계산
+    // 날짜 계산 (로컬/한국 시간 기준 — toISOString()은 UTC라 새벽 시간대에 날짜가 하루 밀림)
     function toDateStr(d) {
-      return d.toISOString().slice(0, 10);
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
     }
     var now   = new Date();
     var today = toDateStr(now);
@@ -609,7 +624,14 @@ body {
     weekStart.setDate(now.getDate() - now.getDay());
     var weekStartStr = toDateStr(weekStart);
 
+    // 날짜별 조회 기본값: 오늘 ~ 오늘
+    var fromInput = document.getElementById('statsDateFrom');
+    var toInput   = document.getElementById('statsDateTo');
+    if (fromInput && !fromInput.value) fromInput.value = today;
+    if (toInput && !toInput.value)     toInput.value   = today;
+
     var rowsEl = document.getElementById('visitorRows');
+    var lastCustomCounts = null; // 페이지별 선택일 카운트 캐시 (재렌더용)
 
     function fetchCount(path, start, end) {
       var encoded = path === '/' ? '//' : encodeURIComponent(path);
@@ -623,6 +645,24 @@ body {
         .catch(function() { return '—'; });
     }
 
+    function renderRows(results) {
+      rowsEl.innerHTML = results.map(function(r, i) {
+        var isEven = i % 2 === 0;
+        var customVal = lastCustomCounts ? lastCustomCounts[i] : '-';
+        return '<div style="display:grid;grid-template-columns:1fr 60px 60px 60px 60px;gap:0;padding:5px 4px;' +
+               'border-bottom:1px solid rgba(0,0,0,0.06);text-align:center;' +
+               (isEven ? '' : 'background:rgba(0,0,0,0.02);') + '">' +
+               '<span style="text-align:left;">' + pages[i].label + '</span>' +
+               '<span>' + r[0] + '</span>' +
+               '<span>' + r[1] + '</span>' +
+               '<strong>' + r[2] + '</strong>' +
+               '<span>' + customVal + '</span>' +
+               '</div>';
+      }).join('');
+    }
+
+    var lastResults = null;
+
     Promise.all(pages.map(function(p) {
       return Promise.all([
         fetchCount(p.path, today, today),
@@ -630,20 +670,35 @@ body {
         fetchCount(p.path)
       ]);
     })).then(function(results) {
-      rowsEl.innerHTML = results.map(function(r, i) {
-        var isEven = i % 2 === 0;
-        return '<div style="display:grid;grid-template-columns:1fr 60px 60px 60px;gap:0;padding:5px 4px;' +
-               'border-bottom:1px solid rgba(0,0,0,0.06);text-align:center;' +
-               (isEven ? '' : 'background:rgba(0,0,0,0.02);') + '">' +
-               '<span style="text-align:left;">' + pages[i].label + '</span>' +
-               '<span>' + r[0] + '</span>' +
-               '<span>' + r[1] + '</span>' +
-               '<strong>' + r[2] + '</strong>' +
-               '</div>';
-      }).join('');
+      lastResults = results;
+      renderRows(results);
     }).catch(function() {
       rowsEl.textContent = '불러오기 실패';
     });
+
+    // 날짜별(기간) 조회
+    window.loadCustomDateStats = function() {
+      var startVal = document.getElementById('statsDateFrom').value;
+      var endVal   = document.getElementById('statsDateTo').value;
+      var statusEl = document.getElementById('customDateStatus');
+      var labelEl  = document.getElementById('customDateColLabel');
+
+      if (!startVal || !endVal) { statusEl.textContent = '날짜를 선택해주세요.'; return; }
+      if (startVal > endVal) { statusEl.textContent = '시작일이 종료일보다 늦습니다.'; return; }
+
+      labelEl.textContent = startVal === endVal ? startVal.slice(5) : (startVal.slice(5) + '~' + endVal.slice(5));
+      statusEl.textContent = '조회 중…';
+
+      Promise.all(pages.map(function(p) {
+        return fetchCount(p.path, startVal, endVal);
+      })).then(function(counts) {
+        lastCustomCounts = counts;
+        statusEl.textContent = '';
+        if (lastResults) renderRows(lastResults);
+      }).catch(function() {
+        statusEl.textContent = '조회 실패';
+      });
+    };
   })();
   </script>
 
