@@ -602,9 +602,8 @@ body {
       <span id="customDateStatus" style="font-size:11px; opacity:0.6;"></span>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 60px 60px 60px 60px; gap:0; padding:6px 4px; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.15); text-align:center;">
+    <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; gap:0; padding:6px 4px; font-weight:600; border-bottom:2px solid rgba(0,0,0,0.15); text-align:center;">
       <span style="text-align:left;">페이지</span>
-      <span>오늘</span>
       <span>이번주</span>
       <span>누적</span>
       <span id="customDateColLabel">선택일</span>
@@ -673,13 +672,12 @@ body {
       rowsEl.innerHTML = results.map(function(r, i) {
         var isEven = i % 2 === 0;
         var customVal = lastCustomCounts ? lastCustomCounts[i] : '-';
-        return '<div style="display:grid;grid-template-columns:1fr 60px 60px 60px 60px;gap:0;padding:5px 4px;' +
+        return '<div style="display:grid;grid-template-columns:1fr 60px 60px 60px;gap:0;padding:5px 4px;' +
                'border-bottom:1px solid rgba(0,0,0,0.06);text-align:center;' +
                (isEven ? '' : 'background:rgba(0,0,0,0.02);') + '">' +
                '<span style="text-align:left;">' + pages[i].label + '</span>' +
                '<span>' + r[0] + '</span>' +
-               '<span>' + r[1] + '</span>' +
-               '<strong>' + r[2] + '</strong>' +
+               '<strong>' + r[1] + '</strong>' +
                '<span>' + customVal + '</span>' +
                '</div>';
       }).join('');
@@ -689,7 +687,6 @@ body {
 
     Promise.all(pages.map(function(p) {
       return Promise.all([
-        fetchCount(p.path, today, today),
         fetchCount(p.path, weekStartStr, today),
         fetchCount(p.path)
       ]);
