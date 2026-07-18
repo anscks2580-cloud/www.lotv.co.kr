@@ -270,6 +270,30 @@ body {
   margin-top: 6px;
 }
 
+.addon-check-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.addon-check-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: var(--ink) !important;
+  cursor: pointer;
+}
+.addon-check-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* ──────────────── BUTTONS ──────────────── */
 .action-row {
   display: flex;
@@ -754,7 +778,29 @@ body {
     </div>
 
     <div class="form-row">
-      <label>추가 옵션</label>
+      <label>추가 옵션 선택</label>
+      <div class="addon-check-group">
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="Ricoh High-end Camera 추가" data-price="+50,000원" onchange="updateOptionField()">
+          <span>Ricoh High-end Camera 추가 &nbsp;+50,000원</span>
+        </label>
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="Polaroid 추가 (5장 기준)" data-price="+30,000원" onchange="updateOptionField()">
+          <span>Polaroid 추가 (5장 기준) &nbsp;+30,000원</span>
+        </label>
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="호텔식 2부 추가" data-price="+30,000원" onchange="updateOptionField()">
+          <span>호텔식 2부 추가 &nbsp;+30,000원</span>
+        </label>
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="첫예식 연출컷 (30분 기준)" data-price="+30,000원" onchange="updateOptionField()">
+          <span>첫예식 연출컷 (30분 기준) &nbsp;+30,000원</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>내용</label>
       <textarea id="f_option" rows="4" placeholder="예: Polaroid 추가 5장&#10;호텔식 2부 추가 등"></textarea>
     </div>
 
@@ -840,7 +886,7 @@ body {
         <div class="cp-field-value" id="cp_product"></div>
       </div>
       <div class="cp-field-row">
-        <div class="cp-field-label">추가 옵션</div>
+        <div class="cp-field-label">내용</div>
         <div class="cp-field-value" id="cp_option" style="white-space:pre-wrap;"></div>
       </div>
 
@@ -930,16 +976,28 @@ document.getElementById('pwInput').addEventListener('keydown', e => {
 });
 
 // 상품명 직접입력 토글
+let baseOptionText = '';
+
+function updateOptionField() {
+  const checks = document.querySelectorAll('.addon-check:checked');
+  const addonLines = Array.from(checks).map(c => `- ${c.dataset.label} ${c.dataset.price}`);
+  const opt = document.getElementById('f_option');
+  let combined = baseOptionText;
+  if (addonLines.length) {
+    combined += (combined ? '\n' : '') + addonLines.join('\n');
+  }
+  opt.value = combined;
+}
+
 document.getElementById('f_product').addEventListener('change', function() {
   document.getElementById('productCustomWrap').style.display =
     this.value === '직접입력' ? 'flex' : 'none';
 
-  const opt = document.getElementById('f_option');
   const spec = document.getElementById('f_special');
 
   if (this.value === 'Polaroid & iPhone Memory Package') {
-    opt.value = `- Polaroid Snap 폴라로이드 필름 10장/ 예식 주요 장면 중심 촬영
-- iPhone Snap Service 아이폰 및 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 20장 보정 제공`;
+    baseOptionText = `- Polaroid Snap 폴라로이드 필름 5장/ 예식 주요 장면 중심 촬영
+- iPhone Snap Service 아이폰 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
 해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
@@ -950,8 +1008,8 @@ LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위�
 지불된 금액의 2배를 배상합니다.
 또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
   } else if (this.value === 'Polaroid & iPhone Memory Package (Promotion)') {
-    opt.value = `- Polaroid Snap 폴라로이드 필름 3장/ 예식 주요 장면 중심 촬영
-- iPhone Snap Service 아이폰 및 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 20장 보정 제공`;
+    baseOptionText = `- Polaroid Snap 폴라로이드 필름 3장/ 예식 주요 장면 중심 촬영
+- iPhone Snap Service 아이폰 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `본 계약 건은 별도의 촬영 비용 없이 진행되는 협찬 조건으로,
 금액은 무료로 제공됩니다.
 대신 촬영된 사진 및 결과물은
@@ -960,7 +1018,7 @@ LOTV SNAP의 인스타그램, 블로그 및 기타 홍보 채널에
 이에 대해 계약자는 초상권 사용에 동의한 것으로 간주됩니다.
 단, 사용 범위는 LOTV SNAP의 포트폴리오 및 홍보 목적에 한정됩니다.`;
   } else if (this.value === 'Digital Camera Only Package (Promotion)') {
-    opt.value = `- 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    baseOptionText = `- 디지털카메라기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `본 계약 건은 별도의 촬영 비용 없이 진행되는 협찬 조건으로,
 금액은 무료로 제공됩니다.
 대신 촬영된 사진 및 결과물은
@@ -969,9 +1027,11 @@ LOTV SNAP의 인스타그램, 블로그 및 기타 홍보 채널에
 이에 대해 계약자는 초상권 사용에 동의한 것으로 간주됩니다.
 단, 사용 범위는 LOTV SNAP의 포트폴리오 및 홍보 목적에 한정됩니다.`;
   } else {
-    opt.value = '';
+    baseOptionText = '';
     spec.value = '';
   }
+
+  updateOptionField();
 });
 
 /* ─── 폼 → 계약서 DOM 채우기 ─── */
