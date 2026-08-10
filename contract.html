@@ -815,7 +815,7 @@ body {
     <div class="form-row-2col">
       <div class="form-row">
         <label>상품 금액</label>
-        <input type="text" id="f_price" placeholder="000,000원">
+        <input type="text" id="f_price" placeholder="000,000원" oninput="formatPrice(this)">
         <div class="price-hint">VAT 포함 금액으로 입력</div>
       </div>
       <div class="form-row" style="align-self:start">
@@ -939,6 +939,17 @@ body {
 
 
 <script>
+/* ─── 상품 금액 자동 콤마 + 원 포맷 ─── */
+function formatPrice(el) {
+  let v = el.value.replace(/[^0-9]/g, '');
+  if (!v) {
+    el.value = '';
+    return;
+  }
+  v = v.replace(/^0+(?=\d)/, '');
+  el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+}
+
 /* ─── 연락처 자동 하이픈 포맷 ─── */
 function formatPhoneNumber(el) {
   let v = el.value.replace(/[^0-9]/g, '').slice(0, 11);
