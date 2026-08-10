@@ -735,7 +735,7 @@ body {
       </div>
       <div class="form-row">
         <label>연락처</label>
-        <input type="tel" id="f_tel" placeholder="010-0000-0000">
+        <input type="tel" id="f_tel" placeholder="010-0000-0000" oninput="formatPhoneNumber(this)">
       </div>
     </div>
 
@@ -746,7 +746,7 @@ body {
 
     <div class="form-row-2col">
       <div class="form-row">
-        <label>예식 일시</label>
+        <label>일시</label>
         <div style="display:flex; gap:10px; align-items:flex-end;">
           <input type="date" id="f_date_picker" style="flex:1; border:none; border-bottom:0.5px solid var(--accent-light); background:transparent; padding:8px 0; font-family:'Noto Sans KR',sans-serif; font-size:13px; color:var(--ink); outline:none; cursor:pointer;" onchange="updateDateTime()">
           <input type="time" id="f_time_picker" style="width:100px; border:none; border-bottom:0.5px solid var(--accent-light); background:transparent; padding:8px 0; font-family:'Noto Sans KR',sans-serif; font-size:13px; color:var(--ink); outline:none; cursor:pointer;" onchange="updateDateTime()">
@@ -764,6 +764,7 @@ body {
       <select id="f_product">
         <option value="">선택해주세요</option>
         <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
+        <option value="Polaroid &amp; iPhone Memory Package(돌잔치)">Polaroid &amp; iPhone Memory Package(돌잔치)</option>
         <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
         <option value="Digital Camera Only Package (Promotion)">Digital Camera Only Package (Promotion)</option>
         <option value="직접입력">직접 입력</option>
@@ -792,6 +793,14 @@ body {
         <label class="addon-check-item">
           <input type="checkbox" class="addon-check" data-label="첫예식 연출컷 (30분 기준)" data-price="+30,000원" onchange="updateOptionField()">
           <span>첫예식 연출컷 (30분 기준) &nbsp;+30,000원</span>
+        </label>
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="30분 추가 촬영" data-price="+30,000원" onchange="updateOptionField()">
+          <span>30분 추가 촬영 &nbsp;+30,000원</span>
+        </label>
+        <label class="addon-check-item">
+          <input type="checkbox" class="addon-check" data-label="1시간 추가 촬영" data-price="+50,000원" onchange="updateOptionField()">
+          <span>1시간 추가 촬영 &nbsp;+50,000원</span>
         </label>
       </div>
     </div>
@@ -824,6 +833,13 @@ body {
       <label>특약사항</label>
       <textarea id="f_special" rows="5" placeholder="계약 관련 특약 사항을 입력하세요.&#10;예: 예식 종료 후 30분 추가 촬영 포함 등"></textarea>
     </div>
+
+    <!-- 임시저장 -->
+    <div class="action-row" style="margin-top:16px;">
+      <button class="btn-preview" onclick="saveDraft()">임시저장</button>
+      <button class="btn-preview" onclick="loadDraft()">불러오기</button>
+    </div>
+    <div id="draftStatus" style="font-size:11px; color:var(--accent); margin-top:8px; letter-spacing:0.05em;"></div>
 
     <!-- 액션 버튼 -->
     <div class="action-row">
@@ -871,7 +887,7 @@ body {
     <!-- 예식 정보 블록 -->
     <div class="cp-event-block">
       <div class="cp-field-row">
-        <div class="cp-field-label">예식 일시</div>
+        <div class="cp-field-label">일시</div>
         <div class="cp-field-value" id="cp_date"></div>
       </div>
       <div class="cp-field-row">
@@ -923,6 +939,85 @@ body {
 
 
 <script>
+/* ─── 연락처 자동 하이픈 포맷 ─── */
+function formatPhoneNumber(el) {
+  let v = el.value.replace(/[^0-9]/g, '').slice(0, 11);
+  if (v.length < 4) {
+    // as-is
+  } else if (v.length < 8) {
+    v = v.slice(0,3) + '-' + v.slice(3);
+  } else {
+    v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+  }
+  el.value = v;
+}
+
+/* ─── 임시저장 / 불러오기 ─── */
+const DRAFT_KEY = 'lotv_contract_draft';
+
+function saveDraft() {
+  const data = {
+    f_name: document.getElementById('f_name').value,
+    f_tel: document.getElementById('f_tel').value,
+    f_date_picker: document.getElementById('f_date_picker').value,
+    f_time_picker: document.getElementById('f_time_picker').value,
+    f_venue: document.getElementById('f_venue').value,
+    f_product: document.getElementById('f_product').value,
+    f_product_custom: document.getElementById('f_product_custom').value,
+    f_option: document.getElementById('f_option').value,
+    f_price: document.getElementById('f_price').value,
+    f_contractDate: document.getElementById('f_contractDate').value,
+    f_special: document.getElementById('f_special').value,
+    addonChecks: Array.from(document.querySelectorAll('.addon-check')).map(c => c.checked)
+  };
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  const status = document.getElementById('draftStatus');
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mi = String(now.getMinutes()).padStart(2,'0');
+  status.textContent = `임시저장됨 (${hh}:${mi})`;
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  const status = document.getElementById('draftStatus');
+  if (!raw) {
+    status.textContent = '저장된 임시저장 내용이 없습니다.';
+    return;
+  }
+  const data = JSON.parse(raw);
+  document.getElementById('f_name').value = data.f_name || '';
+  document.getElementById('f_tel').value = data.f_tel || '';
+  document.getElementById('f_date_picker').value = data.f_date_picker || '';
+  document.getElementById('f_time_picker').value = data.f_time_picker || '';
+  document.getElementById('f_venue').value = data.f_venue || '';
+  document.getElementById('f_product').value = data.f_product || '';
+  document.getElementById('f_product_custom').value = data.f_product_custom || '';
+  document.getElementById('f_price').value = data.f_price || '';
+  document.getElementById('f_contractDate').value = data.f_contractDate || '';
+  document.getElementById('f_special').value = data.f_special || '';
+
+  // 날짜/시간 갱신
+  updateDateTime();
+
+  // 상품명 선택에 따른 표시/자동 텍스트 갱신 (change 이벤트 트리거)
+  document.getElementById('f_product').dispatchEvent(new Event('change'));
+
+  // 체크박스 복원 (change 이벤트로 baseOptionText가 갱신된 뒤 적용)
+  const checks = document.querySelectorAll('.addon-check');
+  if (data.addonChecks) {
+    checks.forEach((c, i) => { c.checked = !!data.addonChecks[i]; });
+  }
+  updateOptionField();
+
+  // 옵션 내용이 직접 수정되어 있었을 경우를 위해 최종적으로 저장된 f_option으로 덮어씀
+  if (data.f_option !== undefined) {
+    document.getElementById('f_option').value = data.f_option;
+  }
+
+  status.textContent = '임시저장 내용을 불러왔습니다.';
+}
+
 /* ─── 날짜/시간 → 포맷 변환 ─── */
 const DAY_KO = ['일','월','화','수','목','금','토'];
 function updateDateTime() {
@@ -995,6 +1090,18 @@ document.getElementById('f_product').addEventListener('change', function() {
   if (this.value === 'Polaroid & iPhone Memory Package') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 5장/ 예식 주요 장면 중심 촬영
 - iPhone Snap Service 아이폰 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
+촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
+해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
+계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
+7일 이후 취소의 경우,
+LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
+단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
+지불된 금액의 2배를 배상합니다.
+또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
+  } else if (this.value === 'Polaroid & iPhone Memory Package(돌잔치)') {
+    baseOptionText = `- Polaroid Snap 폴라로이드 필름 10장/ 행사 주요 장면 중심 촬영
+- Snap Service 아이폰 및 디카 기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
 해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
