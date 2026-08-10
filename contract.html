@@ -764,7 +764,7 @@ body {
       <select id="f_product">
         <option value="">선택해주세요</option>
         <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
-        <option value="Polaroid &amp; iPhone Memory Package(돌잔치)">Polaroid &amp; iPhone Memory Package(돌잔치)</option>
+        <option value="Polaroid &amp; iPhone Memory Package for Baby">Polaroid &amp; iPhone Memory Package for Baby</option>
         <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
         <option value="Digital Camera Only Package (Promotion)">Digital Camera Only Package (Promotion)</option>
         <option value="직접입력">직접 입력</option>
@@ -1110,7 +1110,7 @@ LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위�
 단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
 지불된 금액의 2배를 배상합니다.
 또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
-  } else if (this.value === 'Polaroid & iPhone Memory Package(돌잔치)') {
+  } else if (this.value === 'Polaroid & iPhone Memory Package for Baby') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 10장/ 행사 주요 장면 중심 촬영
 - Snap Service 아이폰 및 디카 기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
     spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
@@ -1263,7 +1263,10 @@ async function downloadImage() {
     const dateStr = today.getFullYear()
       + String(today.getMonth()+1).padStart(2,'0')
       + String(today.getDate()).padStart(2,'0');
-    const fileName = `LOTV_계약서_${nameVal}_${dateStr}.jpg`;
+    const venueVal = document.getElementById('f_venue').value.trim().replace(/[\\/:*?"<>|]/g, '');
+    const fileName = venueVal
+      ? `LOTV_계약서_${nameVal}_${venueVal}_${dateStr}.jpg`
+      : `LOTV_계약서_${nameVal}_${dateStr}.jpg`;
 
     const link = document.createElement('a');
     link.href = imgData;
