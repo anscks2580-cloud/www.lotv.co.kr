@@ -763,8 +763,9 @@ body {
       <label>상품명</label>
       <select id="f_product">
         <option value="">선택해주세요</option>
-        <option value="Polaroid &amp; iPhone Memory Package">Polaroid &amp; iPhone Memory Package</option>
-        <option value="Polaroid &amp; iPhone Memory Package for Baby">Polaroid &amp; iPhone Memory Package for Baby</option>
+        <option value="LOTV Signature Snap">LOTV Signature Snap</option>
+        <option value="LOTV Signature Snap with Rico">LOTV Signature Snap with Rico</option>
+        <option value="LOTV Signature Snap for Baby">LOTV Signature Snap for Baby</option>
         <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
         <option value="Digital Camera Only Package (Promotion)">Digital Camera Only Package (Promotion)</option>
         <option value="직접입력">직접 입력</option>
@@ -779,28 +780,20 @@ body {
       <label>추가 옵션 선택</label>
       <div class="addon-check-group">
         <label class="addon-check-item">
-          <input type="checkbox" class="addon-check" data-label="Ricoh High-end Camera 추가" data-price="+50,000원" onchange="updateOptionField()">
-          <span>Ricoh High-end Camera 추가 &nbsp;+50,000원</span>
-        </label>
-        <label class="addon-check-item">
           <input type="checkbox" class="addon-check" data-label="Polaroid 추가 (5장 기준)" data-price="+30,000원" onchange="updateOptionField()">
           <span>Polaroid 추가 (5장 기준) &nbsp;+30,000원</span>
         </label>
         <label class="addon-check-item">
-          <input type="checkbox" class="addon-check" data-label="호텔식 2부 추가" data-price="+30,000원" onchange="updateOptionField()">
-          <span>호텔식 2부 추가 &nbsp;+30,000원</span>
+          <input type="checkbox" class="addon-check" data-label="호텔식 2부 추가" data-price="+50,000원" onchange="updateOptionField()">
+          <span>호텔식 2부 추가 &nbsp;+50,000원</span>
         </label>
         <label class="addon-check-item">
-          <input type="checkbox" class="addon-check" data-label="첫예식 연출컷 (30분 기준)" data-price="+30,000원" onchange="updateOptionField()">
-          <span>첫예식 연출컷 (30분 기준) &nbsp;+30,000원</span>
+          <input type="checkbox" class="addon-check" data-label="첫예식 연출컷 (30분 기준)" data-price="+50,000원" onchange="updateOptionField()">
+          <span>첫예식 연출컷 (30분 기준) &nbsp;+50,000원</span>
         </label>
         <label class="addon-check-item">
-          <input type="checkbox" class="addon-check" data-label="30분 추가 촬영" data-price="+30,000원" onchange="updateOptionField()">
-          <span>30분 추가 촬영 &nbsp;+30,000원</span>
-        </label>
-        <label class="addon-check-item">
-          <input type="checkbox" class="addon-check" data-label="1시간 추가 촬영" data-price="+50,000원" onchange="updateOptionField()">
-          <span>1시간 추가 촬영 &nbsp;+50,000원</span>
+          <input type="checkbox" class="addon-check" data-label="30분 추가 촬영" data-price="+50,000원" onchange="updateOptionField()">
+          <span>30분 추가 촬영 &nbsp;+50,000원</span>
         </label>
       </div>
     </div>
@@ -1098,10 +1091,10 @@ document.getElementById('f_product').addEventListener('change', function() {
 
   const spec = document.getElementById('f_special');
 
-  if (this.value === 'Polaroid & iPhone Memory Package') {
+  if (this.value === 'LOTV Signature Snap') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 5장/ 예식 주요 장면 중심 촬영
-- iPhone Snap Service 아이폰 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
-    spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
+- Phone (iPhone 17 PRO & XS) 및 Rico Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
 해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
 계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
@@ -1110,10 +1103,24 @@ LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위�
 단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
 지불된 금액의 2배를 배상합니다.
 또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
-  } else if (this.value === 'Polaroid & iPhone Memory Package for Baby') {
+  } else if (this.value === 'LOTV Signature Snap with Rico') {
+    baseOptionText = `- Ricoh High-end Camera 메인 촬영 / 예식 주요 장면 중심 촬영
+- Polaroid Snap 폴라로이드 필름 5장
+- Phone (iPhone 17 PRO & XS) 서브 촬영
+- 촬영 후 24시간 이내 원본 전체 전달 및 베스트컷 10장 보정 제공`;
+    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
+촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
+해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
+계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
+7일 이후 취소의 경우,
+LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
+단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
+지불된 금액의 2배를 배상합니다.
+또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
+  } else if (this.value === 'LOTV Signature Snap for Baby') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 10장/ 행사 주요 장면 중심 촬영
-- Snap Service 아이폰 및 디카 기반 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
-    spec.value = `계약금 50,000원은 예약 확정을 위한 최소 보증금이며
+- Phone (iPhone 17 PRO & XS) 및 Rico Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
 해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
 계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
