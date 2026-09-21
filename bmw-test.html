@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMW 공식 딜러 상담 | 신차 견적·시승·출고 안내</title>
+<style>
+  :root{
+    --navy:#0a1628;
+    --navy2:#0f2038;
+    --steel:#1c3352;
+    --ink:#0a0e14;
+    --paper:#f5f4f0;
+    --white:#ffffff;
+    --line:rgba(255,255,255,.14);
+    --line-soft:rgba(10,22,40,.12);
+    --accent:#5aa9e6;
+    --accent-deep:#2f6fa8;
+    --muted:#9fb0c4;
+    --serif: "Iowan Old Style","Palatino Linotype","Noto Serif KR",serif;
+    --sans: "Pretendard","Apple SD Gothic Neo","Noto Sans KR",-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;background:var(--navy);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--white);}
+  .brand .mark{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 90deg,#0b5fa5 0 25%,#fff 0 50%,#0b5fa5 0 75%,#fff 0 100%);border:1.5px solid #fff;}
+  .brand .name{font-family:var(--serif);font-size:18px;letter-spacing:.02em;}
+  .brand .name b{font-weight:600;}
+  nav.links{display:flex;gap:28px;font-size:14px;color:var(--muted);}
+  nav.links a:hover{color:var(--white);}
+  .nav-cta{display:flex;gap:10px;align-items:center;}
+  .btn{
+    display:inline-block;padding:10px 20px;border-radius:2px;font-size:14px;font-weight:600;
+    cursor:pointer;border:1px solid transparent;transition:transform .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--accent);color:var(--navy);}
+  .btn-primary:hover{background:#78bcf0;}
+  .btn-ghost{border-color:var(--line);color:var(--white);}
+  .btn-ghost:hover{background:rgba(255,255,255,.06);}
+  .btn-dark{background:var(--navy);color:var(--white);}
+  .btn-dark:hover{background:var(--steel);}
+  @media(max-width:820px){nav.links{display:none;}}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;background:var(--navy);color:var(--white);overflow:hidden;min-height:640px;display:flex;align-items:flex-end;}
+  .hero-bg{position:absolute;inset:0;}
+  .hero-bg img,.hero-bg video{width:100%;height:100%;object-fit:cover;opacity:.55;}
+  .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,22,40,.96) 5%,rgba(10,22,40,.35) 55%,rgba(10,22,40,.15) 100%);}
+  .hero-content{position:relative;padding:120px 0 72px;width:100%;}
+  .hero-eyebrow{font-size:13px;color:var(--accent);letter-spacing:.04em;margin:0 0 18px;}
+  .hero h1{
+    font-family:var(--serif);font-weight:500;font-size:clamp(38px,6vw,64px);
+    line-height:1.08;margin:0 0 22px;max-width:14ch;
+  }
+  .hero p.lead{font-size:17px;color:var(--muted);max-width:46ch;line-height:1.7;margin:0 0 34px;}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+
+  /* ---------- promo strip ---------- */
+  .promo{background:var(--accent-deep);color:var(--white);}
+  .promo .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 28px;flex-wrap:wrap;}
+  .promo .tag{font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:2px;letter-spacing:.03em;}
+  .promo .msg{font-size:15px;flex:1;min-width:220px;}
+  .promo a.more{font-size:14px;font-weight:600;white-space:nowrap;border-bottom:1px solid currentColor;}
+
+  /* ---------- section shell ---------- */
+  section{padding:96px 0;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;gap:20px;flex-wrap:wrap;}
+  .section-head .label{font-size:13px;color:var(--accent-deep);margin:0 0 10px;}
+  .section-head h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,3.4vw,36px);margin:0;line-height:1.2;}
+  .section-head .desc{color:#5c6672;font-size:15px;max-width:40ch;line-height:1.6;}
+
+  /* ---------- models / gallery ---------- */
+  .models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line-soft);}
+  .model-card{background:var(--white);padding:0;position:relative;overflow:hidden;}
+  .model-card .imgwrap{aspect-ratio:4/3;overflow:hidden;background:#e7e4dc;}
+  .model-card .imgwrap img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+  .model-card:hover .imgwrap img{transform:scale(1.05);}
+  .model-card .info{padding:20px 22px 26px;}
+  .model-card .info .series{font-size:12px;color:var(--accent-deep);margin-bottom:6px;}
+  .model-card .info h3{font-family:var(--serif);font-size:20px;margin:0 0 6px;}
+  .model-card .info .price{font-size:13px;color:#5c6672;}
+  @media(max-width:820px){.models-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:560px){.models-grid{grid-template-columns:1fr;}}
+
+  /* ---------- video ---------- */
+  .video-section{background:var(--navy);color:var(--white);}
+  .video-section .section-head h2, .video-section .section-head .desc{color:var(--white);}
+  .video-section .section-head .desc{color:var(--muted);}
+  .video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--line);}
+  .video-frame iframe{width:100%;height:100%;border:0;}
+  .video-links{margin-top:18px;font-size:14px;color:var(--muted);}
+  .video-links a{color:var(--accent);border-bottom:1px solid transparent;}
+  .video-links a:hover{border-color:var(--accent);}
+
+  /* ---------- reviews ---------- */
+  .reviews{background:var(--white);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);}
+  .review-track{display:flex;gap:20px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;}
+  .review-card{flex:0 0 300px;background:var(--paper);padding:26px 24px;border:1px solid var(--line-soft);}
+  .review-card .stars{color:var(--accent-deep);font-size:13px;margin-bottom:12px;letter-spacing:2px;}
+  .review-card p{font-size:14.5px;line-height:1.7;color:#333;margin:0 0 16px;min-height:110px;}
+  .review-card .who{font-size:12.5px;color:#5c6672;}
+
+  /* ---------- contact ---------- */
+  .contact{background:var(--paper);}
+  .contact-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;}
+  @media(max-width:820px){.contact-grid{grid-template-columns:1fr;}}
+  .contact-card{background:var(--white);border:1px solid var(--line-soft);padding:36px;}
+  .contact-card .row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line-soft);font-size:14.5px;}
+  .contact-card .row:last-child{border-bottom:none;}
+  .contact-card .row .k{color:#5c6672;}
+  .se-portrait{aspect-ratio:3/4;background:#e7e4dc;overflow:hidden;}
+  .se-portrait img{width:100%;height:100%;object-fit:cover;}
+  .se-name{font-family:var(--serif);font-size:26px;margin:20px 0 4px;}
+  .se-role{font-size:13px;color:var(--accent-deep);margin-bottom:16px;}
+  .se-bio{font-size:14.5px;line-height:1.7;color:#444;}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--navy);color:var(--muted);padding:48px 0 28px;font-size:13px;}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+  footer .flinks{display:flex;gap:18px;flex-wrap:wrap;}
+  footer .flinks a:hover{color:var(--white);}
+
+  /* ---------- admin fab & modal ---------- */
+  #adminFab{
+    position:fixed;bottom:22px;right:22px;z-index:200;
+    width:52px;height:52px;border-radius:50%;background:var(--navy);color:var(--white);
+    display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);border:1px solid var(--line);
+  }
+  #adminFab:hover{background:var(--steel);}
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,14,20,.6);z-index:300;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:#fff;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;
+    border-radius:6px;padding:0;
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line-soft);position:sticky;top:0;background:#fff;z-index:2;}
+  .modal-head h3{font-family:var(--serif);font-size:19px;margin:0;}
+  .modal-close{cursor:pointer;font-size:20px;color:#888;background:none;border:none;}
+  .modal-body{padding:24px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:#333;margin-bottom:6px;}
+  .field input[type=text],.field input[type=password],.field input[type=url],.field textarea{
+    width:100%;padding:10px 12px;border:1px solid #d7d5cc;border-radius:4px;font-size:14px;font-family:inherit;
+  }
+  .field textarea{resize:vertical;min-height:60px;}
+  .field small{display:block;color:#888;font-size:11.5px;margin-top:5px;}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  fieldset{border:1px solid var(--line-soft);border-radius:6px;padding:16px;margin-bottom:22px;}
+  legend{font-size:13px;font-weight:700;padding:0 6px;color:var(--accent-deep);}
+  .img-preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;margin-bottom:8px;background:#eee;}
+  .repeat-item{border:1px solid var(--line-soft);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;}
+  .del-btn{position:absolute;top:10px;right:10px;background:#fff2f2;color:#c0392b;border:1px solid #f0c9c9;border-radius:4px;padding:4px 9px;font-size:12px;cursor:pointer;}
+  .add-btn{width:100%;padding:10px;border:1px dashed #b8b5a8;background:#fbfaf7;border-radius:6px;cursor:pointer;font-size:13.5px;color:#555;}
+  .add-btn:hover{background:#f2f0e8;}
+  .modal-actions{display:flex;gap:10px;padding:18px 24px;border-top:1px solid var(--line-soft);position:sticky;bottom:0;background:#fff;}
+  .modal-actions .btn{flex:1;text-align:center;}
+  .lock-body{padding:36px 24px;text-align:center;}
+  .lock-body p{color:#666;font-size:13.5px;margin-bottom:18px;}
+  .toast{
+    position:fixed;bottom:90px;right:22px;background:var(--navy);color:#fff;padding:12px 18px;
+    border-radius:6px;font-size:13.5px;z-index:400;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  /* ---------- inline WYSIWYG edit mode ---------- */
+  [contenteditable="true"]{outline:1px dashed transparent;border-radius:2px;cursor:text;}
+  [contenteditable="true"]:hover{outline-color:rgba(90,169,230,.55);background:rgba(90,169,230,.08);}
+  [contenteditable="true"]:focus{outline-color:var(--accent-deep);background:rgba(90,169,230,.12);}
+  .imgwrap,.hero-bg,.se-portrait{position:relative;}
+  .img-edit-btn{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:rgba(10,22,40,.85);color:#fff;border:1px solid rgba(255,255,255,.4);
+    padding:9px 18px;border-radius:20px;font-size:12.5px;cursor:pointer;z-index:5;
+    white-space:nowrap;
+  }
+  .model-card{position:relative;}
+  .grid-del{
+    position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;
+    background:rgba(192,57,43,.92);color:#fff;border:none;font-size:13px;cursor:pointer;z-index:6;line-height:1;
+  }
+  .add-tile{
+    display:flex;align-items:center;justify-content:center;min-height:220px;
+    border:2px dashed #c7c4b8;color:#777;font-size:14px;cursor:pointer;background:rgba(255,255,255,.5);
+    text-align:center;padding:20px;
+  }
+  .add-tile:hover{background:#fff;color:#333;}
+  .review-card.add-tile{flex:0 0 220px;min-height:auto;height:100%;}
+  #editToolbar{
+    position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;
+    padding:14px 22px;display:flex;align-items:center;gap:14px;z-index:250;
+    box-shadow:0 -6px 18px rgba(0,0,0,.25);flex-wrap:wrap;
+  }
+  #editToolbar .tag{font-size:12.5px;background:rgba(255,255,255,.15);padding:6px 12px;border-radius:20px;}
+  #editToolbar .spacer{flex:1;}
+  .video-edit-bar{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:16px;}
+  .video-edit-bar .field{margin-bottom:12px;}
+  .video-edit-bar .field:last-child{margin-bottom:0;}
+  .video-edit-bar label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+  .video-edit-bar input{width:100%;padding:9px 11px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font-size:13.5px;}
+  td [contenteditable="true"]{display:inline-block;min-width:36px;}
+
+  /* ---------- dealer card ---------- */
+  .dealer-card-section{background:var(--white);border-bottom:1px solid var(--line-soft);padding:52px 0;}
+  .top-grid{display:grid;grid-template-columns:.72fr 1.28fr;gap:24px;align-items:stretch;}
+  @media(max-width:900px){.top-grid{grid-template-columns:1fr;}}
+  .dealer-card{border:1px solid var(--line-soft);border-radius:8px;padding:24px 26px;display:flex;flex-direction:column;gap:16px;}
+  .dc-company{font-size:17px;}
+  .dc-sub{font-size:11.5px;margin-bottom:10px;}
+  .dc-name{font-size:22px;margin:0 0 4px;}
+  .dc-role{font-size:12.5px;margin-bottom:1px;}
+  .dc-badges{margin-top:8px;gap:2px;}
+  .dc-badge{font-size:11.5px;}
+  .dc-address{margin-top:12px;font-size:12px;}
+  .dc-right{border-left:none;border-top:1px solid var(--line-soft);padding-left:0;padding-top:16px;}
+  .dc-mark{width:38px;height:38px;margin-bottom:10px;align-self:flex-start;border-radius:50%;border:2px solid #b9bdc4;background:conic-gradient(from 90deg,#0b5fa5 0 25%,#fff 0 50%,#0b5fa5 0 75%,#fff 0 100%);}
+  .dc-contact-row{font-size:12.5px;margin-bottom:5px;color:#333;}
+  .dc-contact-row .lbl{color:#888;display:inline-block;min-width:44px;}
+  .dc-web{font-size:11.5px;margin-top:10px;color:var(--accent-deep);}
+  .video-card{border:1px solid var(--line-soft);border-radius:8px;padding:28px 30px;background:var(--white);display:flex;flex-direction:column;}
+  .video-card .video-frame{margin-top:auto;}
+  .dc-company{font-family:var(--serif);font-size:24px;margin:0 0 4px;}
+  .dc-sub{font-size:13px;color:#5c6672;margin-bottom:22px;}
+  .dc-name{font-size:32px;font-weight:700;letter-spacing:.08em;margin:0 0 8px;}
+  .dc-role{font-size:14px;color:#444;margin-bottom:2px;}
+  .dc-badges{display:flex;flex-direction:column;gap:2px;}
+  .dc-badge{font-weight:600;color:var(--accent-deep);position:relative;padding-right:24px;}
+  .dc-badge .grid-del{top:-2px;right:-4px;width:20px;height:20px;font-size:10px;}
+  .badge-add-tile{display:inline-block;font-size:12.5px;color:#888;border:1px dashed #c7c4b8;border-radius:4px;padding:3px 10px;cursor:pointer;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<script id="content-data" type="application/json">
+{
+  "brandName": "노도희",
+  "brandSuffix": "BMW",
+  "heroEyebrow": "BMW Official Dealer",
+  "heroTitle": "당신의 다음 목적지,\nBMW와 함께.",
+  "heroLead": "BMW 공식 딜러 노도희가 견적부터 시승, 계약, 출고까지 모든 과정을 투명하게 안내합니다.",
+  "heroImage": "https://images.unsplash.com/photo-1607853554439-0069ec0f29b6?q=80&w=2000&auto=format&fit=crop",
+  "promoTag": "이달의 프로모션",
+  "promoMsg": "2026년 9월, 5시리즈·X5 계약 시 특별 금융 혜택 + 프리미엄 케어 패키지 무상 제공",
+  "promoLink": "",
+  "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "videoSectionLabel": "SE Channel",
+  "videoSectionTitle": "영상으로 먼저 만나보세요.",
+  "videoSectionDesc": "신차 리뷰, 시승기, 출고 브이로그를 유튜브 채널에서 확인하실 수 있습니다.",
+  "youtubeChannelUrl": "https://www.youtube.com/@BMW노도희",
+  "reviews": [
+    {"text":"견적부터 출고까지 전 과정을 투명하게 안내받았습니다. 다른 딜러보다 훨씬 꼼꼼했어요.","who":"정** 님 · 5 Series 출고 고객"},
+    {"text":"시승 일정, 옵션 조합, 출고 일정 모두 실시간으로 공유해주셔서 정말 편했습니다.","who":"박** 님 · X5 출고 고객"},
+    {"text":"전기차 보조금을 꼼꼼히 비교해주시고, 출고 후 사후 연락까지 좋았어요.","who":"김** 님 · i5 출고 고객"},
+    {"text":"가격 흥정보다 정확한 실구매가를 먼저 보여주셔서 신뢰가 갔습니다.","who":"최** 님 · X3 출고 고객"}
+  ],
+  "sePortrait": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop",
+  "seBio": "BMW 공식 딜러 노도희는 고객 한 분 한 분의 구매 여정을 끝까지 동행합니다. 프로모션 조합부터 출고 후 사후관리까지, 투명하게 공유하고 함께 결정합니다.",
+  "phone": "010-3583-2532",
+  "kakaoUrl": "",
+  "address": "경기도 고양시 덕양구 고양대로 1972-5 (동산동) 10596",
+  "naverBookingUrl": "",
+  "blogUrl": "",
+  "serviceFormEmail": "your-email@example.com",
+  "inStock": [
+    {"model":"320i","trim":"스포츠","color":"미네랄 화이트","price":"₩58,900,000","note":"즉시 출고 가능","img":"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
+    {"model":"X3","trim":"xDrive30d","color":"카본 블랙","price":"₩72,300,000","note":"이번 주 출고 가능","img":"https://images.unsplash.com/photo-1616422285623-13ff0162193c?q=80&w=1200&auto=format&fit=crop"}
+  ],
+  "trimGalleries": [
+    {"model":"5 Series","trim":"520i M Sport","img":"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
+    {"model":"X5","trim":"xDrive40i","img":"https://images.unsplash.com/photo-1616422285623-13ff0162193c?q=80&w=1200&auto=format&fit=crop"}
+  ],
+  "evSubsidyNote": "지역별 정확한 보조금은 변동이 잦아 아래 표는 참고용이며, 계약 시점 기준 최신 금액으로 다시 안내드립니다.",
+  "evSubsidyUpdated": "2026-09-01 기준",
+  "evSubsidyRows": [
+    {"region":"서울","national":"", "local":"", "total":""},
+    {"region":"경기","national":"", "local":"", "total":""},
+    {"region":"인천","national":"", "local":"", "total":""}
+  ],
+  "evOfficialUrl": "https://www.ev.or.kr",
+  "companyName": "바바리안 모터스",
+  "companySubtitle": "BMW&MINI 공식딜러",
+  "companyWebsite": "www.bavarian.co.kr",
+  "dealerPosition": "대리",
+  "dealerTitle": "Sales Expert",
+  "badges": ["BMW Korea 인증영업직원","Best BMW Influencer 2024 3Q","BMW KOREA SALES BEST ROOKIE 2024 3Q","BMW KOREA SALES BEST ROOKIE 2025 3Q"],
+  "showroomName": "BMW 고양 전시장",
+  "cardPhone": "02-6958-7501",
+  "cardFax": "0504-322-2532",
+  "cardEmail": "dohee.noh@bavarian.co.kr",
+  "youtubeChannelId": "UCsloMOE4Gl2FfkOnS8svXgA"
+}
+</script>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="#top">
+      <span class="mark"></span>
+      <span class="name"><b id="hdBrand">노도희</b> BMW</span>
+    </a>
+    <nav class="links">
+      <a href="#instock">즉시출고</a>
+      <a href="#evsubsidy">보조금</a>
+      <a href="#service">서비스센터</a>
+      <a href="#reviews">고객 후기</a>
+      <a href="#contact">상담·전시장</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" id="navKakao" target="_blank" rel="noopener">카카오 상담</a>
+      <a class="btn btn-primary" href="tel:" id="navCall">전화 상담</a>
+    </div>
+  </div>
+</header>
+
+<section class="dealer-card-section">
+  <div class="wrap">
+    <div class="top-grid">
+      <div class="dealer-card">
+        <div>
+          <p class="dc-company" id="dcCompany"></p>
+          <p class="dc-sub" id="dcSub"></p>
+          <p class="dc-name" id="dcName"></p>
+          <p class="dc-role"><span id="dcShowroom"></span> · <span id="dcPosition"></span></p>
+          <p class="dc-role" id="dcTitle"></p>
+          <div class="dc-badges" id="dcBadges"></div>
+          <div class="dc-address"><span id="dcAddress"></span></div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-mark"></div>
+          <div>
+            <div class="dc-contact-row"><span class="lbl">전화</span><a id="dcPhoneLine" href="tel:"></a></div>
+            <div class="dc-contact-row"><span class="lbl">휴대폰</span><a id="dcMobileLine" href="tel:"></a></div>
+            <div class="dc-contact-row"><span class="lbl">팩스</span><span id="dcFax"></span></div>
+            <div class="dc-contact-row"><span class="lbl">이메일</span><a id="dcEmail" href="mailto:"></a></div>
+            <div class="dc-web" id="dcWeb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <p class="label" id="videoLabel" style="color:var(--accent-deep);">SE Channel</p>
+        <h2 id="videoTitle" style="font-family:var(--serif);font-size:22px;margin:0 0 8px;">영상으로 먼저 만나보세요.</h2>
+        <p class="desc" id="videoDesc" style="font-size:13.5px;color:#5c6672;margin-bottom:14px;"></p>
+        <div id="videoEditBar"></div>
+        <div class="video-frame"><iframe id="ytFrame" src="" title="YouTube video" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <p class="video-links" style="margin-top:12px;"><a id="ytChannelLink" target="_blank" rel="noopener" style="display:none;color:var(--accent-deep);border-bottom:1px solid currentColor;font-size:13.5px;">유튜브 채널 전체 영상 보러가기 →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="top" class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="wrap hero-content">
+    <p class="hero-eyebrow" id="heroEyebrow">BMW Official Dealer</p>
+    <h1 id="heroTitle">당신의 다음 목적지,<br>BMW와 함께.</h1>
+    <p class="lead" id="heroLead"></p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#contact">견적·상담 신청</a>
+      <a class="btn btn-ghost" href="#instock">즉시출고 차량 보기</a>
+    </div>
+  </div>
+</div>
+
+<div class="promo" id="promo">
+  <div class="wrap">
+    <span class="tag" id="promoTag">이달의 프로모션</span>
+    <span class="msg" id="promoMsg"></span>
+    <a class="more" href="#contact" id="promoLink">상담 신청 →</a>
+  </div>
+</div>
+
+<section id="trims">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label">Trim Gallery</p>
+        <h2>트림별 실차 사진.</h2>
+      </div>
+      <p class="desc">모델·트림별로 사진을 등록해두면 고객이 색상/옵션을 미리 확인할 수 있습니다.</p>
+    </div>
+    <div class="models-grid" id="trimGrid"></div>
+  </div>
+</section>
+
+<section id="instock" style="background:var(--white);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label">Ready to Deliver</p>
+        <h2>즉시 출고 가능 차량.</h2>
+      </div>
+      <p class="desc">지금 계약하면 바로 받을 수 있는 재고 차량입니다.</p>
+    </div>
+    <div class="models-grid" id="instockGrid"></div>
+  </div>
+</section>
+
+<section id="evsubsidy" style="background:var(--paper);">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label">EV Subsidy</p>
+        <h2>지역별 전기차 보조금.</h2>
+      </div>
+      <p class="desc" id="evSubsidyDesc"></p>
+    </div>
+    <div class="contact-card" style="padding:8px 0;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead><tr style="text-align:left;border-bottom:2px solid var(--line-soft);">
+          <th style="padding:14px 24px;">지역</th><th style="padding:14px 24px;">국비</th><th style="padding:14px 24px;">지방비</th><th style="padding:14px 24px;">합계(예상)</th>
+        </tr></thead>
+        <tbody id="evSubsidyBody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:12.5px;color:#888;margin-top:14px;">업데이트: <span id="evSubsidyUpdated"></span> · <a href="#" id="evOfficialLink" target="_blank" rel="noopener" style="color:var(--accent-deep);border-bottom:1px solid currentColor;">환경부 무공해차 통합누리집에서 실시간 확인 →</a></p>
+  </div>
+</section>
+
+<section id="service" style="background:var(--navy);color:var(--white);">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label" style="color:var(--accent);">Service Center</p>
+        <h2 style="color:#fff;">서비스 센터 입고 신청.</h2>
+      </div>
+      <p class="desc" style="color:var(--muted);">증상과 희망 날짜를 남겨주시면 확인 후 순서대로 연락드립니다.</p>
+    </div>
+    <form id="serviceForm" style="max-width:640px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:32px;">
+      <div class="field"><label style="color:#dfe6ee;">차량 모델 / 트림</label><input type="text" name="차량모델" required style="width:100%;padding:11px 12px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;"></div>
+      <div class="field"><label style="color:#dfe6ee;">성함</label><input type="text" name="성함" required style="width:100%;padding:11px 12px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;"></div>
+      <div class="field"><label style="color:#dfe6ee;">연락처</label><input type="text" name="연락처" required style="width:100%;padding:11px 12px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;"></div>
+      <div class="field"><label style="color:#dfe6ee;">증상 / 요청사항</label><textarea name="증상" required style="width:100%;padding:11px 12px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;min-height:100px;"></textarea></div>
+      <div class="field"><label style="color:#dfe6ee;">희망 입고 날짜</label><input type="date" name="희망날짜" required style="width:100%;padding:11px 12px;border-radius:4px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;"></div>
+      <input type="hidden" name="_subject" value="[서비스센터 입고 신청] 새 접수">
+      <input type="hidden" name="_captcha" value="true">
+      <input type="hidden" name="_next" value="">
+      <button type="submit" class="btn btn-primary" style="width:100%;">신청 접수하기</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;">접수 즉시 등록하신 이메일로 신청 내용이 전송되어, 놓치지 않고 확인하실 수 있습니다.</p>
+    </form>
+  </div>
+</section>
+
+<section id="reviews" class="reviews">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label">Delivery Reviews</p>
+        <h2>출고 후기.</h2>
+      </div>
+    </div>
+    <div class="review-track" id="reviewTrack"></div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label">Your SE</p>
+        <h2 id="seName">노도희 드림.</h2>
+      </div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="row"><span class="k">전시장</span><span id="cAddress"></span></div>
+        <div class="row"><span class="k">전화</span><a id="cPhone" href="tel:"></a></div>
+        <div class="row"><span class="k">카카오 상담</span><a id="cKakao" target="_blank" rel="noopener">바로가기</a></div>
+        <div class="row"><span class="k">실시간 예약</span><a id="cBooking" target="_blank" rel="noopener">바로가기</a></div>
+      </div>
+      <div>
+        <div class="se-portrait"><img id="sePortraitImg" src="" alt="담당 SE"></div>
+        <p class="se-name" id="seName2"></p>
+        <p class="se-role">BMW Sales Expert</p>
+        <p class="se-bio" id="seBio"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="year"></span> BMW <span id="ftBrand"></span>. 본 사이트는 공식 딜러 개인 브랜딩 페이지이며, BMW Korea와 무관합니다.</div>
+    <div class="flinks">
+      <a id="ftPhone" href="tel:"></a>
+      <a id="ftKakao" target="_blank" rel="noopener" style="display:none;">카카오 상담</a>
+      <a id="ftBlog" target="_blank" rel="noopener" style="display:none;">블로그</a>
+    </div>
+  </div>
+</footer>
+
+<div id="adminFab" title="관리자">⚙</div>
+<div id="editToolbar" style="display:none;"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<input type="file" id="hiddenImgInput" accept="image/*" style="display:none;">
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var LS_KEY = "bmw_site_content_v2";
+  var LS_AUTH = "bmw_site_admin_ok";
+  var ADMIN_PW_KEY = "bmw_site_admin_pw";
+  var DEFAULT_CONTENT = JSON.parse(document.getElementById('content-data').textContent);
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch(e){ saved = null; }
+  var CONTENT = Object.assign({}, DEFAULT_CONTENT, saved || {});
+  var EDIT = false;
+
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
+  function ytEmbed(url){
+    if(!url) return "";
+    var m = url.match(/(?:youtu\.be\/|v=|shorts\/)([A-Za-z0-9_-]{6,})/);
+    var id = m ? m[1] : "";
+    return id ? ("https://www.youtube.com/embed/" + id) : "";
+  }
+  function ytEmbedAuto(){
+    var chId = (CONTENT.youtubeChannelId||'').trim();
+    if(chId.indexOf('UC') === 0){
+      var uploadsId = 'UU' + chId.slice(2);
+      return 'https://www.youtube.com/embed/videoseries?list=' + uploadsId;
+    }
+    return ytEmbed(CONTENT.youtubeUrl);
+  }
+  function getPw(){ return localStorage.getItem(ADMIN_PW_KEY) || "admin1234"; }
+  function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(CONTENT)); }
+  function fileToDataUrl(file, cb){
+    var reader = new FileReader();
+    reader.onload = function(){ cb(reader.result); };
+    reader.readAsDataURL(file);
+  }
+  function getDeep(obj, path){
+    var parts = path.split('.'); var cur = obj;
+    for(var i=0;i<parts.length;i++){ if(cur==null) return undefined; cur = cur[/^\d+$/.test(parts[i])?parseInt(parts[i],10):parts[i]]; }
+    return cur;
+  }
+  function setDeep(obj, path, val){
+    var parts = path.split('.'); var cur = obj;
+    for(var i=0;i<parts.length-1;i++){
+      var p = parts[i]; p = /^\d+$/.test(p)?parseInt(p,10):p;
+      cur = cur[p];
+    }
+    var last = parts[parts.length-1];
+    cur[/^\d+$/.test(last)?parseInt(last,10):last] = val;
+  }
+
+  function ed(path, opts){
+    if(!EDIT) return '';
+    opts = opts || {};
+    return ' contenteditable="true" data-path="'+path+'"' + (opts.multiline ? ' data-multiline="1"' : '');
+  }
+  function imgBtn(path){
+    return EDIT ? '<button type="button" class="img-edit-btn" data-imgpath="'+path+'">사진 변경</button>' : '';
+  }
+  function delBtn(arr, idx){
+    return EDIT ? '<button type="button" class="grid-del" data-delarr="'+arr+'" data-idx="'+idx+'" title="삭제">✕</button>' : '';
+  }
+  function addTile(arr, label, extraClass){
+    return EDIT ? '<div class="add-tile '+(extraClass||'')+'" data-addarr="'+arr+'">+ '+esc(label)+' 추가</div>' : '';
+  }
+
+  function render(){
+    document.body.classList.toggle('edit-mode', EDIT);
+
+    var hd = document.getElementById('hdBrand');
+    hd.textContent = CONTENT.brandName; hd.setAttribute && (EDIT ? hd.setAttribute('contenteditable','true') : hd.removeAttribute('contenteditable'));
+    hd.dataset.path = 'brandName';
+
+    var he = document.getElementById('heroEyebrow');
+    he.textContent = CONTENT.heroEyebrow; setEditable(he,'heroEyebrow');
+
+    var ht = document.getElementById('heroTitle');
+    ht.innerHTML = nl2br(CONTENT.heroTitle); setEditable(ht,'heroTitle',true);
+
+    var hl = document.getElementById('heroLead');
+    hl.textContent = CONTENT.heroLead; setEditable(hl,'heroLead');
+
+    document.getElementById('heroBg').innerHTML = '<img src="'+esc(CONTENT.heroImage)+'" alt="hero">' + imgBtn('heroImage');
+
+    var pt = document.getElementById('promoTag'); pt.textContent = CONTENT.promoTag; setEditable(pt,'promoTag');
+    var pm = document.getElementById('promoMsg'); pm.textContent = CONTENT.promoMsg; setEditable(pm,'promoMsg');
+    if(CONTENT.promoLink){ document.getElementById('promoLink').href = CONTENT.promoLink; document.getElementById('promoLink').target = "_blank"; }
+
+    var dc = CONTENT;
+    var dcCompany = document.getElementById('dcCompany'); dcCompany.textContent = dc.companyName; setEditable(dcCompany,'companyName');
+    var dcSub = document.getElementById('dcSub'); dcSub.textContent = dc.companySubtitle; setEditable(dcSub,'companySubtitle');
+    var dcName = document.getElementById('dcName'); dcName.textContent = dc.brandName; setEditable(dcName,'brandName');
+    var dcShowroom = document.getElementById('dcShowroom'); dcShowroom.textContent = dc.showroomName; setEditable(dcShowroom,'showroomName');
+    var dcPosition = document.getElementById('dcPosition'); dcPosition.textContent = dc.dealerPosition; setEditable(dcPosition,'dealerPosition');
+    var dcTitle = document.getElementById('dcTitle'); dcTitle.textContent = dc.dealerTitle; setEditable(dcTitle,'dealerTitle');
+    var dcAddress = document.getElementById('dcAddress'); dcAddress.textContent = dc.address; setEditable(dcAddress,'address');
+    document.getElementById('dcBadges').innerHTML = (dc.badges||[]).map(function(b,i){
+      return '<div class="dc-badge">' + delBtn('badges',i) + '<span'+ed('badges.'+i)+'>'+esc(b)+'</span></div>';
+    }).join('') + (EDIT ? '<div class="badge-add-tile" data-addarr="badges">+ 수상·인증 추가</div>' : '');
+    var dcPhoneLine = document.getElementById('dcPhoneLine'); dcPhoneLine.textContent = dc.cardPhone; dcPhoneLine.href = 'tel:'+(dc.cardPhone||'').replace(/-/g,''); setEditable(dcPhoneLine,'cardPhone');
+    var dcMobileLine = document.getElementById('dcMobileLine'); dcMobileLine.textContent = dc.phone; dcMobileLine.href = 'tel:'+(dc.phone||'').replace(/-/g,''); setEditable(dcMobileLine,'phone');
+    var dcFax = document.getElementById('dcFax'); dcFax.textContent = dc.cardFax; setEditable(dcFax,'cardFax');
+    var dcEmail = document.getElementById('dcEmail'); dcEmail.textContent = dc.cardEmail; dcEmail.href = 'mailto:'+(dc.cardEmail||''); setEditable(dcEmail,'cardEmail');
+    var dcWeb = document.getElementById('dcWeb'); dcWeb.textContent = dc.companyWebsite; setEditable(dcWeb,'companyWebsite');
+
+    var vl = document.getElementById('videoLabel'); vl.textContent = CONTENT.videoSectionLabel; setEditable(vl,'videoSectionLabel');
+    var vt = document.getElementById('videoTitle'); vt.textContent = CONTENT.videoSectionTitle; setEditable(vt,'videoSectionTitle');
+    var vd = document.getElementById('videoDesc'); vd.textContent = CONTENT.videoSectionDesc; setEditable(vd,'videoSectionDesc');
+    document.getElementById('ytFrame').src = ytEmbedAuto();
+    var chLink = document.getElementById('ytChannelLink');
+    if(CONTENT.youtubeChannelUrl){ chLink.href = CONTENT.youtubeChannelUrl; chLink.style.display='inline'; } else { chLink.style.display='none'; }
+    var vBar = document.getElementById('videoEditBar');
+    vBar.innerHTML = EDIT ? (
+      '<div class="video-edit-bar">' +
+      '<div class="field"><label>유튜브 채널 ID (UC로 시작 · 최신 영상이 자동으로 뜹니다)</label><input type="text" data-path="youtubeChannelId" value="'+esc(CONTENT.youtubeChannelId)+'" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"></div>' +
+      '<div class="field"><label>채널 ID가 없을 때만: 특정 영상 링크로 고정</label><input type="text" data-path="youtubeUrl" value="'+esc(CONTENT.youtubeUrl)+'" placeholder="https://www.youtube.com/watch?v=..."></div>' +
+      '<div class="field"><label>유튜브 채널 링크 ("전체 영상 보기" 버튼용)</label><input type="text" data-path="youtubeChannelUrl" value="'+esc(CONTENT.youtubeChannelUrl)+'" placeholder="https://www.youtube.com/@채널명"></div>' +
+      '</div>'
+    ) : '';
+
+    var track = document.getElementById('reviewTrack');
+    track.innerHTML = (CONTENT.reviews||[]).map(function(r,i){
+      return '<div class="review-card">' + delBtn('reviews',i) + '<div class="stars">★★★★★</div>' +
+        '<p'+ed('reviews.'+i+'.text',{multiline:true})+'>“'+nl2br(r.text)+'”</p>' +
+        '<div class="who"'+ed('reviews.'+i+'.who')+'>'+esc(r.who)+'</div></div>';
+    }).join('') + addTile('reviews','후기','review-card');
+
+    var sn = document.getElementById('seName');
+    var sn2 = document.getElementById('seName2');
+    sn.textContent = CONTENT.brandName + ' 드림.';
+    sn2.textContent = CONTENT.brandName; setEditable(sn2,'brandName');
+    var sb = document.getElementById('seBio'); sb.textContent = CONTENT.seBio; setEditable(sb,'seBio',true);
+    document.getElementById('sePortraitImg').src = CONTENT.sePortrait;
+    var seWrap = document.getElementById('sePortraitImg').parentElement;
+    var oldBtn = seWrap.querySelector('.img-edit-btn'); if(oldBtn) oldBtn.remove();
+    if(EDIT){ seWrap.insertAdjacentHTML('beforeend', imgBtn('sePortrait')); }
+
+    var ca = document.getElementById('cAddress'); ca.textContent = CONTENT.address; setEditable(ca,'address');
+    var cp = document.getElementById('cPhone');
+    cp.textContent = CONTENT.phone; cp.href = 'tel:' + (CONTENT.phone||'').replace(/-/g,''); setEditable(cp,'phone');
+    document.getElementById('cKakao').href = CONTENT.kakaoUrl || '#';
+    document.getElementById('cBooking').href = CONTENT.naverBookingUrl || '#';
+
+    document.getElementById('navCall').href = 'tel:' + (CONTENT.phone||'').replace(/-/g,'');
+    var navKakao = document.getElementById('navKakao');
+    if(CONTENT.kakaoUrl){ navKakao.style.display='inline-block'; navKakao.href = CONTENT.kakaoUrl; } else { navKakao.style.display='none'; }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('ftBrand').textContent = CONTENT.brandName;
+    var ftPhone = document.getElementById('ftPhone');
+    ftPhone.textContent = CONTENT.phone; ftPhone.href = 'tel:' + (CONTENT.phone||'').replace(/-/g,'');
+    var ftKakao = document.getElementById('ftKakao');
+    ftKakao.style.display = CONTENT.kakaoUrl ? 'inline' : 'none'; if(CONTENT.kakaoUrl) ftKakao.href = CONTENT.kakaoUrl;
+    var ftBlog = document.getElementById('ftBlog');
+    ftBlog.style.display = CONTENT.blogUrl ? 'inline' : 'none'; if(CONTENT.blogUrl) ftBlog.href = CONTENT.blogUrl;
+
+    document.getElementById('trimGrid').innerHTML = (CONTENT.trimGalleries||[]).map(function(t,i){
+      return '<div class="model-card">' + delBtn('trimGalleries',i) +
+        '<div class="imgwrap"><img src="'+esc(t.img)+'" alt="'+esc(t.model)+' '+esc(t.trim)+'">'+imgBtn('trimGalleries.'+i+'.img')+'</div>' +
+        '<div class="info"><div class="series"'+ed('trimGalleries.'+i+'.model')+'>'+esc(t.model)+'</div>' +
+        '<h3'+ed('trimGalleries.'+i+'.trim')+'>'+esc(t.trim)+'</h3></div></div>';
+    }).join('') + addTile('trimGalleries','트림 사진');
+
+    document.getElementById('instockGrid').innerHTML = (CONTENT.inStock||[]).map(function(s,i){
+      return '<div class="model-card">' + delBtn('inStock',i) +
+        '<div class="imgwrap"><img src="'+esc(s.img)+'" alt="'+esc(s.model)+'">'+imgBtn('inStock.'+i+'.img')+'</div>' +
+        '<div class="info"><div class="series"><span'+ed('inStock.'+i+'.trim')+'>'+esc(s.trim)+'</span> · <span'+ed('inStock.'+i+'.color')+'>'+esc(s.color)+'</span></div>' +
+        '<h3'+ed('inStock.'+i+'.model')+'>'+esc(s.model)+'</h3>' +
+        '<div class="price"'+ed('inStock.'+i+'.price')+'>'+esc(s.price)+'</div>' +
+        '<div class="price" style="color:var(--accent-deep);font-weight:600;margin-top:4px;"'+ed('inStock.'+i+'.note')+'>'+esc(s.note)+'</div></div></div>';
+    }).join('') + addTile('inStock','재고 차량');
+
+    var evd = document.getElementById('evSubsidyDesc'); evd.textContent = CONTENT.evSubsidyNote; setEditable(evd,'evSubsidyNote',true);
+    var evu = document.getElementById('evSubsidyUpdated'); evu.textContent = CONTENT.evSubsidyUpdated; setEditable(evu,'evSubsidyUpdated');
+    document.getElementById('evOfficialLink').href = CONTENT.evOfficialUrl || 'https://www.ev.or.kr';
+    document.getElementById('evSubsidyBody').innerHTML = (CONTENT.evSubsidyRows||[]).map(function(r,i){
+      return '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
+        '<td style="padding:12px 24px;position:relative;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span></td>' +
+        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
+        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
+        '<td style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td></tr>';
+    }).join('');
+    var evAddRow = document.getElementById('evAddRow');
+    if(evAddRow) evAddRow.remove();
+    if(EDIT){
+      document.getElementById('evSubsidyBody').insertAdjacentHTML('afterend', '');
+      var evTable = document.getElementById('evSubsidyBody').closest('table');
+      var addRowBtn = document.createElement('div');
+      addRowBtn.id = 'evAddRow';
+      addRowBtn.className = 'add-tile';
+      addRowBtn.style.cssText = 'min-height:auto;padding:12px;margin-top:10px;';
+      addRowBtn.setAttribute('data-addarr','evSubsidyRows');
+      addRowBtn.textContent = '+ 지역 추가';
+      evTable.parentElement.appendChild(addRowBtn);
+    }
+
+    var svcForm = document.getElementById('serviceForm');
+    if(svcForm && CONTENT.serviceFormEmail){
+      svcForm.action = 'https://formsubmit.co/' + CONTENT.serviceFormEmail;
+      svcForm.method = 'POST';
+    }
+
+    document.getElementById('adminFab').style.display = EDIT ? 'none' : 'flex';
+    renderToolbar();
+  }
+
+  function setEditable(el, path, multiline){
+    if(EDIT){ el.setAttribute('contenteditable','true'); el.dataset.path = path; if(multiline) el.dataset.multiline='1'; }
+    else { el.removeAttribute('contenteditable'); delete el.dataset.path; delete el.dataset.multiline; }
+  }
+
+  render();
+
+  /* ---------------- shared modal / toast ---------------- */
+  var overlay = document.getElementById('modalOverlay');
+  var box = document.getElementById('modalBox');
+  var toastEl = document.getElementById('toast');
+  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(function(){toastEl.classList.remove('show');},2400); }
+  function closeModal(){ overlay.classList.remove('open'); }
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
+
+  /* ---------------- login ---------------- */
+  document.getElementById('adminFab').addEventListener('click', function(){
+    var authed = sessionStorage.getItem(LS_AUTH) === "1";
+    if(authed){ EDIT = true; render(); toast("편집 모드입니다. 사진·글·가격을 클릭해서 바로 수정해보세요."); return; }
+    overlay.classList.add('open');
+    box.innerHTML = lockHTML();
+    wireLock();
+  });
+
+  function lockHTML(){
+    return '<div class="modal-head"><h3>관리자 로그인</h3><button class="modal-close" id="lockClose">×</button></div>' +
+      '<div class="lock-body"><p>비밀번호를 입력하면 실제 화면에서 바로 사진과 글, 가격을 수정할 수 있습니다.</p>' +
+      '<input type="password" id="pwInput" placeholder="비밀번호" style="width:100%;padding:12px;border:1px solid #d7d5cc;border-radius:6px;font-size:14px;margin-bottom:14px;">' +
+      '<button class="btn btn-dark" id="pwSubmit" style="width:100%;">입장</button>' +
+      '<p style="font-size:11.5px;color:#999;margin-top:14px;">최초 비밀번호: admin1234 (입장 후 설정에서 변경 가능)</p></div>';
+  }
+  function wireLock(){
+    document.getElementById('lockClose').addEventListener('click', closeModal);
+    var input = document.getElementById('pwInput');
+    var submit = document.getElementById('pwSubmit');
+    function tryLogin(){
+      if(input.value === getPw()){
+        sessionStorage.setItem(LS_AUTH,"1");
+        EDIT = true;
+        closeModal();
+        render();
+        toast("편집 모드입니다. 사진·글·가격을 클릭해서 바로 수정해보세요.");
+      } else {
+        toast("비밀번호가 올바르지 않습니다.");
+      }
+    }
+    submit.addEventListener('click', tryLogin);
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
+    input.focus();
+  }
+
+  /* ---------------- edit toolbar ---------------- */
+  function renderToolbar(){
+    var tb = document.getElementById('editToolbar');
+    if(!EDIT){ tb.style.display = 'none'; tb.innerHTML=''; return; }
+    tb.style.display = 'flex';
+    tb.innerHTML =
+      '<span class="tag">편집 모드</span>' +
+      '<span style="font-size:13px;color:var(--muted);">화면의 글자·사진에 마우스를 올려 바로 클릭해서 수정하세요</span>' +
+      '<span class="spacer"></span>' +
+      '<button class="btn btn-ghost" id="tbSettings">설정</button>' +
+      '<button class="btn btn-ghost" id="tbExport">사이트 파일 내보내기</button>' +
+      '<button class="btn btn-primary" id="tbDone">편집 종료</button>';
+    document.getElementById('tbSettings').addEventListener('click', openSettings);
+    document.getElementById('tbExport').addEventListener('click', exportSite);
+    document.getElementById('tbDone').addEventListener('click', function(){ EDIT = false; render(); });
+  }
+
+  /* ---------------- settings modal (non-visual fields) ---------------- */
+  function openSettings(){
+    var c = CONTENT;
+    overlay.classList.add('open');
+    box.innerHTML =
+      '<div class="modal-head"><h3>사이트 설정</h3><button class="modal-close" id="setClose">×</button></div>' +
+      '<div class="modal-body">' +
+        '<div class="field"><label>프로모션 더보기 링크 (선택)</label><input type="text" id="setPromoLink" value="'+esc(c.promoLink)+'"></div>' +
+        '<div class="field"><label>카카오톡 상담 링크</label><input type="text" id="setKakao" value="'+esc(c.kakaoUrl)+'" placeholder="https://open.kakao.com/o/..."></div>' +
+        '<div class="field"><label>네이버 실시간예약 링크</label><input type="text" id="setBooking" value="'+esc(c.naverBookingUrl)+'"></div>' +
+        '<div class="field"><label>블로그 링크</label><input type="text" id="setBlog" value="'+esc(c.blogUrl)+'"></div>' +
+        '<div class="field"><label>서비스센터 신청서 접수 이메일</label><input type="text" id="setSvcEmail" value="'+esc(c.serviceFormEmail)+'">' +
+          '<small>저장 후 <b>최초 1회</b>, formsubmit.co에서 오는 확인 메일의 링크를 눌러야 활성화됩니다.</small></div>' +
+        '<div class="field"><label>환경부 무공해차 통합누리집 링크</label><input type="text" id="setEvUrl" value="'+esc(c.evOfficialUrl)+'"></div>' +
+        '<div class="field"><label>관리자 비밀번호 변경</label><input type="password" id="setPw" placeholder="새 비밀번호 (변경 시에만 입력)"></div>' +
+      '</div>' +
+      '<div class="modal-actions"><button class="btn btn-dark" id="setSave" style="width:100%;">저장</button></div>';
+    document.getElementById('setClose').addEventListener('click', closeModal);
+    document.getElementById('setSave').addEventListener('click', function(){
+      CONTENT.promoLink = document.getElementById('setPromoLink').value.trim();
+      CONTENT.kakaoUrl = document.getElementById('setKakao').value.trim();
+      CONTENT.naverBookingUrl = document.getElementById('setBooking').value.trim();
+      CONTENT.blogUrl = document.getElementById('setBlog').value.trim();
+      CONTENT.serviceFormEmail = document.getElementById('setSvcEmail').value.trim();
+      CONTENT.evOfficialUrl = document.getElementById('setEvUrl').value.trim();
+      var newPw = document.getElementById('setPw').value.trim();
+      if(newPw){ localStorage.setItem(ADMIN_PW_KEY, newPw); }
+      saveLocal();
+      closeModal();
+      render();
+      toast("설정이 저장되었습니다.");
+    });
+  }
+
+  /* ---------------- inline edit interactions ---------------- */
+  document.body.addEventListener('focusout', function(e){
+    var el = e.target;
+    if(!el.dataset || !el.dataset.path) return;
+    if(el.tagName === 'INPUT'){
+      setDeep(CONTENT, el.dataset.path, el.value);
+    } else if(el.dataset.multiline){
+      var text = (el.innerText || el.textContent || '').replace(/\r/g,'');
+      setDeep(CONTENT, el.dataset.path, text.trim());
+    } else {
+      setDeep(CONTENT, el.dataset.path, (el.textContent||'').trim());
+    }
+    saveLocal();
+    render();
+  }, true);
+
+  document.body.addEventListener('keydown', function(e){
+    var el = e.target;
+    if(el && el.tagName === 'INPUT' && el.dataset && el.dataset.path && e.key === 'Enter'){
+      e.preventDefault(); el.blur();
+    }
+    if(el && el.isContentEditable && !el.dataset.multiline && e.key === 'Enter'){
+      e.preventDefault(); el.blur();
+    }
+  });
+
+  var pendingImgPath = null;
+  document.body.addEventListener('click', function(e){
+    var imgBtnEl = e.target.closest('.img-edit-btn');
+    if(imgBtnEl){
+      pendingImgPath = imgBtnEl.getAttribute('data-imgpath');
+      document.getElementById('hiddenImgInput').click();
+      return;
+    }
+    var del = e.target.closest('[data-delarr]');
+    if(del){
+      var arr = del.getAttribute('data-delarr');
+      var idx = parseInt(del.getAttribute('data-idx'),10);
+      CONTENT[arr].splice(idx,1);
+      saveLocal(); render();
+      return;
+    }
+    var add = e.target.closest('[data-addarr]');
+    if(add){
+      var arrName = add.getAttribute('data-addarr');
+      var defaults = {
+        trimGalleries: {model:"모델명",trim:"트림명",img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
+        inStock: {model:"모델명",trim:"트림",color:"색상",price:"가격",note:"즉시 출고 가능",img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
+        reviews: {text:"후기 내용을 입력하세요.",who:"고객명 · 모델명 출고 고객"},
+        evSubsidyRows: {region:"지역명",national:"",local:"",total:""},
+        badges: "수상·인증 내용"
+      };
+      CONTENT[arrName] = CONTENT[arrName] || [];
+      CONTENT[arrName].push(typeof defaults[arrName] === 'string' ? defaults[arrName] : Object.assign({}, defaults[arrName]));
+      saveLocal(); render();
+      return;
+    }
+  });
+
+  document.getElementById('hiddenImgInput').addEventListener('change', function(e){
+    var f = e.target.files[0];
+    if(!f || !pendingImgPath) return;
+    fileToDataUrl(f, function(url){
+      setDeep(CONTENT, pendingImgPath, url);
+      saveLocal();
+      render();
+      toast("사진이 변경되었습니다.");
+      pendingImgPath = null;
+    });
+    e.target.value = '';
+  });
+
+  function exportSite(){
+    var doc = document.documentElement.cloneNode(true);
+    var script = doc.querySelector('#content-data');
+    script.textContent = JSON.stringify(CONTENT, null, 2);
+    doc.querySelector('body').classList.remove('edit-mode');
+    var html = "<!DOCTYPE html>\n" + doc.outerHTML;
+    var blob = new Blob([html], {type:"text/html"});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "index.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast("index.html 파일이 다운로드되었습니다. 기존 호스팅에 재업로드하세요.");
+  }
+})();
+</script>
+</body>
+</html>
