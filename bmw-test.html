@@ -306,7 +306,8 @@
   "cardPhone": "02-6958-7501",
   "cardFax": "0504-322-2532",
   "cardEmail": "dohee.noh@bavarian.co.kr",
-  "youtubeChannelId": "UCsloMOE4Gl2FfkOnS8svXgA"
+  "youtubeChannelId": "UCsloMOE4Gl2FfkOnS8svXgA",
+  "videoProxyUrl": ""
 }
 </script>
 
@@ -545,6 +546,27 @@
     }
     return ytEmbed(CONTENT.youtubeUrl);
   }
+  function parseISODuration(iso){
+    var m = (iso||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if(!m) return 0;
+    var h = parseInt(m[1]||0,10), mi = parseInt(m[2]||0,10), s = parseInt(m[3]||0,10);
+    return h*3600 + mi*60 + s;
+  }
+  function fetchLatestLongFormVideo(){
+    var chId = (CONTENT.youtubeChannelId||'').trim();
+    var proxy = (CONTENT.videoProxyUrl||'').trim();
+    if(!proxy || chId.indexOf('UC') !== 0) return;
+    var sep = proxy.indexOf('?') === -1 ? '?' : '&';
+    fetch(proxy + sep + 'channelId=' + encodeURIComponent(chId))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data && data.videoId){
+          var frame = document.getElementById('ytFrame');
+          if(frame) frame.src = 'https://www.youtube.com/embed/' + data.videoId;
+        }
+      })
+      .catch(function(){ /* 중계 서버 실패 시 재생목록(쇼츠 포함) 그대로 유지 */ });
+  }
   function getPw(){ return localStorage.getItem(ADMIN_PW_KEY) || "admin1234"; }
   function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(CONTENT)); }
   function fileToDataUrl(file, cb){
@@ -625,12 +647,14 @@
     var vt = document.getElementById('videoTitle'); vt.textContent = CONTENT.videoSectionTitle; setEditable(vt,'videoSectionTitle');
     var vd = document.getElementById('videoDesc'); vd.textContent = CONTENT.videoSectionDesc; setEditable(vd,'videoSectionDesc');
     document.getElementById('ytFrame').src = ytEmbedAuto();
+    fetchLatestLongFormVideo();
     var chLink = document.getElementById('ytChannelLink');
     if(CONTENT.youtubeChannelUrl){ chLink.href = CONTENT.youtubeChannelUrl; chLink.style.display='inline'; } else { chLink.style.display='none'; }
     var vBar = document.getElementById('videoEditBar');
     vBar.innerHTML = EDIT ? (
       '<div class="video-edit-bar">' +
       '<div class="field"><label>유튜브 채널 ID (UC로 시작 · 최신 영상이 자동으로 뜹니다)</label><input type="text" data-path="youtubeChannelId" value="'+esc(CONTENT.youtubeChannelId)+'" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"></div>' +
+      '<div class="field"><label>동영상 중계 서버 주소 (선택 · 넣으면 쇼츠 제외하고 일반 영상만 가져옵니다)</label><input type="text" data-path="videoProxyUrl" value="'+esc(CONTENT.videoProxyUrl)+'" placeholder="https://yt-latest.내계정.workers.dev"><small style="color:var(--muted);display:block;margin-top:5px;">홈페이지를 여러 개 판매할 계획이면, 이 주소는 한 번만 만들어서 모든 사이트에 재사용하면 됩니다.</small></div>' +
       '<div class="field"><label>채널 ID가 없을 때만: 특정 영상 링크로 고정</label><input type="text" data-path="youtubeUrl" value="'+esc(CONTENT.youtubeUrl)+'" placeholder="https://www.youtube.com/watch?v=..."></div>' +
       '<div class="field"><label>유튜브 채널 링크 ("전체 영상 보기" 버튼용)</label><input type="text" data-path="youtubeChannelUrl" value="'+esc(CONTENT.youtubeChannelUrl)+'" placeholder="https://www.youtube.com/@채널명"></div>' +
       '</div>'
