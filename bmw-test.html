@@ -37,7 +37,8 @@
   }
   .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;max-width:1180px;margin:0 auto;}
   .brand{display:flex;align-items:center;gap:10px;color:var(--white);}
-  .brand .mark{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 90deg,#0b5fa5 0 25%,#fff 0 50%,#0b5fa5 0 75%,#fff 0 100%);border:1.5px solid #fff;}
+  .brand .mark{width:30px;height:30px;border-radius:50%;border:1.5px solid #fff;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;position:relative;}
+  .brand .mark img{width:100%;height:100%;object-fit:contain;}
   .brand .name{font-family:var(--serif);font-size:18px;letter-spacing:.02em;}
   .brand .name b{font-weight:600;}
   nav.links{display:flex;gap:28px;font-size:14px;color:var(--muted);}
@@ -232,7 +233,8 @@
   .dc-badge{font-size:11.5px;}
   .dc-address{margin-top:12px;font-size:12px;}
   .dc-right{border-left:none;border-top:1px solid var(--line-soft);padding-left:0;padding-top:16px;}
-  .dc-mark{width:38px;height:38px;margin-bottom:10px;align-self:flex-start;border-radius:50%;border:2px solid #b9bdc4;background:conic-gradient(from 90deg,#0b5fa5 0 25%,#fff 0 50%,#0b5fa5 0 75%,#fff 0 100%);}
+  .dc-mark{width:38px;height:38px;margin-bottom:10px;align-self:flex-start;border-radius:50%;border:2px solid #b9bdc4;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;position:relative;}
+  .dc-mark img{width:100%;height:100%;object-fit:contain;}
   .dc-contact-row{font-size:12.5px;margin-bottom:5px;color:#333;}
   .dc-contact-row .lbl{color:#888;display:inline-block;min-width:44px;}
   .dc-web{font-size:11.5px;margin-top:10px;color:var(--accent-deep);}
@@ -303,6 +305,7 @@
   "dealerTitle": "Sales Expert",
   "badges": ["BMW Korea 인증영업직원","Best BMW Influencer 2024 3Q","BMW KOREA SALES BEST ROOKIE 2024 3Q","BMW KOREA SALES BEST ROOKIE 2025 3Q"],
   "showroomName": "BMW 고양 전시장",
+  "logoImage": "data:image/png;base64,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",
   "cardPhone": "02-6958-7501",
   "cardFax": "0504-322-2532",
   "cardEmail": "dohee.noh@bavarian.co.kr",
@@ -314,7 +317,7 @@
 <header>
   <div class="nav">
     <a class="brand" href="#top">
-      <span class="mark"></span>
+      <span class="mark" id="brandMark"></span>
       <span class="name"><b id="hdBrand">노도희</b> BMW</span>
     </a>
     <nav class="links">
@@ -345,7 +348,7 @@
           <div class="dc-address"><span id="dcAddress"></span></div>
         </div>
         <div class="dc-right">
-          <div class="dc-mark"></div>
+          <div class="dc-mark" id="dcMarkImg"></div>
           <div>
             <div class="dc-contact-row"><span class="lbl">전화</span><a id="dcPhoneLine" href="tel:"></a></div>
             <div class="dc-contact-row"><span class="lbl">휴대폰</span><a id="dcMobileLine" href="tel:"></a></div>
@@ -632,6 +635,8 @@
     hd.textContent = CONTENT.brandName; hd.setAttribute && (EDIT ? hd.setAttribute('contenteditable','true') : hd.removeAttribute('contenteditable'));
     hd.dataset.path = 'brandName';
 
+    document.getElementById('brandMark').innerHTML = '<img src="'+esc(CONTENT.logoImage)+'" alt="logo">' + imgBtn('logoImage');
+
     var he = document.getElementById('heroEyebrow');
     he.textContent = CONTENT.heroEyebrow; setEditable(he,'heroEyebrow');
 
@@ -663,6 +668,7 @@
     var dcFax = document.getElementById('dcFax'); dcFax.textContent = dc.cardFax; setEditable(dcFax,'cardFax');
     var dcEmail = document.getElementById('dcEmail'); dcEmail.textContent = dc.cardEmail; dcEmail.href = 'mailto:'+(dc.cardEmail||''); setEditable(dcEmail,'cardEmail');
     var dcWeb = document.getElementById('dcWeb'); dcWeb.textContent = dc.companyWebsite; setEditable(dcWeb,'companyWebsite');
+    document.getElementById('dcMarkImg').innerHTML = '<img src="'+esc(CONTENT.logoImage)+'" alt="logo">' + imgBtn('logoImage');
 
     var vl = document.getElementById('videoLabel'); vl.textContent = CONTENT.videoSectionLabel; setEditable(vl,'videoSectionLabel');
     var vt = document.getElementById('videoTitle'); vt.textContent = CONTENT.videoSectionTitle; setEditable(vt,'videoSectionTitle');
