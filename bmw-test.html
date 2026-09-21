@@ -362,7 +362,6 @@
         <p class="desc" id="videoDesc" style="font-size:13.5px;color:#5c6672;margin-bottom:14px;"></p>
         <div id="videoEditBar"></div>
         <div class="video-frame">
-          <div id="ytLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;">영상을 불러오는 중...</div>
           <iframe id="ytFrame" src="" title="YouTube video" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
         </div>
         <p class="video-links" style="margin-top:12px;"><a id="ytChannelLink" target="_blank" rel="noopener" style="display:none;color:var(--accent-deep);border-bottom:1px solid currentColor;font-size:13.5px;">유튜브 채널 전체 영상 보러가기 →</a></p>
@@ -557,9 +556,7 @@
   }
   function setYtSrc(url){
     var frame = document.getElementById('ytFrame');
-    var loading = document.getElementById('ytLoading');
     if(frame) frame.src = url || '';
-    if(loading) loading.style.display = url ? 'none' : 'flex';
   }
   function fetchLatestLongFormVideo(fallbackSrc){
     var chId = (CONTENT.youtubeChannelId||'').trim();
