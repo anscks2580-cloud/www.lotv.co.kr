@@ -101,6 +101,15 @@
   .stock-table th,.stock-table td{padding:14px 16px;border-bottom:1px solid var(--line-soft);text-align:left;}
   .stock-table th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em;}
   .stock-table td[contenteditable="true"]{outline:1px dashed var(--accent-deep);}
+  details.stock-group{border:1px solid var(--line-soft);border-radius:6px;margin-bottom:8px;background:var(--white);}
+  details.stock-group>summary{padding:16px 18px;cursor:pointer;font-family:var(--serif);font-size:17px;list-style:none;display:flex;align-items:center;justify-content:space-between;}
+  details.stock-group>summary::-webkit-details-marker{display:none;}
+  details.stock-group>summary .count{font-family:inherit;font-size:12px;color:var(--muted);font-weight:400;}
+  details.stock-model{border-top:1px solid var(--line-soft);}
+  details.stock-model>summary{padding:12px 18px 12px 32px;cursor:pointer;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between;color:#3a3f45;}
+  details.stock-model>summary::-webkit-details-marker{display:none;}
+  details.stock-model>summary .count{font-size:12px;color:var(--muted);}
+  details.stock-model .stock-table{margin:0 18px 14px 32px;width:calc(100% - 50px);}
 
   /* ---------- video ---------- */
   .video-section{background:var(--navy);color:var(--white);}
@@ -420,7 +429,8 @@
       </div>
       <p class="desc">지금 계약하면 바로 받을 수 있는 재고 차량입니다.</p>
     </div>
-    <div class="models-grid" id="instockGrid"></div>
+    <input type="text" id="instockSearch" placeholder="모델명으로 검색 (예: 520i, X5)" style="width:100%;max-width:360px;padding:10px 14px;border:1px solid var(--line-soft);border-radius:6px;font-size:14px;margin-bottom:16px;">
+    <div class="stock-accordion" id="instockGrid"></div>
   </div>
 </section>
 
@@ -779,15 +789,41 @@
         '<h3'+ed('trimGalleries.'+i+'.trim')+'>'+esc(t.trim)+'</h3></div></div>';
     }).join('') + addTile('trimGalleries','트림 사진');
 
-    document.getElementById('instockGrid').innerHTML =
-      '<table class="stock-table"><thead><tr><th>상세모델명</th><th>외장색상</th><th>실내색상</th>'+(EDIT?'<th></th>':'')+'</tr></thead><tbody>' +
-      (CONTENT.inStock||[]).map(function(s,i){
-        return '<tr><td'+ed('inStock.'+i+'.model')+'>'+esc(s.model)+'</td>' +
-          '<td'+ed('inStock.'+i+'.extColor')+'>'+esc(s.extColor)+'</td>' +
-          '<td'+ed('inStock.'+i+'.intColor')+'>'+esc(s.intColor)+'</td>' +
-          (EDIT?'<td>'+delBtn('inStock',i)+'</td>':'') + '</tr>';
-      }).join('') +
-      '</tbody></table>' + addTile('inStock','재고 차량 (직접 추가)');
+    (function renderInStockGrouped(){
+      var groups = {}; // series -> model -> [{idx, extColor, intColor}]
+      var order = [];
+      (CONTENT.inStock||[]).forEach(function(s,i){
+        var series = s.series || '기타';
+        var model = s.model || '';
+        if(!groups[series]){ groups[series] = {}; order.push(series); }
+        if(!groups[series][model]) groups[series][model] = [];
+        groups[series][model].push({idx:i, extColor:s.extColor, intColor:s.intColor});
+      });
+      var html = order.map(function(series){
+        var models = groups[series];
+        var modelNames = Object.keys(models);
+        var modelCount = modelNames.length;
+        var modelsHtml = modelNames.map(function(model){
+          var items = models[model];
+          var rowsHtml = items.map(function(it){
+            return '<tr data-searchtext="'+esc((model+' '+it.extColor+' '+it.intColor).toLowerCase())+'">' +
+              '<td'+ed('inStock.'+it.idx+'.model')+'>'+esc(model)+'</td>' +
+              '<td'+ed('inStock.'+it.idx+'.extColor')+'>'+esc(it.extColor)+'</td>' +
+              '<td'+ed('inStock.'+it.idx+'.intColor')+'>'+esc(it.intColor)+'</td>' +
+              (EDIT?'<td>'+delBtn('inStock',it.idx)+'</td>':'') + '</tr>';
+          }).join('');
+          return '<details class="stock-model">' +
+            '<summary>'+esc(model)+' <span class="count">'+items.length+'가지 색상</span></summary>' +
+            '<table class="stock-table"><tbody>'+rowsHtml+'</tbody></table>' +
+            '</details>';
+        }).join('');
+        return '<details class="stock-group">' +
+          '<summary>'+esc(series==='기타'?series:series+' 시리즈')+' <span class="count">'+modelCount+'개 모델</span></summary>' +
+          modelsHtml +
+          '</details>';
+      }).join('');
+      document.getElementById('instockGrid').innerHTML = html + addTile('inStock','재고 차량 (직접 추가)');
+    })();
 
     var evd = document.getElementById('evSubsidyDesc'); evd.textContent = CONTENT.evSubsidyNote; setEditable(evd,'evSubsidyNote',true);
     var evu = document.getElementById('evSubsidyUpdated'); evu.textContent = CONTENT.evSubsidyUpdated; setEditable(evu,'evSubsidyUpdated');
@@ -980,7 +1016,7 @@
       var arrName = add.getAttribute('data-addarr');
       var defaults = {
         trimGalleries: {model:"모델명",trim:"트림명",img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
-        inStock: {model:"상세모델명",extColor:"외장색상",intColor:"실내색상"},
+        inStock: {model:"상세모델명",extColor:"외장색상",intColor:"실내색상",series:""},
         reviews: {text:"후기 내용을 입력하세요.",who:"고객명 · 모델명 출고 고객"},
         evSubsidyRows: {region:"지역명",national:"",local:"",total:""},
         badges: "수상·인증 내용"
@@ -1023,6 +1059,11 @@
     }
     return -1;
   }
+  function cleanColorText(v){
+    v = String(v||'').trim();
+    var m = v.match(/\(([^)]+)\)/); // "475( Black Sapphire metallic )" -> "Black Sapphire metallic"
+    return m ? m[1].trim() : v;
+  }
   function parseStockExcel(file){
     var reader = new FileReader();
     reader.onload = function(e){
@@ -1032,28 +1073,37 @@
         var rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
         if(!rows.length){ toast("엑셀에서 데이터를 찾지 못했습니다."); return; }
         var headers = rows[0];
-        var modelCol = findCol(headers, ['상세모델명','모델명','차종','모델']);
+        // 실제 재고관리 엑셀 헤더 우선 매칭, 못 찾으면 유사 키워드로 재시도
+        var modelCol = findCol(headers, ['상세모델(그룹명)','상세모델명','대표모델','상세모델','모델명','차종','모델']);
         var extCol = findCol(headers, ['외장색상','외장컬러','외장','바디컬러']);
-        var intCol = findCol(headers, ['실내색상','내장색상','실내컬러','내장','시트컬러']);
+        var intCol = findCol(headers, ['내장색상','실내색상','내장컬러','실내컬러','내장','시트컬러']);
+        var seriesCol = findCol(headers, ['시리즈']);
         if(modelCol===-1 || extCol===-1 || intCol===-1){
           toast("엑셀 헤더에서 상세모델명/외장색상/실내색상 열을 찾지 못했습니다. 헤더명을 확인해주세요.");
           return;
         }
+        var seen = {};
         var list = [];
         for(var r=1;r<rows.length;r++){
           var row = rows[r];
           if(!row || !row[modelCol]) continue;
-          list.push({
+          var item = {
             model: String(row[modelCol]||'').trim(),
-            extColor: String(row[extCol]||'').trim(),
-            intColor: String(row[intCol]||'').trim()
-          });
+            extColor: cleanColorText(row[extCol]),
+            intColor: cleanColorText(row[intCol]),
+            series: seriesCol!==-1 ? String(row[seriesCol]||'').trim() : ''
+          };
+          if(!item.model) continue;
+          var key = item.model + '|' + item.extColor + '|' + item.intColor;
+          if(seen[key]) continue; // 같은 모델·색상 조합 중복 제거
+          seen[key] = true;
+          list.push(item);
         }
         if(!list.length){ toast("등록할 수 있는 행이 없습니다."); return; }
         CONTENT.inStock = list;
         saveContent();
         render();
-        toast(list.length + "대의 재고가 업데이트되었습니다.");
+        toast(list.length + "개 조합(중복 제외)으로 재고가 업데이트되었습니다.");
       }catch(err){
         console.error('엑셀 파싱 실패', err);
         toast("엑셀 파일을 읽는 중 문제가 발생했습니다.");
@@ -1065,6 +1115,28 @@
     var f = e.target.files[0];
     if(f) parseStockExcel(f);
     e.target.value = '';
+  });
+  document.getElementById('instockSearch').addEventListener('input', function(){
+    var q = this.value.trim().toLowerCase();
+    var grid = document.getElementById('instockGrid');
+    var modelGroups = grid.querySelectorAll('details.stock-model');
+    modelGroups.forEach(function(modelDetail){
+      var rows = modelDetail.querySelectorAll('tr[data-searchtext]');
+      var anyVisible = false;
+      rows.forEach(function(tr){
+        var match = !q || tr.getAttribute('data-searchtext').indexOf(q) !== -1;
+        tr.style.display = match ? '' : 'none';
+        if(match) anyVisible = true;
+      });
+      modelDetail.style.display = anyVisible ? '' : 'none';
+      if(q) modelDetail.open = anyVisible;
+    });
+    grid.querySelectorAll('details.stock-group').forEach(function(seriesDetail){
+      var visibleModels = seriesDetail.querySelectorAll('details.stock-model:not([style*="display: none"])');
+      var anyVisible = visibleModels.length > 0;
+      seriesDetail.style.display = anyVisible ? '' : 'none';
+      if(q) seriesDetail.open = anyVisible;
+    });
   });
 
   function exportSite(){
