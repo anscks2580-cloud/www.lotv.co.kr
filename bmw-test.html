@@ -97,6 +97,10 @@
   .model-card .info .price{font-size:13px;color:#5c6672;}
   @media(max-width:820px){.models-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:560px){.models-grid{grid-template-columns:1fr;}}
+  .stock-table{width:100%;border-collapse:collapse;background:var(--white);font-size:14px;}
+  .stock-table th,.stock-table td{padding:14px 16px;border-bottom:1px solid var(--line-soft);text-align:left;}
+  .stock-table th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em;}
+  .stock-table td[contenteditable="true"]{outline:1px dashed var(--accent-deep);}
 
   /* ---------- video ---------- */
   .video-section{background:var(--navy);color:var(--white);}
@@ -521,11 +525,41 @@
 </div>
 
 <input type="file" id="hiddenImgInput" accept="image/*" style="display:none;">
+<input type="file" id="hiddenStockInput" accept=".xlsx,.xls,.csv" style="display:none;">
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase (다중 딜러 사이트 공용 프로젝트: dealer-site-platform) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+<!-- SheetJS (재고 엑셀 파싱용) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
 (function(){
+  /* ---------------- 사이트 식별 & Firebase 초기화 ---------------- */
+  // 사이트마다 고유해야 하는 값 (새 딜러 사이트를 만들 때마다 이 3줄만 바꿔서 발급)
+  var SITE_ID = "nodohee-bmw";
+  var SITE_AUTH_EMAIL = "site-nodohee-bmw@dealer-site-platform.local";
+  var SITE_AUTH_PASSWORD = "vjVr9ltreXDErd4FmoCI";
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyBno-MPsqhZZQD5zTdZkS1IUVOCcXVMm9o",
+    authDomain: "dealer-site-platform.firebaseapp.com",
+    projectId: "dealer-site-platform",
+    storageBucket: "dealer-site-platform.firebasestorage.app",
+    messagingSenderId: "430501808290",
+    appId: "1:430501808290:web:22edea74ad578f953caffb"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var fbAuth = firebase.auth();
+  var fbDb = firebase.firestore();
+  var fbStorage = firebase.storage();
+  var contentDocRef = fbDb.collection('sites').doc(SITE_ID).collection('content').doc('main');
+
   var LS_KEY = "bmw_site_content_v2";
   var LS_AUTH = "bmw_site_admin_ok";
   var ADMIN_PW_KEY = "bmw_site_admin_pw";
@@ -593,6 +627,21 @@
   }
   function getPw(){ return localStorage.getItem(ADMIN_PW_KEY) || "admin1234"; }
   function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(CONTENT)); }
+  function saveContent(){
+    saveLocal();
+    contentDocRef.set(CONTENT).catch(function(err){
+      console.error('Firestore 저장 실패', err);
+      toast("서버 저장에 실패했습니다. 로그인이 풀렸을 수 있어요. (이 기기에는 임시 저장됨)");
+    });
+  }
+  /* 페이지를 여는 모든 방문자는 로그인 없이 최신 내용을 Firestore에서 읽어옴 */
+  contentDocRef.get().then(function(snap){
+    if(snap.exists){
+      CONTENT = Object.assign({}, DEFAULT_CONTENT, snap.data());
+      saveLocal();
+      render();
+    }
+  }).catch(function(err){ console.error('Firestore 로드 실패', err); });
   function fileToDataUrl(file, cb){
     var reader = new FileReader();
     reader.onload = function(){ cb(reader.result); };
@@ -730,14 +779,15 @@
         '<h3'+ed('trimGalleries.'+i+'.trim')+'>'+esc(t.trim)+'</h3></div></div>';
     }).join('') + addTile('trimGalleries','트림 사진');
 
-    document.getElementById('instockGrid').innerHTML = (CONTENT.inStock||[]).map(function(s,i){
-      return '<div class="model-card">' + delBtn('inStock',i) +
-        '<div class="imgwrap"><img src="'+esc(s.img)+'" alt="'+esc(s.model)+'">'+imgBtn('inStock.'+i+'.img')+'</div>' +
-        '<div class="info"><div class="series"><span'+ed('inStock.'+i+'.trim')+'>'+esc(s.trim)+'</span> · <span'+ed('inStock.'+i+'.color')+'>'+esc(s.color)+'</span></div>' +
-        '<h3'+ed('inStock.'+i+'.model')+'>'+esc(s.model)+'</h3>' +
-        '<div class="price"'+ed('inStock.'+i+'.price')+'>'+esc(s.price)+'</div>' +
-        '<div class="price" style="color:var(--accent-deep);font-weight:600;margin-top:4px;"'+ed('inStock.'+i+'.note')+'>'+esc(s.note)+'</div></div></div>';
-    }).join('') + addTile('inStock','재고 차량');
+    document.getElementById('instockGrid').innerHTML =
+      '<table class="stock-table"><thead><tr><th>상세모델명</th><th>외장색상</th><th>실내색상</th>'+(EDIT?'<th></th>':'')+'</tr></thead><tbody>' +
+      (CONTENT.inStock||[]).map(function(s,i){
+        return '<tr><td'+ed('inStock.'+i+'.model')+'>'+esc(s.model)+'</td>' +
+          '<td'+ed('inStock.'+i+'.extColor')+'>'+esc(s.extColor)+'</td>' +
+          '<td'+ed('inStock.'+i+'.intColor')+'>'+esc(s.intColor)+'</td>' +
+          (EDIT?'<td>'+delBtn('inStock',i)+'</td>':'') + '</tr>';
+      }).join('') +
+      '</tbody></table>' + addTile('inStock','재고 차량 (직접 추가)');
 
     var evd = document.getElementById('evSubsidyDesc'); evd.textContent = CONTENT.evSubsidyNote; setEditable(evd,'evSubsidyNote',true);
     var evu = document.getElementById('evSubsidyUpdated'); evu.textContent = CONTENT.evSubsidyUpdated; setEditable(evu,'evSubsidyUpdated');
@@ -809,15 +859,21 @@
     var input = document.getElementById('pwInput');
     var submit = document.getElementById('pwSubmit');
     function tryLogin(){
-      if(input.value === getPw()){
+      if(input.value !== getPw()){
+        toast("비밀번호가 올바르지 않습니다.");
+        return;
+      }
+      submit.disabled = true;
+      fbAuth.signInWithEmailAndPassword(SITE_AUTH_EMAIL, SITE_AUTH_PASSWORD).then(function(){
         sessionStorage.setItem(LS_AUTH,"1");
         EDIT = true;
         closeModal();
         render();
         toast("편집 모드입니다. 사진·글·가격을 클릭해서 바로 수정해보세요.");
-      } else {
-        toast("비밀번호가 올바르지 않습니다.");
-      }
+      }).catch(function(err){
+        console.error('Firebase 인증 실패', err);
+        toast("서버 인증에 실패했습니다. 개발자에게 문의해주세요.");
+      }).finally(function(){ submit.disabled = false; });
     }
     submit.addEventListener('click', tryLogin);
     input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
@@ -834,9 +890,11 @@
       '<span style="font-size:13px;color:var(--muted);">화면의 글자·사진에 마우스를 올려 바로 클릭해서 수정하세요</span>' +
       '<span class="spacer"></span>' +
       '<button class="btn btn-ghost" id="tbSettings">설정</button>' +
-      '<button class="btn btn-ghost" id="tbExport">사이트 파일 내보내기</button>' +
+      '<button class="btn btn-ghost" id="tbStockUpload">재고 엑셀 업로드</button>' +
+      '<button class="btn btn-ghost" id="tbExport">사이트 파일 내보내기(백업)</button>' +
       '<button class="btn btn-primary" id="tbDone">편집 종료</button>';
     document.getElementById('tbSettings').addEventListener('click', openSettings);
+    document.getElementById('tbStockUpload').addEventListener('click', function(){ document.getElementById('hiddenStockInput').click(); });
     document.getElementById('tbExport').addEventListener('click', exportSite);
     document.getElementById('tbDone').addEventListener('click', function(){ EDIT = false; render(); });
   }
@@ -868,7 +926,7 @@
       CONTENT.evOfficialUrl = document.getElementById('setEvUrl').value.trim();
       var newPw = document.getElementById('setPw').value.trim();
       if(newPw){ localStorage.setItem(ADMIN_PW_KEY, newPw); }
-      saveLocal();
+      saveContent();
       closeModal();
       render();
       toast("설정이 저장되었습니다.");
@@ -887,7 +945,7 @@
     } else {
       setDeep(CONTENT, el.dataset.path, (el.textContent||'').trim());
     }
-    saveLocal();
+    saveContent();
     render();
   }, true);
 
@@ -914,7 +972,7 @@
       var arr = del.getAttribute('data-delarr');
       var idx = parseInt(del.getAttribute('data-idx'),10);
       CONTENT[arr].splice(idx,1);
-      saveLocal(); render();
+      saveContent(); render();
       return;
     }
     var add = e.target.closest('[data-addarr]');
@@ -922,14 +980,14 @@
       var arrName = add.getAttribute('data-addarr');
       var defaults = {
         trimGalleries: {model:"모델명",trim:"트림명",img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
-        inStock: {model:"모델명",trim:"트림",color:"색상",price:"가격",note:"즉시 출고 가능",img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
+        inStock: {model:"상세모델명",extColor:"외장색상",intColor:"실내색상"},
         reviews: {text:"후기 내용을 입력하세요.",who:"고객명 · 모델명 출고 고객"},
         evSubsidyRows: {region:"지역명",national:"",local:"",total:""},
         badges: "수상·인증 내용"
       };
       CONTENT[arrName] = CONTENT[arrName] || [];
       CONTENT[arrName].push(typeof defaults[arrName] === 'string' ? defaults[arrName] : Object.assign({}, defaults[arrName]));
-      saveLocal(); render();
+      saveContent(); render();
       return;
     }
   });
@@ -937,13 +995,75 @@
   document.getElementById('hiddenImgInput').addEventListener('change', function(e){
     var f = e.target.files[0];
     if(!f || !pendingImgPath) return;
-    fileToDataUrl(f, function(url){
-      setDeep(CONTENT, pendingImgPath, url);
-      saveLocal();
+    var thisPath = pendingImgPath;
+    toast("사진 업로드 중...");
+    var storageRef = fbStorage.ref('sites/' + SITE_ID + '/images/' + Date.now() + '_' + f.name);
+    storageRef.put(f).then(function(snapshot){
+      return snapshot.ref.getDownloadURL();
+    }).then(function(url){
+      setDeep(CONTENT, thisPath, url);
+      saveContent();
       render();
       toast("사진이 변경되었습니다.");
-      pendingImgPath = null;
+    }).catch(function(err){
+      console.error('이미지 업로드 실패', err);
+      toast("사진 업로드에 실패했습니다. 관리자 로그인이 풀렸을 수 있어요.");
     });
+    pendingImgPath = null;
+    e.target.value = '';
+  });
+
+  /* ---------------- 재고 엑셀 업로드 (상세모델명 / 외장색상 / 실내색상만 사용) ---------------- */
+  function findCol(headers, keywords){
+    for(var i=0;i<headers.length;i++){
+      var h = String(headers[i]||'').replace(/\s/g,'');
+      for(var k=0;k<keywords.length;k++){
+        if(h.indexOf(keywords[k]) !== -1) return i;
+      }
+    }
+    return -1;
+  }
+  function parseStockExcel(file){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        var sheet = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+        if(!rows.length){ toast("엑셀에서 데이터를 찾지 못했습니다."); return; }
+        var headers = rows[0];
+        var modelCol = findCol(headers, ['상세모델명','모델명','차종','모델']);
+        var extCol = findCol(headers, ['외장색상','외장컬러','외장','바디컬러']);
+        var intCol = findCol(headers, ['실내색상','내장색상','실내컬러','내장','시트컬러']);
+        if(modelCol===-1 || extCol===-1 || intCol===-1){
+          toast("엑셀 헤더에서 상세모델명/외장색상/실내색상 열을 찾지 못했습니다. 헤더명을 확인해주세요.");
+          return;
+        }
+        var list = [];
+        for(var r=1;r<rows.length;r++){
+          var row = rows[r];
+          if(!row || !row[modelCol]) continue;
+          list.push({
+            model: String(row[modelCol]||'').trim(),
+            extColor: String(row[extCol]||'').trim(),
+            intColor: String(row[intCol]||'').trim()
+          });
+        }
+        if(!list.length){ toast("등록할 수 있는 행이 없습니다."); return; }
+        CONTENT.inStock = list;
+        saveContent();
+        render();
+        toast(list.length + "대의 재고가 업데이트되었습니다.");
+      }catch(err){
+        console.error('엑셀 파싱 실패', err);
+        toast("엑셀 파일을 읽는 중 문제가 발생했습니다.");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  document.getElementById('hiddenStockInput').addEventListener('change', function(e){
+    var f = e.target.files[0];
+    if(f) parseStockExcel(f);
     e.target.value = '';
   });
 
