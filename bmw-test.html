@@ -179,36 +179,47 @@
 
   /* ---------- 플로팅 연락 버튼 (인스타/유튜브/카카오/전화) ---------- */
   #floatDock{
-    position:fixed;right:22px;bottom:88px;z-index:199;
-    display:flex;flex-direction:column;gap:12px;align-items:flex-end;
+    position:fixed;right:18px;bottom:86px;z-index:199;
+    display:flex;flex-direction:column;gap:10px;align-items:center;
+  }
+  .fd-item{
+    display:flex;flex-direction:column;align-items:center;gap:7px;
+    text-decoration:none;cursor:pointer;
   }
   .fd-btn{
-    position:relative;width:52px;height:52px;border-radius:50%;
+    width:52px;height:52px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 18px rgba(0,0,0,.22);border:none;cursor:pointer;
-    text-decoration:none;transition:transform .15s,box-shadow .15s;
+    box-shadow:0 6px 18px rgba(0,0,0,.22);
+    transition:transform .15s,box-shadow .15s;
   }
   .fd-btn svg{width:24px;height:24px;display:block;}
-  .fd-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.28);}
-  .fd-btn:focus-visible{outline:3px solid var(--accent-deep);outline-offset:3px;}
-  .fd-btn .fd-tip{
-    position:absolute;right:64px;top:50%;transform:translateY(-50%);
-    background:var(--navy);color:#fff;font-size:12.5px;font-weight:600;white-space:nowrap;
-    padding:6px 11px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .15s;
+  .fd-label{
+    position:relative;display:block;
+    background:#fff;color:var(--navy);
+    font-size:11.5px;font-weight:600;line-height:1;white-space:nowrap;
+    padding:5px 9px;border-radius:999px;
+    box-shadow:0 3px 10px rgba(0,0,0,.16);
   }
-  .fd-btn:hover .fd-tip,.fd-btn:focus-visible .fd-tip{opacity:1;}
-  .fd-insta{background:linear-gradient(45deg,#f9a33b 0%,#e8433c 45%,#c13584 75%,#833ab4 100%);color:#fff;}
-  .fd-youtube{background:#ff0000;color:#fff;}
-  .fd-kakao{background:#fee500;color:#191919;}
-  .fd-call{background:var(--accent-deep);color:#fff;}
+  .fd-label::before{
+    content:'';position:absolute;top:-4px;left:50%;
+    width:8px;height:8px;background:#fff;
+    transform:translateX(-50%) rotate(45deg);border-radius:1px;
+  }
+  .fd-item:hover .fd-btn{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.28);}
+  .fd-item:focus-visible{outline:none;}
+  .fd-item:focus-visible .fd-btn{outline:3px solid var(--accent-deep);outline-offset:3px;}
+  .fd-insta .fd-btn{background:linear-gradient(45deg,#f9a33b 0%,#e8433c 45%,#c13584 75%,#833ab4 100%);color:#fff;}
+  .fd-youtube .fd-btn{background:#ff0000;color:#fff;}
+  .fd-kakao .fd-btn{background:#fee500;color:#191919;}
+  .fd-call .fd-btn{background:var(--accent-deep);color:#fff;}
   body.edit-mode #floatDock{display:none;}
   @media (max-width:640px){
-    #floatDock{right:16px;bottom:80px;gap:10px;}
-    .fd-btn{width:48px;height:48px;}
-    .fd-btn svg{width:22px;height:22px;}
-    .fd-btn .fd-tip{display:none;}
+    #floatDock{right:12px;bottom:80px;gap:8px;}
+    .fd-btn{width:44px;height:44px;}
+    .fd-btn svg{width:20px;height:20px;}
+    .fd-label{font-size:10.5px;padding:4px 7px;}
   }
-  @media (prefers-reduced-motion:reduce){ .fd-btn{transition:none;} .fd-btn:hover{transform:none;} }
+  @media (prefers-reduced-motion:reduce){ .fd-btn{transition:none;} .fd-item:hover .fd-btn{transform:none;} }
   .modal-overlay{
     position:fixed;inset:0;background:rgba(10,14,20,.6);z-index:300;
     display:none;align-items:center;justify-content:center;padding:20px;
@@ -583,21 +594,21 @@
 </footer>
 
 <nav id="floatDock" aria-label="빠른 연락">
-  <a class="fd-btn fd-insta" id="fdInsta" href="#" target="_blank" rel="noopener" aria-label="인스타그램">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.7l1.3-2h5l1.3 2h1.7A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
-    <span class="fd-tip">인스타그램</span>
+  <a class="fd-item fd-youtube" id="fdYoutube" href="#" target="_blank" rel="noopener" aria-label="유튜브">
+    <span class="fd-btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 6.2v11.6a.8.8 0 0 0 1.2.7l9.3-5.8a.8.8 0 0 0 0-1.4L9.7 5.5a.8.8 0 0 0-1.2.7z"/></svg></span>
+    <span class="fd-label">유튜브</span>
   </a>
-  <a class="fd-btn fd-youtube" id="fdYoutube" href="#" target="_blank" rel="noopener" aria-label="유튜브">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 6.2v11.6a.8.8 0 0 0 1.2.7l9.3-5.8a.8.8 0 0 0 0-1.4L9.7 5.5a.8.8 0 0 0-1.2.7z"/></svg>
-    <span class="fd-tip">유튜브</span>
+  <a class="fd-item fd-kakao" id="fdKakao" href="#" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+    <span class="fd-btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4C7 4 3 7.1 3 11c0 2.5 1.7 4.7 4.2 5.9l-.9 3.3c-.1.4.3.7.6.5l3.9-2.6c.4 0 .8.1 1.2.1 5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg></span>
+    <span class="fd-label">카카오톡 문의</span>
   </a>
-  <a class="fd-btn fd-kakao" id="fdKakao" href="#" target="_blank" rel="noopener" aria-label="카카오톡 상담">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7 4 3 7.1 3 11c0 2.5 1.7 4.7 4.2 5.9l-.9 3.3c-.1.4.3.7.6.5l3.9-2.6c.4 0 .8.1 1.2.1 5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg>
-    <span class="fd-tip">카카오톡 상담</span>
+  <a class="fd-item fd-insta" id="fdInsta" href="#" target="_blank" rel="noopener" aria-label="인스타그램">
+    <span class="fd-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.7l1.3-2h5l1.3 2h1.7A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg></span>
+    <span class="fd-label">인스타그램</span>
   </a>
-  <a class="fd-btn fd-call" id="fdCall" href="tel:" aria-label="전화 걸기">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 3.5c.5-.2 1.1 0 1.4.5l1.8 3c.3.5.2 1.1-.2 1.5l-1.5 1.3a11.6 11.6 0 0 0 6.1 6.1l1.3-1.5c.4-.4 1-.5 1.5-.2l3 1.8c.5.3.7.9.5 1.4l-.8 2.1c-.3.8-1.1 1.3-2 1.2C9.9 20.1 3.9 14.1 3.3 6.3c-.1-.9.4-1.7 1.2-2z"/></svg>
-    <span class="fd-tip">전화 상담</span>
+  <a class="fd-item fd-call" id="fdCall" href="tel:" aria-label="전화 문의">
+    <span class="fd-btn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 3.5c.5-.2 1.1 0 1.4.5l1.8 3c.3.5.2 1.1-.2 1.5l-1.5 1.3a11.6 11.6 0 0 0 6.1 6.1l1.3-1.5c.4-.4 1-.5 1.5-.2l3 1.8c.5.3.7.9.5 1.4l-.8 2.1c-.3.8-1.1 1.3-2 1.2C9.9 20.1 3.9 14.1 3.3 6.3c-.1-.9.4-1.7 1.2-2z"/></svg></span>
+    <span class="fd-label">전화 문의</span>
   </a>
 </nav>
 <div id="adminFab" title="관리자">⚙</div>
@@ -984,7 +995,7 @@
 
   /* ---------------- login ---------------- */
   document.getElementById('floatDock').addEventListener('click', function(e){
-    var a = e.target.closest('.fd-btn');
+    var a = e.target.closest('.fd-item');
     if(a && a.getAttribute('data-empty')){
       e.preventDefault();
       toast(a.getAttribute('aria-label') + ' 링크는 준비 중입니다.');
