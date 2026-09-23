@@ -119,10 +119,12 @@
   details>summary:hover>.sum-right>.open-hint{background:var(--accent-deep);color:#fff;}
   details>summary:focus-visible{outline:2px solid var(--accent-deep);outline-offset:-2px;}
   details.stock-model .open-hint{font-size:11px;padding:3px 9px;}
-  #evModelWrap{display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-  #evModelWrap label{font-size:13px;font-weight:600;color:#3a3f45;}
-  #evModelSelect{padding:9px 12px;border:1px solid var(--line-soft);border-radius:6px;font-size:14px;background:#fff;min-width:240px;max-width:100%;}
-  #evModelInfo{font-size:12.5px;color:#888;}
+  .ev-model-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .ev-model-table th{padding:14px 20px;text-align:left;border-bottom:2px solid var(--line-soft);white-space:nowrap;}
+  .ev-model-table td{padding:10px 20px;border-bottom:1px solid var(--line-soft);}
+  .ev-model-table td.ev-region{font-weight:600;vertical-align:top;background:#faf9f6;white-space:nowrap;border-right:1px solid var(--line-soft);}
+  .ev-model-table tr.ev-group-start td{border-top:2px solid var(--line-soft);}
+  .ev-model-table td.ev-model{white-space:nowrap;}
 
   /* ---------- video ---------- */
   .video-section{background:var(--navy);color:var(--white);}
@@ -457,11 +459,6 @@
       </div>
       <p class="desc" id="evSubsidyDesc"></p>
     </div>
-    <div id="evModelWrap">
-      <label for="evModelSelect">모델 선택</label>
-      <select id="evModelSelect"></select>
-      <span id="evModelInfo"></span>
-    </div>
     <div class="contact-card" style="padding:8px 0;overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <thead><tr style="text-align:left;border-bottom:2px solid var(--line-soft);">
@@ -469,6 +466,16 @@
         </tr></thead>
         <tbody id="evSubsidyBody"></tbody>
       </table>
+    </div>
+    <div id="evModelSection" style="display:none;margin-top:36px;">
+      <h3 style="font-family:var(--serif);font-size:20px;margin:0 0 6px;">모델별 보조금</h3>
+      <p style="font-size:13px;color:#888;margin:0 0 14px;">같은 시·도 안에서도 시·군·구마다 지방비가 달라 금액은 범위로 표시됩니다.</p>
+      <div class="contact-card" style="padding:8px 0;overflow-x:auto;">
+        <table class="ev-model-table">
+          <thead><tr><th>지역</th><th>모델명</th><th>국비</th><th>지방비</th><th>합계</th></tr></thead>
+          <tbody id="evModelBody"></tbody>
+        </table>
+      </div>
     </div>
     <p style="font-size:12.5px;color:#888;margin-top:14px;">업데이트: <span id="evSubsidyUpdated"></span> · <a href="#" id="evOfficialLink" target="_blank" rel="noopener" style="color:var(--accent-deep);border-bottom:1px solid currentColor;">환경부 무공해차 통합누리집에서 실시간 확인 →</a></p>
   </div>
@@ -692,7 +699,6 @@
     cur[/^\d+$/.test(last)?parseInt(last,10):last] = val;
   }
 
-  var EV_MODEL = ''; // 보조금 표에서 선택된 모델명 (빈 값 = 전체)
   function ed(path, opts){
     if(!EDIT) return '';
     opts = opts || {};
@@ -708,6 +714,7 @@
     return EDIT ? '<div class="add-tile '+(extraClass||'')+'" data-addarr="'+arr+'">+ '+esc(label)+' 추가</div>' : '';
   }
 
+  var REGION_ORDER = ["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주","공단"];
   function render(){
     document.body.classList.toggle('edit-mode', EDIT);
 
@@ -849,48 +856,17 @@
     var evd = document.getElementById('evSubsidyDesc'); evd.textContent = CONTENT.evSubsidyNote; setEditable(evd,'evSubsidyNote',true);
     var evu = document.getElementById('evSubsidyUpdated'); evu.textContent = CONTENT.evSubsidyUpdated; setEditable(evu,'evSubsidyUpdated');
     document.getElementById('evOfficialLink').href = CONTENT.evOfficialUrl || 'https://www.ev.or.kr';
-    // 모델 선택 드롭다운
-    var evModels = CONTENT.evSubsidyModels || [];
-    var evSel = document.getElementById('evModelSelect');
-    var evWrap = document.getElementById('evModelWrap');
-    if(EV_MODEL && !evModels.some(function(m){ return m.model===EV_MODEL; })) EV_MODEL = '';
-    if(evModels.length){
-      evWrap.style.display = 'flex';
-      evSel.innerHTML = '<option value="">BMW 전체 모델 (금액 범위)</option>' + evModels.map(function(m){
-        return '<option value="'+esc(m.model)+'">'+esc(m.model)+'</option>';
-      }).join('');
-      evSel.value = EV_MODEL;
-      document.getElementById('evModelInfo').textContent = EV_MODEL ? '' : '보조금 대상 모델 '+evModels.length+'개';
-    } else {
-      evWrap.style.display = 'none';
-      EV_MODEL = '';
-    }
-    var curModel = EV_MODEL ? evModels.filter(function(m){ return m.model===EV_MODEL; })[0] : null;
-    document.getElementById('evTotalHead').textContent = curModel ? '합계('+curModel.model+')' : '합계(BMW 기준)';
-    if(curModel){
-      var remainMap = {};
-      (CONTENT.evSubsidyRows||[]).forEach(function(r){ remainMap[r.region] = r.remain; });
-      document.getElementById('evSubsidyBody').innerHTML = (curModel.rows||[]).map(function(r){
-        return '<tr style="border-bottom:1px solid var(--line-soft);">' +
-          '<td style="padding:12px 24px;">'+esc(r.region)+'</td>' +
-          '<td style="padding:12px 24px;">'+esc(r.national||'-')+'</td>' +
-          '<td style="padding:12px 24px;">'+esc(r.local||'-')+'</td>' +
-          '<td style="padding:12px 24px;font-weight:600;">'+esc(r.total||'-')+'</td>' +
-          '<td style="padding:12px 24px;">'+esc(remainMap[r.region]||'-')+'</td></tr>';
-      }).join('');
-    } else {
-      document.getElementById('evSubsidyBody').innerHTML = (CONTENT.evSubsidyRows||[]).map(function(r,i){
-        return '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
-          '<td style="padding:12px 24px;position:relative;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span></td>' +
-          '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
-          '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
-          '<td style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td>' +
-          '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.remain')+'>'+esc(r.remain||'-')+'</span></td></tr>';
-      }).join('');
-    }
+    document.getElementById('evSubsidyBody').innerHTML = (CONTENT.evSubsidyRows||[]).map(function(r,i){
+      return '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
+        '<td style="padding:12px 24px;position:relative;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span></td>' +
+        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
+        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
+        '<td style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td>' +
+        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.remain')+'>'+esc(r.remain||'-')+'</span></td></tr>';
+    }).join('');
     var evAddRow = document.getElementById('evAddRow');
     if(evAddRow) evAddRow.remove();
-    if(EDIT && !curModel){
+    if(EDIT){
       var evTable = document.getElementById('evSubsidyBody').closest('table');
       var addRowBtn = document.createElement('div');
       addRowBtn.id = 'evAddRow';
@@ -900,6 +876,33 @@
       addRowBtn.textContent = '+ 지역 추가';
       evTable.parentElement.appendChild(addRowBtn);
     }
+
+    // 모델별 보조금 전체 표 (지역별로 묶어서 모든 모델 표시, MINI 제외)
+    (function renderEvModels(){
+      var models = (CONTENT.evSubsidyModels||[]).filter(function(m){ return !/^\s*mini/i.test(m.model||''); });
+      var section = document.getElementById('evModelSection');
+      if(!models.length){ section.style.display = 'none'; return; }
+      section.style.display = '';
+      var byRegion = {};
+      models.forEach(function(m){
+        (m.rows||[]).forEach(function(r){
+          if(!byRegion[r.region]) byRegion[r.region] = [];
+          byRegion[r.region].push({model:m.model, national:r.national, local:r.local, total:r.total});
+        });
+      });
+      var html = sortRegions(Object.keys(byRegion)).map(function(region){
+        var list = byRegion[region];
+        return list.map(function(it, k){
+          return '<tr'+(k===0?' class="ev-group-start"':'')+'>' +
+            (k===0 ? '<td class="ev-region" rowspan="'+list.length+'">'+esc(region)+'</td>' : '') +
+            '<td class="ev-model">'+esc(it.model)+'</td>' +
+            '<td>'+esc(it.national||'-')+'</td>' +
+            '<td>'+esc(it.local||'-')+'</td>' +
+            '<td style="font-weight:600;">'+esc(it.total||'-')+'</td></tr>';
+        }).join('');
+      }).join('');
+      document.getElementById('evModelBody').innerHTML = html;
+    })();
 
     var svcForm = document.getElementById('serviceForm');
     if(svcForm && CONTENT.serviceFormEmail){
@@ -1172,7 +1175,6 @@
   });
 
   /* ---------------- 환경부 무공해차 보조금 엑셀 업로드 (원본 파일 그대로 업로드, 필요한 부분만 자동 추출) ---------------- */
-  var REGION_ORDER = ["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주","공단"];
   function findSheetByKeyword(wb, keywords){
     for(var i=0;i<wb.SheetNames.length;i++){
       var name = wb.SheetNames[i];
@@ -1224,10 +1226,6 @@
       return a.localeCompare(b);
     });
   }
-  document.getElementById('evModelSelect').addEventListener('change', function(){
-    EV_MODEL = this.value;
-    render();
-  });
   function parseSubsidyExcel(file){
     var reader = new FileReader();
     reader.onload = function(e){
@@ -1260,6 +1258,8 @@
           if(String(row['제조사']||'').trim() !== 'BMW') return;
           var region = String(row['시도']||'').trim();
           if(!region) return;
+          var mname = modelKey ? String(row[modelKey]||'').trim() : '';
+          if(/^mini/i.test(mname)) return; // MINI로 시작하는 모델은 제외
           var nat = Number(row['국비(만원)']);
           var loc = Number(row['지방비(만원)']);
           var tot = Number(row['전환 포함 총액(만원)']);
@@ -1268,7 +1268,6 @@
           if(!isNaN(loc)) bmwByRegion[region].loc.push(loc);
           if(!isNaN(tot)) bmwByRegion[region].tot.push(tot);
           if(modelKey){
-            var mname = String(row[modelKey]||'').trim();
             if(mname){
               if(!byModel[mname]){ byModel[mname] = {}; modelOrder.push(mname); }
               if(!byModel[mname][region]) byModel[mname][region] = {nat:[], loc:[], tot:[]};
@@ -1295,8 +1294,7 @@
         });
         CONTENT.evSubsidyRows = rows;
         CONTENT.evSubsidyModels = models;
-        EV_MODEL = '';
-        CONTENT.evSubsidyUpdated = new Date().toISOString().slice(0,10) + ' 기준 (환경부 파일 업로드, BMW·MINI 전 모델 범위)';
+        CONTENT.evSubsidyUpdated = new Date().toISOString().slice(0,10) + ' 기준 (환경부 파일 업로드, BMW 전 모델 범위, MINI 제외)';
         saveContent();
         render();
         toast(rows.length + "개 지역" + (models.length ? ", " + models.length + "개 모델" : "") + "의 BMW 보조금 정보가 자동으로 업데이트되었습니다." + (modelKey ? "" : " (모델명 열을 찾지 못해 모델 선택은 제외됨)"));
