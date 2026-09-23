@@ -355,8 +355,8 @@
   "sePortrait": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop",
   "seBio": "BMW 공식 딜러 노도희는 고객 한 분 한 분의 구매 여정을 끝까지 동행합니다. 프로모션 조합부터 출고 후 사후관리까지, 투명하게 공유하고 함께 결정합니다.",
   "phone": "010-3583-2532",
-  "kakaoUrl": "",
-  "instagramUrl": "",
+  "kakaoUrl": "https://open.kakao.com/o/sTgOlxXg",
+  "instagramUrl": "https://www.instagram.com/bmw_dohee/",
   "address": "경기도 고양시 덕양구 고양대로 1972-5 (동산동) 10596",
   "naverBookingUrl": "",
   "blogUrl": "",
@@ -777,6 +777,8 @@
   var REGION_ORDER = ["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주","공단"];
   function render(){
     document.body.classList.toggle('edit-mode', EDIT);
+    // 저장된 값이 비어 있으면 기본 링크 사용
+    ['kakaoUrl','instagramUrl','youtubeChannelUrl'].forEach(function(k){ if(!CONTENT[k]) CONTENT[k] = DEFAULT_CONTENT[k]; });
 
     var hd = document.getElementById('hdBrand');
     hd.textContent = CONTENT.brandName; hd.setAttribute && (EDIT ? hd.setAttribute('contenteditable','true') : hd.removeAttribute('contenteditable'));
@@ -966,7 +968,7 @@
     document.getElementById('adminFab').style.display = EDIT ? 'none' : 'inline-flex';
 
     // 플로팅 연락 버튼 링크
-    [['fdInsta', CONTENT.instagramUrl], ['fdYoutube', CONTENT.youtubeChannelUrl], ['fdKakao', CONTENT.kakaoUrl]].forEach(function(pair){
+    [['fdInsta', CONTENT.instagramUrl || DEFAULT_CONTENT.instagramUrl], ['fdYoutube', CONTENT.youtubeChannelUrl || DEFAULT_CONTENT.youtubeChannelUrl], ['fdKakao', CONTENT.kakaoUrl]].forEach(function(pair){
       var a = document.getElementById(pair[0]);
       var url = (pair[1]||'').trim();
       a.href = url || '#';
