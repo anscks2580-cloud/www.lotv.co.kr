@@ -27,6 +27,7 @@
     -webkit-font-smoothing:antialiased;
   }
   img{max-width:100%;display:block;}
+  body{word-break:keep-all;overflow-wrap:break-word;}
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
 
@@ -62,7 +63,7 @@
   .hero-bg{position:absolute;inset:0;}
   .hero-bg img,.hero-bg video{width:100%;height:100%;object-fit:cover;opacity:.55;}
   .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,22,40,.96) 5%,rgba(10,22,40,.35) 55%,rgba(10,22,40,.15) 100%);}
-  .hero-content{position:relative;padding:120px 0 72px;width:100%;}
+  .hero-content{position:relative;padding-top:120px;padding-bottom:72px;width:100%;}
   .hero-eyebrow{font-size:13px;color:var(--accent);letter-spacing:.04em;margin:0 0 18px;}
   .hero h1{
     font-family:var(--serif);font-weight:500;font-size:clamp(38px,6vw,64px);
@@ -271,7 +272,7 @@
   [contenteditable="true"]{outline:1px dashed transparent;border-radius:2px;cursor:text;}
   [contenteditable="true"]:hover{outline-color:rgba(90,169,230,.55);background:rgba(90,169,230,.08);}
   [contenteditable="true"]:focus{outline-color:var(--accent-deep);background:rgba(90,169,230,.12);}
-  .imgwrap,.hero-bg,.se-portrait{position:relative;}
+  .imgwrap,.se-portrait{position:relative;}
   .img-edit-btn{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     background:rgba(10,22,40,.85);color:#fff;border:1px solid rgba(255,255,255,.4);
@@ -332,6 +333,108 @@
   .dc-badge{font-weight:600;color:var(--accent-deep);position:relative;padding-right:24px;}
   .dc-badge .grid-del{top:-2px;right:-4px;width:20px;height:20px;font-size:10px;}
   .badge-add-tile{display:inline-block;font-size:12.5px;color:#888;border:1px dashed #c7c4b8;border-radius:4px;padding:3px 10px;cursor:pointer;margin-top:4px;}
+
+  /* ================= 모바일 정리 ================= */
+  @media (max-width:640px){
+    .wrap{padding-left:20px;padding-right:20px;}
+
+    /* 헤더 */
+    .nav{padding:10px 16px;gap:10px;}
+    .brand{gap:8px;min-width:0;}
+    .brand .mark{width:28px;height:28px;}
+    .brand .name{font-size:16px;line-height:1.15;}
+    .nav-cta{gap:6px;flex-shrink:0;}
+    .nav-cta .btn{padding:8px 11px;font-size:12.5px;white-space:nowrap;border-radius:4px;}
+
+    /* 섹션 공통 여백 */
+    section{padding:52px 0;}
+    .section-head{margin-bottom:22px;gap:8px;}
+    .section-head .label{font-size:12px;margin-bottom:6px;}
+    .section-head h2{font-size:24px;}
+    .section-head .desc{font-size:14px;margin:0;}
+
+    /* 상단 명함 + 영상 */
+    .dealer-card-section{padding:20px 0 24px;}
+    .top-grid{gap:14px;}
+    .dealer-card{padding:22px 20px;gap:14px;}
+    .dc-company{font-size:21px;}
+    .dc-sub{margin-bottom:14px;}
+    .dc-name{font-size:28px;}
+    .video-card{padding:22px 20px;}
+    .video-card h2,.video-card h3{font-size:21px !important;}
+
+    /* 히어로 */
+    .hero{min-height:540px;}
+    .hero-content{padding-top:180px;padding-bottom:40px;}
+    .hero-eyebrow{font-size:12px;margin-bottom:12px;}
+    .hero h1{font-size:32px;line-height:1.18;max-width:none;margin-bottom:14px;}
+    .hero p.lead{font-size:15px;line-height:1.65;margin-bottom:24px;}
+    .hero-actions{gap:8px;}
+    .hero-actions .btn{flex:1 1 0;text-align:center;padding:12px 10px;font-size:13.5px;white-space:nowrap;}
+
+    /* 프로모션 띠 */
+    .promo .wrap{padding:14px 20px;gap:10px;}
+    .promo .msg{font-size:14px;min-width:0;flex-basis:100%;line-height:1.5;}
+
+    /* 트림 갤러리 */
+    .model-card .info{padding:14px 16px 18px;}
+    .model-card .info h3{font-size:18px;}
+    .models-grid{gap:12px;background:transparent;}
+
+    /* 즉시출고 */
+    #instockSearch{max-width:none !important;}
+    details.stock-group>summary{padding:14px;font-size:16px;gap:8px;}
+    details.stock-model>summary{padding:11px 14px 11px 20px;gap:8px;}
+    details.stock-model .stock-table{margin:0 12px 12px 20px;width:calc(100% - 32px);}
+    .stock-table th,.stock-table td{padding:10px 8px;font-size:13px;}
+    .sum-right{gap:8px;}
+
+    /* 전기차 보조금: 모바일에서는 표 → 지역별 카드 */
+    #evsubsidy .contact-card{padding:0 !important;overflow:visible !important;}
+    #evsubsidy table,#evsubsidy tbody,#evsubsidy tr,#evsubsidy td{display:block;width:100%;}
+    #evsubsidy thead{display:none;}
+    #evsubsidy tr.ev-row{display:grid !important;grid-template-columns:1fr 1fr;gap:10px 14px;padding:16px;}
+    #evsubsidy tr.ev-row>td{padding:0 !important;font-size:14px;white-space:normal;}
+    #evsubsidy tr.ev-row>td.ev-region-cell{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16px;font-weight:700;}
+    #evsubsidy td[data-label]::before{content:attr(data-label);display:block;font-size:11.5px;font-weight:500;color:#8a929c;margin-bottom:3px;}
+    .ev-toggle{margin:0;font-size:11.5px;padding:5px 10px;}
+    #evsubsidy tr.ev-detail>td{padding:0 12px 14px !important;background:#faf9f6;}
+    #evsubsidy tr.ev-detail{border-bottom:1px solid var(--line-soft);}
+    #evsubsidy tr[hidden]{display:none !important;}
+    .ev-model-table{border-radius:6px;overflow:hidden;}
+    .ev-model-table tr{display:grid !important;grid-template-columns:repeat(3,1fr);gap:6px 10px;padding:12px 14px;border-bottom:1px solid var(--line-soft);}
+    .ev-model-table tr:last-child{border-bottom:none;}
+    .ev-model-table td{padding:0 !important;border:none !important;font-size:13px;white-space:normal !important;}
+    .ev-model-table td.ev-mname{grid-column:1/-1;font-weight:700;font-size:14px;color:#1a1f26;}
+    .ev-model-table td[data-label]::before{font-size:10.5px !important;}
+
+    /* 서비스센터 신청서 */
+    #serviceForm{padding:22px 18px !important;}
+
+    /* 후기 */
+    .review-track{gap:12px;margin-right:-20px;padding-right:20px;scroll-snap-type:x mandatory;}
+    .review-card{flex:0 0 82%;padding:22px 20px;scroll-snap-align:start;}
+    .review-card p{min-height:0;font-size:14px;}
+
+    /* 연락처 */
+    .contact-grid{gap:28px;}
+    .contact-card{padding:6px 18px;}
+    .contact-card .row{gap:16px;font-size:14px;}
+    .contact-card .row .k{flex-shrink:0;white-space:nowrap;}
+    .contact-card .row>*:last-child{text-align:right;}
+    .se-portrait{aspect-ratio:4/5;}
+    .se-name{font-size:23px;margin-top:16px;}
+
+    /* 푸터 (플로팅 버튼에 가리지 않게 오른쪽 여유) */
+    footer{padding:32px 0 28px;}
+    footer .wrap{padding-right:88px;gap:14px;font-size:12.5px;line-height:1.6;}
+    footer .flinks{gap:10px 14px;align-items:center;}
+
+    /* 모달 */
+    .modal-overlay{padding:12px;}
+    .modal-body{padding:18px;}
+    .modal-head{padding:16px 18px;}
+  }
 </style>
 </head>
 <body>
@@ -938,17 +1041,17 @@
       var list = evByRegion[r.region] || [];
       var open = !!EV_OPEN[r.region];
       var toggle = list.length ? '<button type="button" class="ev-toggle" data-evregion="'+esc(r.region)+'" aria-expanded="'+open+'">모델 '+list.length+'개 확인하기</button>' : '';
-      var row = '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
-        '<td style="padding:12px 24px;position:relative;white-space:nowrap;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span>'+toggle+'</td>' +
-        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
-        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
-        '<td style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td>' +
-        '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.remain')+'>'+esc(r.remain||'-')+'</span></td></tr>';
+      var row = '<tr class="ev-row" style="border-bottom:1px solid var(--line-soft);position:relative;">' +
+        '<td class="ev-region-cell" style="padding:12px 24px;position:relative;white-space:nowrap;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span>'+toggle+'</td>' +
+        '<td data-label="국비" style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
+        '<td data-label="지방비" style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
+        '<td data-label="합계(BMW 기준)" style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td>' +
+        '<td data-label="잔여대수" style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.remain')+'>'+esc(r.remain||'-')+'</span></td></tr>';
       if(!list.length) return row;
       var detail = '<tr class="ev-detail" data-evdetail="'+esc(r.region)+'"'+(open?'':' hidden')+'><td colspan="5">' +
         '<table class="ev-model-table"><thead><tr><th>모델명</th><th>국비</th><th>지방비</th><th>합계</th></tr></thead><tbody>' +
         list.map(function(it){
-          return '<tr><td>'+esc(it.model)+'</td><td>'+esc(it.national||'-')+'</td><td>'+esc(it.local||'-')+'</td><td style="font-weight:600;">'+esc(it.total||'-')+'</td></tr>';
+          return '<tr><td class="ev-mname">'+esc(it.model)+'</td><td data-label="국비">'+esc(it.national||'-')+'</td><td data-label="지방비">'+esc(it.local||'-')+'</td><td data-label="합계" style="font-weight:600;">'+esc(it.total||'-')+'</td></tr>';
         }).join('') +
         '</tbody></table></td></tr>';
       return row + detail;
