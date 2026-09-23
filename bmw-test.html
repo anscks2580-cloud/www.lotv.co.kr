@@ -119,12 +119,16 @@
   details>summary:hover>.sum-right>.open-hint{background:var(--accent-deep);color:#fff;}
   details>summary:focus-visible{outline:2px solid var(--accent-deep);outline-offset:-2px;}
   details.stock-model .open-hint{font-size:11px;padding:3px 9px;}
-  .ev-model-table{width:100%;border-collapse:collapse;font-size:14px;}
-  .ev-model-table th{padding:14px 20px;text-align:left;border-bottom:2px solid var(--line-soft);white-space:nowrap;}
-  .ev-model-table td{padding:10px 20px;border-bottom:1px solid var(--line-soft);}
-  .ev-model-table td.ev-region{font-weight:600;vertical-align:top;background:#faf9f6;white-space:nowrap;border-right:1px solid var(--line-soft);}
-  .ev-model-table tr.ev-group-start td{border-top:2px solid var(--line-soft);}
-  .ev-model-table td.ev-model{white-space:nowrap;}
+  .ev-toggle{display:inline-flex;align-items:center;gap:4px;margin-left:10px;font-family:inherit;font-size:12px;font-weight:600;color:var(--accent-deep);background:transparent;border:1px solid var(--accent-deep);border-radius:999px;padding:4px 10px;line-height:1;cursor:pointer;white-space:nowrap;vertical-align:middle;transition:background .15s,color .15s;}
+  .ev-toggle::after{content:'▾';font-size:11px;}
+  .ev-toggle[aria-expanded="true"]::after{content:'▴';}
+  .ev-toggle:hover,.ev-toggle[aria-expanded="true"]{background:var(--accent-deep);color:#fff;}
+  .ev-toggle:focus-visible{outline:2px solid var(--accent-deep);outline-offset:2px;}
+  tr.ev-detail>td{padding:0 24px 18px;background:#faf9f6;border-bottom:1px solid var(--line-soft);}
+  .ev-model-table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--line-soft);border-radius:6px;}
+  .ev-model-table th{padding:10px 16px;text-align:left;font-size:12px;color:#888;font-weight:600;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
+  .ev-model-table td{padding:9px 16px;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
+  .ev-model-table tr:last-child td{border-bottom:none;}
 
   /* ---------- video ---------- */
   .video-section{background:var(--navy);color:var(--white);}
@@ -467,16 +471,6 @@
         <tbody id="evSubsidyBody"></tbody>
       </table>
     </div>
-    <div id="evModelSection" style="display:none;margin-top:36px;">
-      <h3 style="font-family:var(--serif);font-size:20px;margin:0 0 6px;">모델별 보조금</h3>
-      <p style="font-size:13px;color:#888;margin:0 0 14px;">같은 시·도 안에서도 시·군·구마다 지방비가 달라 금액은 범위로 표시됩니다.</p>
-      <div class="contact-card" style="padding:8px 0;overflow-x:auto;">
-        <table class="ev-model-table">
-          <thead><tr><th>지역</th><th>모델명</th><th>국비</th><th>지방비</th><th>합계</th></tr></thead>
-          <tbody id="evModelBody"></tbody>
-        </table>
-      </div>
-    </div>
     <p style="font-size:12.5px;color:#888;margin-top:14px;">업데이트: <span id="evSubsidyUpdated"></span> · <a href="#" id="evOfficialLink" target="_blank" rel="noopener" style="color:var(--accent-deep);border-bottom:1px solid currentColor;">환경부 무공해차 통합누리집에서 실시간 확인 →</a></p>
   </div>
 </section>
@@ -714,6 +708,7 @@
     return EDIT ? '<div class="add-tile '+(extraClass||'')+'" data-addarr="'+arr+'">+ '+esc(label)+' 추가</div>' : '';
   }
 
+  var EV_OPEN = {}; // 보조금 표에서 펼쳐둔 지역
   var REGION_ORDER = ["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주","공단"];
   function render(){
     document.body.classList.toggle('edit-mode', EDIT);
@@ -856,13 +851,33 @@
     var evd = document.getElementById('evSubsidyDesc'); evd.textContent = CONTENT.evSubsidyNote; setEditable(evd,'evSubsidyNote',true);
     var evu = document.getElementById('evSubsidyUpdated'); evu.textContent = CONTENT.evSubsidyUpdated; setEditable(evu,'evSubsidyUpdated');
     document.getElementById('evOfficialLink').href = CONTENT.evOfficialUrl || 'https://www.ev.or.kr';
+    // 지역별 모델 목록 (MINI 제외)
+    var evByRegion = {};
+    (CONTENT.evSubsidyModels||[]).forEach(function(m){
+      if(/^\s*mini/i.test(m.model||'')) return;
+      (m.rows||[]).forEach(function(r){
+        if(!evByRegion[r.region]) evByRegion[r.region] = [];
+        evByRegion[r.region].push({model:m.model, national:r.national, local:r.local, total:r.total});
+      });
+    });
     document.getElementById('evSubsidyBody').innerHTML = (CONTENT.evSubsidyRows||[]).map(function(r,i){
-      return '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
-        '<td style="padding:12px 24px;position:relative;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span></td>' +
+      var list = evByRegion[r.region] || [];
+      var open = !!EV_OPEN[r.region];
+      var toggle = list.length ? '<button type="button" class="ev-toggle" data-evregion="'+esc(r.region)+'" aria-expanded="'+open+'">모델 '+list.length+'개 확인하기</button>' : '';
+      var row = '<tr style="border-bottom:1px solid var(--line-soft);position:relative;">' +
+        '<td style="padding:12px 24px;position:relative;white-space:nowrap;">'+delBtn('evSubsidyRows',i)+'<span'+ed('evSubsidyRows.'+i+'.region')+'>'+esc(r.region)+'</span>'+toggle+'</td>' +
         '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.national')+'>'+esc(r.national||'-')+'</span></td>' +
         '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.local')+'>'+esc(r.local||'-')+'</span></td>' +
         '<td style="padding:12px 24px;font-weight:600;"><span'+ed('evSubsidyRows.'+i+'.total')+'>'+esc(r.total||'-')+'</span></td>' +
         '<td style="padding:12px 24px;"><span'+ed('evSubsidyRows.'+i+'.remain')+'>'+esc(r.remain||'-')+'</span></td></tr>';
+      if(!list.length) return row;
+      var detail = '<tr class="ev-detail" data-evdetail="'+esc(r.region)+'"'+(open?'':' hidden')+'><td colspan="5">' +
+        '<table class="ev-model-table"><thead><tr><th>모델명</th><th>국비</th><th>지방비</th><th>합계</th></tr></thead><tbody>' +
+        list.map(function(it){
+          return '<tr><td>'+esc(it.model)+'</td><td>'+esc(it.national||'-')+'</td><td>'+esc(it.local||'-')+'</td><td style="font-weight:600;">'+esc(it.total||'-')+'</td></tr>';
+        }).join('') +
+        '</tbody></table></td></tr>';
+      return row + detail;
     }).join('');
     var evAddRow = document.getElementById('evAddRow');
     if(evAddRow) evAddRow.remove();
@@ -876,33 +891,6 @@
       addRowBtn.textContent = '+ 지역 추가';
       evTable.parentElement.appendChild(addRowBtn);
     }
-
-    // 모델별 보조금 전체 표 (지역별로 묶어서 모든 모델 표시, MINI 제외)
-    (function renderEvModels(){
-      var models = (CONTENT.evSubsidyModels||[]).filter(function(m){ return !/^\s*mini/i.test(m.model||''); });
-      var section = document.getElementById('evModelSection');
-      if(!models.length){ section.style.display = 'none'; return; }
-      section.style.display = '';
-      var byRegion = {};
-      models.forEach(function(m){
-        (m.rows||[]).forEach(function(r){
-          if(!byRegion[r.region]) byRegion[r.region] = [];
-          byRegion[r.region].push({model:m.model, national:r.national, local:r.local, total:r.total});
-        });
-      });
-      var html = sortRegions(Object.keys(byRegion)).map(function(region){
-        var list = byRegion[region];
-        return list.map(function(it, k){
-          return '<tr'+(k===0?' class="ev-group-start"':'')+'>' +
-            (k===0 ? '<td class="ev-region" rowspan="'+list.length+'">'+esc(region)+'</td>' : '') +
-            '<td class="ev-model">'+esc(it.model)+'</td>' +
-            '<td>'+esc(it.national||'-')+'</td>' +
-            '<td>'+esc(it.local||'-')+'</td>' +
-            '<td style="font-weight:600;">'+esc(it.total||'-')+'</td></tr>';
-        }).join('');
-      }).join('');
-      document.getElementById('evModelBody').innerHTML = html;
-    })();
 
     var svcForm = document.getElementById('serviceForm');
     if(svcForm && CONTENT.serviceFormEmail){
@@ -1305,6 +1293,19 @@
     };
     reader.readAsArrayBuffer(file);
   }
+  document.getElementById('evSubsidyBody').addEventListener('click', function(e){
+    var btn = e.target.closest('.ev-toggle');
+    if(!btn) return;
+    e.preventDefault();
+    var region = btn.getAttribute('data-evregion');
+    var open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    var rows = this.querySelectorAll('tr.ev-detail');
+    for(var k=0;k<rows.length;k++){
+      if(rows[k].getAttribute('data-evdetail') === region) rows[k].hidden = !open;
+    }
+    if(open) EV_OPEN[region] = true; else delete EV_OPEN[region];
+  });
   document.getElementById('hiddenSubsidyInput').addEventListener('change', function(e){
     var f = e.target.files[0];
     if(f) parseSubsidyExcel(f);
