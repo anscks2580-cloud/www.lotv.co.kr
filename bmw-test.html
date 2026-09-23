@@ -1148,12 +1148,44 @@
         '<div class="field"><label>네이버 실시간예약 링크</label><input type="text" id="setBooking" value="'+esc(c.naverBookingUrl)+'"></div>' +
         '<div class="field"><label>블로그 링크</label><input type="text" id="setBlog" value="'+esc(c.blogUrl)+'"></div>' +
         '<div class="field"><label>서비스센터 신청서 접수 이메일</label><input type="text" id="setSvcEmail" value="'+esc(c.serviceFormEmail)+'">' +
-          '<small>저장 후 <b>최초 1회</b>, formsubmit.co에서 오는 확인 메일의 링크를 눌러야 활성화됩니다.</small></div>' +
+          '<button type="button" class="btn btn-ghost" id="setSvcVerify" style="margin-top:10px;color:var(--accent-deep);border-color:var(--accent-deep);">인증 메일 보내기</button>' +
+          '<div id="setSvcStatus" role="status" style="display:none;margin-top:10px;padding:12px 14px;border-radius:6px;font-size:13px;line-height:1.55;"></div>' +
+          '<small>이메일을 새로 넣거나 바꾼 경우 <b>인증 메일 보내기</b>를 누른 뒤, 메일함에서 FormSubmit의 <b>Activate Form</b> 버튼을 눌러야 접수 메일이 옵니다.</small></div>' +
         '<div class="field"><label>환경부 무공해차 통합누리집 링크</label><input type="text" id="setEvUrl" value="'+esc(c.evOfficialUrl)+'"></div>' +
         '<div class="field"><label>관리자 비밀번호 변경</label><input type="password" id="setPw" placeholder="새 비밀번호 (변경 시에만 입력)"></div>' +
       '</div>' +
       '<div class="modal-actions"><button class="btn btn-dark" id="setSave" style="width:100%;">저장</button></div>';
     document.getElementById('setClose').addEventListener('click', closeModal);
+    document.getElementById('setSvcVerify').addEventListener('click', function(){
+      var btn = this;
+      var email = document.getElementById('setSvcEmail').value.trim();
+      var st = document.getElementById('setSvcStatus');
+      function show(msg, ok){
+        st.style.display = 'block';
+        st.style.background = ok ? '#eef5fb' : '#fdf0ee';
+        st.style.color = ok ? '#1f4f7a' : '#a33a2c';
+        st.innerHTML = msg;
+      }
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ show('이메일 주소를 정확히 입력해주세요.', false); return; }
+      btn.disabled = true; var t = btn.textContent; btn.textContent = '보내는 중...';
+      var data = new FormData();
+      data.append('안내', '홈페이지 관리자 화면에서 보낸 접수 이메일 인증용 테스트입니다.');
+      data.append('_subject', '[서비스센터 입고 신청] 이메일 인증 테스트');
+      fetch('https://formsubmit.co/ajax/' + encodeURIComponent(email), {
+        method:'POST', headers:{'Accept':'application/json'}, body:data
+      }).then(function(r){ return r.json(); }).then(function(json){
+        if(json && String(json.success) === 'true'){
+          show('이미 인증된 이메일입니다. <b>'+esc(email)+'</b>로 테스트 메일을 보냈어요. 저장만 누르면 바로 사용할 수 있습니다.', true);
+        } else if(json && /activat/i.test(String(json.message||''))){
+          show('인증 메일을 보냈습니다. <b>'+esc(email)+'</b> 메일함(스팸함 포함)에서 FormSubmit의 <b>Activate Form</b> 버튼을 눌러주세요.<br>인증 후 아래 <b>저장</b>을 누르면 접수 메일이 이 주소로 옵니다.', true);
+        } else {
+          throw new Error((json && json.message) || '전송 실패');
+        }
+      }).catch(function(err){
+        console.error('인증 메일 전송 실패', err);
+        show('인증 메일을 보내지 못했습니다. 이메일 주소를 확인하거나 잠시 후 다시 시도해주세요.', false);
+      }).then(function(){ btn.disabled = false; btn.textContent = t; });
+    });
     document.getElementById('setSave').addEventListener('click', function(){
       CONTENT.promoLink = document.getElementById('setPromoLink').value.trim();
       CONTENT.kakaoUrl = document.getElementById('setKakao').value.trim();
