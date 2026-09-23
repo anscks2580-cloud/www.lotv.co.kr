@@ -360,7 +360,7 @@
   "address": "경기도 고양시 덕양구 고양대로 1972-5 (동산동) 10596",
   "naverBookingUrl": "",
   "blogUrl": "",
-  "serviceFormEmail": "your-email@example.com",
+  "serviceFormEmail": "smc1823@nate.com",
   "inStock": [
     {"model":"320i","trim":"스포츠","color":"미네랄 화이트","price":"₩58,900,000","note":"즉시 출고 가능","img":"https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop"},
     {"model":"X3","trim":"xDrive30d","color":"카본 블랙","price":"₩72,300,000","note":"이번 주 출고 가능","img":"https://images.unsplash.com/photo-1616422285623-13ff0162193c?q=80&w=1200&auto=format&fit=crop"}
@@ -779,6 +779,7 @@
     document.body.classList.toggle('edit-mode', EDIT);
     // 저장된 값이 비어 있으면 기본 링크 사용
     ['kakaoUrl','instagramUrl','youtubeChannelUrl'].forEach(function(k){ if(!CONTENT[k]) CONTENT[k] = DEFAULT_CONTENT[k]; });
+    if(!CONTENT.serviceFormEmail || CONTENT.serviceFormEmail === 'your-email@example.com') CONTENT.serviceFormEmail = DEFAULT_CONTENT.serviceFormEmail;
 
     var hd = document.getElementById('hdBrand');
     hd.textContent = CONTENT.brandName; hd.setAttribute && (EDIT ? hd.setAttribute('contenteditable','true') : hd.removeAttribute('contenteditable'));
