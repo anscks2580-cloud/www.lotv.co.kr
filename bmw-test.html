@@ -1010,7 +1010,12 @@
   var overlay = document.getElementById('modalOverlay');
   var box = document.getElementById('modalBox');
   var toastEl = document.getElementById('toast');
-  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(function(){toastEl.classList.remove('show');},2400); }
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, Math.min(8000, 2400 + String(msg).length * 60));
+  }
   function closeModal(){ overlay.classList.remove('open'); box.classList.remove('modal-sm'); }
   overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
 
@@ -1047,6 +1052,8 @@
       if(json && String(json.success) === 'true'){
         form.reset();
         showServiceDone();
+      } else if(json && /activat/i.test(String(json.message||''))){
+        toast('처음 쓰는 접수 이메일이라 인증이 필요합니다. ' + email + ' 메일함(스팸함 포함)에서 FormSubmit의 "Activate Form" 메일을 눌러주세요.');
       } else {
         throw new Error((json && json.message) || '전송 실패');
       }
