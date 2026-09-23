@@ -353,15 +353,22 @@
     .section-head h2{font-size:24px;}
     .section-head .desc{font-size:14px;margin:0;}
 
-    /* 상단 명함 + 영상 */
-    .dealer-card-section{padding:20px 0 24px;}
-    .top-grid{gap:14px;}
-    .dealer-card{padding:22px 20px;gap:14px;}
-    .dc-company{font-size:21px;}
-    .dc-sub{margin-bottom:14px;}
-    .dc-name{font-size:28px;}
-    .video-card{padding:22px 20px;}
-    .video-card h2,.video-card h3{font-size:21px !important;}
+    /* 상단: 이름/직함 → 유튜브 → 전화·이메일 순서 + 간격 축소 */
+    .dealer-card-section{padding:14px 0 22px;}
+    .top-grid{display:flex;flex-direction:column;gap:12px;}
+    .dealer-card{display:contents;}
+    .dc-main{order:1;border:1px solid var(--line-soft);border-radius:8px;padding:20px;}
+    .dc-company{font-size:20px;margin-bottom:2px;}
+    .dc-sub{margin-bottom:12px;}
+    .dc-name{font-size:27px;margin-bottom:6px;}
+    .dc-address{margin-top:10px;}
+    .video-card{order:2;padding:20px 18px;}
+    .video-card .label{margin:0 0 8px;}
+    .video-card h2{font-size:20px !important;}
+    .video-card .desc{margin-bottom:12px !important;}
+    .dc-right{order:3;display:flex;align-items:center;gap:16px;border:1px solid var(--line-soft);border-radius:8px;padding:16px 18px;}
+    .dc-right .dc-mark{margin-bottom:0;flex-shrink:0;}
+    .dc-contact-row{margin-bottom:4px;}
 
     /* 히어로 */
     .hero{min-height:540px;}
@@ -527,7 +534,7 @@
   <div class="wrap">
     <div class="top-grid">
       <div class="dealer-card">
-        <div>
+        <div class="dc-main">
           <p class="dc-company" id="dcCompany"></p>
           <p class="dc-sub" id="dcSub"></p>
           <p class="dc-name" id="dcName"></p>
