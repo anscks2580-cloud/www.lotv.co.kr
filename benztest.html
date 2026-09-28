@@ -1135,9 +1135,12 @@
     }
     resolveChannelId(apiKey, idOrHandle).then(function(channelId){
       if(!channelId) throw new Error('채널을 찾지 못했습니다');
-      return ytApiGet('search', apiKey, {part:'snippet', channelId:channelId, order:'date', maxResults:'10', type:'video'});
+      // search API는 최신 업로드가 색인에 반영되기까지 며칠씩 지연될 수 있어,
+      // 실시간으로 반영되는 업로드 재생목록(uploads playlist)에서 직접 가져온다.
+      var uploadsPlaylistId = 'UU' + channelId.slice(2);
+      return ytApiGet('playlistItems', apiKey, {part:'contentDetails', playlistId:uploadsPlaylistId, maxResults:'15'});
     }).then(function(data){
-      var ids = (data.items||[]).map(function(it){ return it.id && it.id.videoId; }).filter(Boolean);
+      var ids = (data.items||[]).map(function(it){ return it.contentDetails && it.contentDetails.videoId; }).filter(Boolean);
       if(!ids.length) throw new Error('업로드된 영상이 없습니다');
       return ytApiGet('videos', apiKey, {part:'contentDetails', id:ids.join(',')}).then(function(vd){ return {ids:ids, items:vd.items||[]}; });
     }).then(function(res){
