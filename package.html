@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="LOTV 상품 안내 — Signature Snap, with Rico, for Baby 패키지와 추가 옵션.">
+<meta property="og:title" content="Package | LOTV 로토브 스냅">
+<title>Package | LOTV l 로토브 스냅</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=6">
+<script>document.documentElement.classList.add('js');</script>
+
+<style>
+/* 서브페이지 공통 머리(.page-head / .page-title / .page-sub)는 css/lotv.css */
+
+.packages { padding-bottom: var(--section); }
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(calc(16px * var(--s, 1)), 2vw, calc(28px * var(--s, 1)));
+  align-items: stretch;
+}
+/* 배경과 구분되는 흰색 카드 + 테두리 + 그림자 + 상단 포인트 라인 */
+.pkg-card {
+  padding: clamp(calc(32px * var(--s, 1)), 3.4vw, calc(48px * var(--s, 1))) clamp(calc(24px * var(--s, 1)), 2.6vw, calc(36px * var(--s, 1))) clamp(calc(36px * var(--s, 1)), 3.6vw, calc(48px * var(--s, 1)));
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-top: 2px solid var(--accent);
+  box-shadow: 0 calc(12px * var(--s, 1)) calc(32px * var(--s, 1)) rgba(40, 30, 20, 0.08), 0 2px calc(6px * var(--s, 1)) rgba(40, 30, 20, 0.04);
+  scroll-margin-top: calc(var(--header-h) + calc(24px * var(--s, 1)));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.pkg-card:hover {
+  transform: translateY(calc(-4px * var(--s, 1)));
+  box-shadow: 0 calc(18px * var(--s, 1)) calc(40px * var(--s, 1)) rgba(40, 30, 20, 0.12), 0 2px calc(8px * var(--s, 1)) rgba(40, 30, 20, 0.05);
+}
+.pkg-tag {
+  display: block;
+  margin-bottom: calc(24px * var(--s, 1));
+  font-size: calc(12px * var(--s, 1));
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+.pkg-name {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(calc(23px * var(--s, 1)), 2vw, calc(28px * var(--s, 1)));
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  min-height: 2.5em;
+}
+.pkg-price {
+  margin-top: calc(22px * var(--s, 1));
+  font-family: var(--title);
+  font-size: clamp(calc(21px * var(--s, 1)), 1.7vw, calc(24px * var(--s, 1)));
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+}
+.pkg-price-note {
+  margin-top: calc(4px * var(--s, 1));
+  font-size: calc(12.5px * var(--s, 1));
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.pkg-divider { height: 1px; background: var(--line); margin: calc(28px * var(--s, 1)) 0 calc(24px * var(--s, 1)); }
+.pkg-features { list-style: none; display: flex; flex-direction: column; gap: calc(10px * var(--s, 1)); }
+.pkg-features li {
+  position: relative;
+  padding-left: calc(16px * var(--s, 1));
+  font-size: calc(14.5px * var(--s, 1));
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+.pkg-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.9em;
+  width: calc(6px * var(--s, 1));
+  height: 1px;
+  background: var(--accent);
+}
+.pkg-option-label {
+  margin-top: calc(40px * var(--s, 1));
+  font-size: calc(13px * var(--s, 1));
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.pkg-option-label + .pkg-divider { margin: calc(12px * var(--s, 1)) 0 calc(18px * var(--s, 1)); }
+
+.pkg-note {
+  margin-top: calc(44px * var(--s, 1));
+  font-size: calc(13.5px * var(--s, 1));
+  line-height: 2;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+.pkg-cta { display: flex; gap: calc(12px * var(--s, 1)); flex-wrap: wrap; margin-top: calc(44px * var(--s, 1)); }
+.pkg-cta .btn { font-size: calc(13.5px * var(--s, 1)); }
+/* 이 페이지 머리 보조 문구(VAT 안내)도 +2 */
+body[data-page="package"] .page-sub { font-size: calc(13.5px * var(--s, 1)); }
+
+@media (max-width: 900px) {
+  .pkg-grid { grid-template-columns: 1fr; }
+  .pkg-name { min-height: 0; }
+}
+@media (max-width: 480px) {
+  .pkg-cta .btn { width: 100%; }
+}
+@media (hover: none) {
+  .pkg-card:hover { transform: none; }
+}
+</style>
+
+<script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body data-page="package">
+
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
+  </button>
+</header>
+
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <nav class="drawer-nav" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </nav>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <header class="page-head">
+    <div class="container">
+      <h1 class="page-title">Package</h1>
+      <p class="page-sub">모든 금액은 VAT 포함입니다.</p>
+    </div>
+  </header>
+
+  <section class="packages" aria-label="상품 안내">
+    <div class="container">
+      <div class="pkg-grid">
+
+        <!-- 메인 패키지 -->
+        <article class="pkg-card" id="signature">
+          <span class="pkg-tag">LOTV SNAP</span>
+          <h2 class="pkg-name">LOTV Signature<br>Snap</h2>
+          <p class="pkg-price">250,000원</p>
+          <p class="pkg-price-note">VAT 포함</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>예식 시작 약 60분 전 도착, 하객 맞이부터 플라워샤워까지</li>
+            <li>Polaroid 5장</li>
+            <li>Phone (iPhone 17 PRO &amp; XS) 및 Rico Camera 촬영</li>
+            <li>원본 600장 이상 전후 전체 전송</li>
+            <li>베스트컷 보정본 10장 전송</li>
+          </ul>
+          <p class="pkg-option-label">추가 옵션</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>Polaroid 추가 (5장 기준) &nbsp;+30,000원</li>
+            <li>호텔식 2부 추가 &nbsp;+50,000원</li>
+            <li>첫예식 연출컷 (30분 기준) &nbsp;+50,000원</li>
+          </ul>
+        </article>
+
+        <!-- 리코 메인 패키지 -->
+        <article class="pkg-card" id="rico">
+          <span class="pkg-tag">LOTV SNAP</span>
+          <h2 class="pkg-name">LOTV Signature<br>Snap with Rico</h2>
+          <p class="pkg-price">350,000원</p>
+          <p class="pkg-price-note">VAT 포함</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>예식 시작 약 60분 전 도착, 하객 맞이부터 플라워샤워까지</li>
+            <li>Ricoh High-end Camera 메인 촬영</li>
+            <li>Polaroid 5장</li>
+            <li>Phone (iPhone 17 PRO &amp; XS) 서브 촬영</li>
+            <li>원본 600장 이상 전후 전체 전송</li>
+            <li>베스트컷 보정본 10장 전송</li>
+          </ul>
+          <p class="pkg-option-label">추가 옵션</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>Polaroid 추가 (5장 기준) &nbsp;+30,000원</li>
+            <li>호텔식 2부 추가 &nbsp;+50,000원</li>
+            <li>첫예식 연출컷 (30분 기준) &nbsp;+50,000원</li>
+          </ul>
+        </article>
+
+        <!-- 돌잔치 패키지 -->
+        <article class="pkg-card" id="baby">
+          <span class="pkg-tag">LOTV SNAP</span>
+          <h2 class="pkg-name">LOTV Signature<br>Snap for Baby</h2>
+          <p class="pkg-price">400,000원</p>
+          <p class="pkg-price-note">VAT 포함</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>행사 시작 60분 전 도착</li>
+            <li>Polaroid 10장</li>
+            <li>Phone (iPhone 17 PRO &amp; XS) 및 Rico Camera 촬영</li>
+            <li>원본 전체 전송</li>
+            <li>베스트컷 보정본 10장 전송</li>
+          </ul>
+          <p class="pkg-option-label">추가 옵션 (Baby 패키지 전용)</p>
+          <div class="pkg-divider"></div>
+          <ul class="pkg-features">
+            <li>30분 추가 촬영 &nbsp;+50,000원</li>
+          </ul>
+        </article>
+
+      </div>
+
+      <p class="pkg-note">
+        * 정확한 일정 확인 및 예약은 카카오톡 LOTV 로토브로 문의해 주세요.<br>
+        * 날짜·웨딩홀 정보를 함께 보내주시면 더 빠른 확인이 가능합니다.
+      </p>
+
+      <div class="pkg-cta">
+        <a class="btn" href="reserve.html">예약 안내 보기</a>
+        <a class="btn" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 채널 상담하기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER (공통) ── -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand-block">
+        <a class="footer-brand" href="index.html">LOTV</a>
+        <p class="footer-tagline">Every moment we capture becomes a memory that lingers.</p>
+      </div>
+      <div class="footer-col footer-col--contact">
+        <span class="footer-label">Contact</span>
+        <ul>
+          <li><a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">Instagram @lotv.snap</a></li>
+          <li><a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 LOTV 로토브</a></li>
+        </ul>
+      </div>
+      <nav class="footer-col footer-col--menu" aria-label="하단 메뉴">
+        <span class="footer-label">Menu</span>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="camera.html">Camera</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="package.html">Package</a></li>
+          <li><a href="reserve.html">Reservation</a></li>
+          <li><a href="policy.html">Policy</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p><span>상호명 : 엘오티브이(LOTV)</span><span>사업자등록번호 : 349-29-02113</span></p>
+      <p class="footer-copy">© 2026 LOTV SNAP. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+<script src="js/lotv.js"></script>
+</body>
+</html>

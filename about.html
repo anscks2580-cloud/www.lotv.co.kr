@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="LOTV 소개 — 시간이 흐른 뒤에도 꺼내보게 되는 기억의 한 장.">
+<meta property="og:title" content="About | LOTV 로토브 스냅">
+<title>About | LOTV l 로토브 스냅</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=6">
+<script>document.documentElement.classList.add('js');</script>
+
+<style>
+/* 서브페이지 공통 머리(.page-head / .page-title / .page-sub)는 css/lotv.css */
+
+.about { padding-bottom: var(--section); }
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gap);
+  align-items: center;
+}
+.about-visual {
+  grid-column: 1 / span 5;
+  aspect-ratio: 3 / 4;
+  background: var(--cream);
+  overflow: hidden;
+}
+/* 대표사진: 프레임을 꽉 채우도록 (about.jpg) */
+.about-visual img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.about-content { grid-column: 7 / span 5; }
+.about-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(calc(24px * var(--s, 1)), 2.3vw, calc(32px * var(--s, 1)));
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  margin-bottom: clamp(calc(32px * var(--s, 1)), 3.4vw, calc(44px * var(--s, 1)));
+}
+.about-body {
+  font-size: calc(15px * var(--s, 1));
+  line-height: 2.15;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+.about-divider {
+  width: calc(24px * var(--s, 1));
+  height: 1px;
+  margin: calc(32px * var(--s, 1)) 0;
+  background: var(--accent);
+  opacity: 0.5;
+}
+/* 촬영 구성: 테두리 칩 대신 조용한 텍스트 행 */
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8px * var(--s, 1)) calc(26px * var(--s, 1));
+  margin-top: calc(44px * var(--s, 1));
+  padding-top: calc(18px * var(--s, 1));
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+.about-tags li {
+  font-size: calc(13px * var(--s, 1));
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 900px) {
+  .about-visual  { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
+  .about-content { grid-column: 1 / -1; margin-top: calc(40px * var(--s, 1)); }
+}
+</style>
+
+<script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body data-page="about">
+
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
+  </button>
+</header>
+
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <nav class="drawer-nav" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </nav>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <header class="page-head">
+    <div class="container">
+      <h1 class="page-title">About</h1>
+    </div>
+  </header>
+
+  <section class="about" aria-labelledby="about-title">
+    <div class="container about-grid">
+      <div class="about-visual">
+        <img src="about.jpg" alt="LOTV 대표 사진" data-fade>
+      </div>
+      <div class="about-content">
+        <h2 class="about-title" id="about-title">Happiness always comes back,<br>Like Lily of the Valley.</h2>
+        <p class="about-body">
+          LOTV는<br>
+          단순히 '남기는 사진'이 아닌<br>
+          시간이 흐른 뒤에도 자연스럽게 꺼내보게 되는<br>
+          기억의 한 장을 담고자 시작되었습니다.
+        </p>
+        <div class="about-divider" aria-hidden="true"></div>
+        <p class="about-body">
+          어릴 적, 한 장씩 꺼내보던 폴라로이드 사진처럼<br>
+          완벽하지 않아 더 따뜻하고,<br>
+          그래서 더 오래 머무는 순간들을 기록합니다.
+        </p>
+        <ul class="about-tags" aria-label="촬영 구성">
+          <li>Sub Snap</li>
+          <li>iPhone</li>
+          <li>Digital</li>
+          <li>Polaroid</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER (공통) ── -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand-block">
+        <a class="footer-brand" href="index.html">LOTV</a>
+        <p class="footer-tagline">Every moment we capture becomes a memory that lingers.</p>
+      </div>
+      <div class="footer-col footer-col--contact">
+        <span class="footer-label">Contact</span>
+        <ul>
+          <li><a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">Instagram @lotv.snap</a></li>
+          <li><a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 LOTV 로토브</a></li>
+        </ul>
+      </div>
+      <nav class="footer-col footer-col--menu" aria-label="하단 메뉴">
+        <span class="footer-label">Menu</span>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="camera.html">Camera</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="package.html">Package</a></li>
+          <li><a href="reserve.html">Reservation</a></li>
+          <li><a href="policy.html">Policy</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p><span>상호명 : 엘오티브이(LOTV)</span><span>사업자등록번호 : 349-29-02113</span></p>
+      <p class="footer-copy">© 2026 LOTV SNAP. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+<script src="js/lotv.js"></script>
+</body>
+</html>

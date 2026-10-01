@@ -2,1330 +2,268 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="LOTV — Lily of the Valley Snap. 결혼식 본식 스냅, 아이폰 감성, 필름 무드.">
 <meta property="og:title" content="LOTV — Lily of the Valley Snap">
 <meta property="og:description" content="결혼식의 한 장면을 영원히. 본식 스냅 · 아이폰 감성 · 필름 무드">
 <meta property="og:url" content="https://www.lotv.com">
+<meta property="og:type" content="website">
 <title>LOTV l 로토브 스냅</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=6">
+<script>document.documentElement.classList.add('js');</script>
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ==========================================================================
+   INDEX 전용 — 스크롤 없는 한 화면
+   · 중앙 축(심볼 → LOTV → 라인 → 영문명 → 한글명) = 브랜드 레이어
+   · 모서리(햄버거 / 사업자 정보 / 카카오) = 기능 레이어
+     → 공통 좌우 기준선(--gutter)과 하단 기준선(--foot-y)에 정렬
+   헤더·햄버거·카카오 기본 스타일은 css/lotv.css 공통
+   ========================================================================== */
+:root {
+  --foot-y: clamp(calc(18px * var(--s, 1)), 3.2vh, calc(34px * var(--s, 1)));                 /* 하단 기준선 */
+  --m:      clamp(calc(30px * var(--s, 1)), min(3.7vw, 5.4vh), calc(52px * var(--s, 1)));     /* LOTV 크기 = Hero 전체 비율의 기준 단위 */
+}
 
-  :root {
-    --cream: #F2EFE8;
-    --cream-dark: #E8E3D8;
-    --ink: #1C1A17;
-    --ink-soft: #5A5650;
-    --warm-white: #FAF8F4;
-    --accent: #9B8E7A;
-  }
+html, body { height: 100%; overflow: hidden; }
 
-  html { scroll-behavior: smooth; }
+/* ── HERO ───────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--header-h) var(--gutter);
+  background: var(--paper);
+  text-align: center;
+}
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 시각적 중심을 기하학적 중심보다 살짝 위로 (지면 구성의 광학 중심) */
+  translate: 0 calc(var(--m) * -0.36);
+}
 
-  body {
-    background: var(--cream);
-    color: var(--ink);
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-  }
+/* 은방울꽃 심볼 (투명 PNG) — 크기는 LOTV 기준 비율, 화면 높이로 상한 */
+.hero-symbol {
+  display: block;
+  height: min(calc(var(--m) * 4.8), 30vh);
+  width: auto;
+  margin-bottom: calc(var(--m) * 0.56);
+  /* 가운데 정렬 미세 조정: 음수 = 왼쪽, 양수 = 오른쪽 (예: -6px) */
+  translate: var(--symbol-shift, 0px) 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
 
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    padding: 24px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: background 0.4s, padding 0.4s;
-  }
-  nav.scrolled {
-    background: rgba(242,239,232,0.94);
-    backdrop-filter: blur(10px);
-    padding: 16px 48px;
-    border-bottom: 0.5px solid rgba(28,26,23,0.08);
-  }
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--ink);
-  }
-  .logo-img {
-    height: 44px;
-    width: auto;
-    mix-blend-mode: multiply;
-  }
-  .logo-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 300;
-    letter-spacing: 0.18em;
-  }
-  .nav-links {
-    display: flex;
-    gap: 40px;
-    list-style: none;
-  }
-  .nav-links a {
-    text-decoration: none;
-    color: var(--ink-soft);
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover { color: var(--ink); }
+.hero-mark {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: var(--m);
+  line-height: 1;
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;          /* 자간 우측 여백 보정 → 시각적 중앙 정렬 */
+  color: var(--ink);
+  display: flex;
+}
+.hero-mark span { display: inline-block; }
 
-  /* 모바일 햄버거 */
-  .nav-toggle {
-    display: none;
+.hero-rule {
+  display: block;
+  width: 1px;
+  height: calc(var(--m) * 0.82);
+  margin: calc(var(--m) * 0.74) 0 calc(var(--m) * 0.5);
+  background: var(--ink);
+  opacity: 0.45;
+  transform-origin: top;
+}
+
+.hero-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(calc(14px * var(--s, 1)), calc(var(--m) * 0.33), calc(17px * var(--s, 1)));
+  line-height: 1.3;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+.hero-ko {
+  margin-top: clamp(calc(8px * var(--s, 1)), calc(var(--m) * 0.22), calc(12px * var(--s, 1)));
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  font-size: calc(10px * var(--s, 1));
+  line-height: 1;
+  letter-spacing: 0.42em;
+  padding-left: 0.42em;
+  color: var(--accent);
+}
+
+/* ── 하단 사업자 정보 — 기능 레이어 (좌하단 모서리) ─────────────────────── */
+.hero-foot {
+  position: absolute;
+  left: var(--gutter);
+  right: calc(var(--gutter) + calc(64px * var(--s, 1)));          /* 카카오 버튼 자리 확보 */
+  bottom: calc(var(--foot-y) + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 2px calc(28px * var(--s, 1));
+  font-family: 'Jost', 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: calc(10px * var(--s, 1));
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  text-align: left;
+  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 72%, var(--paper));
+}
+.hero-foot span { white-space: nowrap; }
+
+/* 카카오: 사업자 정보와 같은 하단 기준선 + 연출 끝무렵 조용히 등장 */
+body[data-page="home"] .kakao-float {
+  bottom: calc(var(--foot-y) + env(safe-area-inset-bottom, 0px));
+  animation: lotv-fade 1.6s ease 2.6s backwards;
+}
+@keyframes lotv-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── 페이지 로드 연출: 천천히 드러나는 순서 ─────────────────────────────────
+   심볼 → LOTV(자간이 조용히 모임) → 라인 → 영문명 → 한글명 → 하단 정보
+   ────────────────────────────────────────────────────────────────────────── */
+.js .hero-symbol {
+  opacity: 0;
+  transform: translateY(calc(6px * var(--s, 1)));
+  transition: opacity 2s ease 0.1s, transform 2.4s var(--ease-out) 0.1s;
+}
+.js .hero-mark {
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+  transition: letter-spacing 2.6s var(--ease-out) 0.4s, padding-left 2.6s var(--ease-out) 0.4s;
+}
+.js .hero-mark span {
+  opacity: 0;
+  transform: translateY(0.06em);
+  transition: opacity 1.8s ease, transform 2s var(--ease-out);
+}
+.js .hero-rule { transform: scaleY(0); transition: transform 1.4s var(--ease) 1.25s; }
+.js .hero-name,
+.js .hero-ko,
+.js .hero-foot { opacity: 0; transition: opacity 1.6s ease; }
+
+.is-ready .hero-symbol { opacity: 1; transform: none; }
+.is-ready .hero-mark { letter-spacing: 0.22em; padding-left: 0.22em; }
+.is-ready .hero-mark span { opacity: 1; transform: none; transition-delay: 0.5s; }
+.is-ready .hero-mark span:nth-child(2) { transition-delay: 0.58s; }
+.is-ready .hero-mark span:nth-child(3) { transition-delay: 0.66s; }
+.is-ready .hero-mark span:nth-child(4) { transition-delay: 0.74s; }
+.is-ready .hero-rule { transform: scaleY(1); }
+.is-ready .hero-name { opacity: 1; transition-delay: 1.9s; }
+.is-ready .hero-ko   { opacity: 1; transition-delay: 2.15s; }
+.is-ready .hero-foot { opacity: 1; transition-delay: 2.5s; }
+
+/* ── 모바일: 축소가 아니라 세로 화면에 맞게 다시 짠 비율 ───────────────── */
+@media (max-width: 640px) {
+  :root { --m: calc(30px * var(--s, 1)); }
+
+  .hero-inner { translate: 0 -2.4vh; }
+  .hero-symbol { height: clamp(calc(140px * var(--s, 1)), 24vh, calc(196px * var(--s, 1))); margin-bottom: calc(18px * var(--s, 1)); }
+  .hero-rule { height: calc(30px * var(--s, 1)); margin: calc(24px * var(--s, 1)) 0 calc(16px * var(--s, 1)); }
+  .hero-name { font-size: calc(14px * var(--s, 1)); }
+  .hero-ko { margin-top: calc(9px * var(--s, 1)); font-size: calc(9.5px * var(--s, 1)); }
+
+  .hero-foot {
+    right: calc(var(--gutter) + calc(54px * var(--s, 1)));
     flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 4px;
-  }
-  .nav-toggle span {
-    display: block;
-    width: 22px;
-    height: 0.5px;
-    background: var(--ink);
-    transition: transform 0.3s, opacity 0.3s;
-  }
-  .nav-toggle.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
-  .nav-toggle.open span:nth-child(2) { opacity: 0; }
-  .nav-toggle.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0 48px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background: var(--cream-dark);
-    overflow: hidden;
-  }
-  .hero-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-  }
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(242,239,232,0.9) 0%, rgba(242,239,232,0.1) 55%, transparent 100%);
-    pointer-events: none;
-  }
-  .hero-text {
-    position: relative;
-    z-index: 2;
-    max-width: 520px;
-  }
-  .hero-eyebrow {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(16px, 5.5vw, 52px);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink);
-    font-weight: 300;
-    white-space: nowrap;
-  }
-  .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(48px, 6.5vw, 76px);
-    font-weight: 300;
-    line-height: 1.05;
-    letter-spacing: 0.01em;
-    margin-bottom: 26px;
-  }
-  .hero-title em { font-style: italic; }
-  .hero-sub {
-    font-size: 13px;
-    color: var(--ink-soft);
-    letter-spacing: 0.1em;
-    line-height: 1.8;
-  }
-  .hero-scroll-hint {
-    position: absolute;
-    bottom: 32px;
-    right: 48px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--accent);
-    font-size: 9px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-  }
-  .hero-scroll-hint::after {
-    content: '';
-    display: block;
-    width: 0.5px;
-    height: 40px;
-    background: var(--accent);
-    animation: scrollLine 1.8s ease-in-out infinite;
-  }
-  @keyframes scrollLine {
-    0%, 100% { opacity: 0.3; transform: scaleY(1); transform-origin: top; }
-    50% { opacity: 1; transform: scaleY(1); transform-origin: top; }
-  }
-
-  /* ── SECTION BASE ── */
-  section { padding: 100px 48px; }
-
-  .section-label {
-    font-size: 10px;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 48px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .section-label::after {
-    content: '';
-    display: block;
-    height: 0.5px;
-    width: 48px;
-    background: var(--accent);
-    opacity: 0.5;
-  }
-
-  /* ── ABOUT ── */
-  .about {
-    background: var(--warm-white);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-  }
-  .about-visual {
-    aspect-ratio: 3/4;
-    background: var(--warm-white);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 14px;
-    letter-spacing: 0.06em;
-  }
-  /* .about-visual img { width:100%; height:100%; object-fit:cover; } */
-  .about-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 40px;
-    font-weight: 600;
-    font-style: normal;
-    line-height: 1.3;
-    margin-bottom: 32px;
-  }
-  .about-title em { font-style: normal; font-weight: 600; }
-  .about-body {
-    font-size: 13.5px;
-    color: var(--ink-soft);
-    line-height: 2.1;
-    margin-bottom: 20px;
-  }
-  .about-divider {
-    width: 32px;
-    height: 0.5px;
-    background: var(--accent);
-    margin: 32px 0;
-    opacity: 0.6;
-  }
-  .about-tag-row {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .about-tag {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 0.5px solid var(--accent);
-    padding: 6px 14px;
-    opacity: 0.7;
-  }
-
-  /* ── GALLERY ── */
-  .gallery { background: var(--cream); }
-  .gallery-tabs {
-    display: flex;
+    align-items: flex-start;
     gap: 0;
-    margin-bottom: 48px;
-    border-bottom: 0.5px solid rgba(28,26,23,0.12);
-  }
-  .gallery-tab {
-    background: none; border: none;
-    border-bottom: 1.5px solid transparent;
-    color: var(--ink-soft);
-    font-family: 'Jost', sans-serif;
-    font-size: 11px; font-weight: 300;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    padding: 12px 24px; cursor: pointer;
-    transition: color 0.25s, border-color 0.25s;
-    margin-bottom: -0.5px;
-  }
-  .gallery-tab:hover { color: var(--ink); }
-  .gallery-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-  .gallery-venue {
-    display: none;
-    opacity: 0;
-  }
-  .gallery-venue.active {
-    display: block;
-    opacity: 1;
-  }
-  .gallery-card {
-    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
-    will-change: transform, opacity;
-  }
-  .gallery-thumb-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .gallery-card {
-    text-decoration: none;
-    color: var(--ink);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    cursor: pointer;
-  }
-  .gallery-card-img {
-    aspect-ratio: 3/4;
-    overflow: hidden;
-    background: var(--cream-dark);
-  }
-  .gallery-card-img img {
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
-    transition: transform 0.5s ease;
-  }
-  .gallery-card:hover .gallery-card-img img { transform: scale(1.03); }
-  .gallery-card-placeholder {
-    width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--accent);
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic; font-size: 14px;
-    letter-spacing: 0.08em;
-  }
-  .gallery-card-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 0.5px solid rgba(28,26,23,0.1);
-  }
-  .gallery-card-name {
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    color: var(--ink);
-  }
-  .gallery-card-arrow {
-    font-size: 14px;
-    color: var(--accent);
-    transition: transform 0.2s;
-  }
-  .gallery-card:hover .gallery-card-arrow { transform: translateX(4px); }
-  .gallery-card.coming-soon { opacity: 0.5; cursor: default; }
-  .gallery-item { background: var(--cream-dark); overflow: hidden; cursor: pointer; transition: opacity 0.35s; aspect-ratio: 3/4; }
-  .gallery-item:hover { opacity: 0.85; }
-  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .gallery-item-inner { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; letter-spacing: 0.06em; }
-  .gallery-item-wrap { display: flex; flex-direction: column; gap: 10px; }
-  .gallery-caption { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft); text-align: center; }
-  .packages {
-    background: var(--ink);
-    color: var(--cream);
-  }
-  .packages .section-label { color: var(--accent); }
-  .packages .section-label::after { background: var(--accent); }
-  .packages-heading {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 44px;
-    font-weight: 300;
-    color: var(--cream);
-    margin-bottom: 4px;
-  }
-  .packages-heading em { font-style: italic; }
-  .packages-sub {
-    font-size: 12px;
-    color: rgba(242,239,232,0.4);
-    letter-spacing: 0.1em;
-    margin-bottom: 0;
-  }
-  .pkg-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: rgba(255,255,255,0.07);
-    margin-top: 56px;
-  }
-  .pkg-card {
-    background: var(--ink);
-    padding: 52px 40px;
-    transition: background 0.3s;
-    cursor: default;
-    position: relative;
-  }
-  .pkg-card:hover { background: #222019; }
-  .pkg-card.featured { background: #222019; }
-  .pkg-tag {
-    font-size: 9px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 28px;
-    display: block;
-  }
-  .pkg-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 30px;
-    font-weight: 300;
-    color: var(--cream);
-    margin-bottom: 6px;
-  }
-  .pkg-price {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 26px;
-    color: rgba(242,239,232,0.95);
-    letter-spacing: 0.02em;
-    margin-bottom: 4px;
-  }
-  .pkg-price-note {
-    font-size: 11px;
-    color: rgba(242,239,232,0.38);
-    letter-spacing: 0.08em;
-    margin-bottom: 28px;
-  }
-  .pkg-divider {
-    height: 0.5px;
-    background: rgba(255,255,255,0.1);
-    margin-bottom: 28px;
-  }
-  .pkg-features {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-  }
-  .pkg-features li {
-    font-size: 12.5px;
-    color: rgba(242,239,232,0.6);
-    padding-left: 18px;
-    position: relative;
-    line-height: 1.65;
-  }
-  .pkg-features li::before {
-    content: '—';
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-    font-size: 10px;
-    top: 2px;
-  }
-  .pkg-note {
-    font-size: 11px;
-    color: rgba(242,239,232,0.28);
-    margin-top: 48px;
-    letter-spacing: 0.1em;
-    line-height: 1.8;
-  }
-
-  /* ── RESERVE ── */
-  .policy-box {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    background: var(--cream-dark);
-    border: 0.5px solid rgba(28,26,23,0.12);
-    padding: 32px 48px;
-    margin-bottom: 0;
-  }
-  .policy-notice {
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    line-height: 1.9;
+    font-size: calc(9.5px * var(--s, 1));
+    line-height: 1.7;
     letter-spacing: 0.04em;
   }
-  .policy-btn {
-    display: inline-block;
-    padding: 11px 32px;
-    border: 0.5px solid var(--ink);
-    font-family: 'Jost', sans-serif;
-    font-size: 13px;
-    font-weight: 300;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink);
-    background: transparent;
-    transition: background 0.3s, color 0.3s;
-  }
-  .policy-btn:hover {
-    background: var(--ink);
-    color: var(--cream);
-  }
-  .policy-divider {
-    width: 0.5px;
-    height: 60px;
-    background: var(--accent);
-    opacity: 0.4;
-    margin: 40px auto;
-  }
-  .reserve-section-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(22px, 3vw, 34px);
-    font-weight: 300;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin-bottom: 48px;
-    text-align: center;
-    line-height: 1.4;
-  }
-  .reserve {
-    text-align: center;
-    padding: 130px 48px;
-    background: var(--warm-white);
-  }
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(52px, 7vw, 80px);
-    font-weight: 300;
-    line-height: 1.1;
-    margin-bottom: 28px;
-  }
-  .reserve-title em { font-style: italic; }
-  .reserve-sub {
-    font-size: 13.5px;
-    color: var(--ink-soft);
-    letter-spacing: 0.05em;
-    margin-bottom: 52px;
-    line-height: 2.1;
-  }
-  .reserve-sub strong {
-    font-weight: 400;
-    color: var(--ink);
-  }
-  .reserve-btn {
-    display: inline-block;
-    padding: 17px 56px;
-    border: 0.5px solid var(--ink);
-    font-family: 'Jost', sans-serif;
-    font-size: 11px;
-    font-weight: 300;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink);
-    background: transparent;
-    transition: background 0.3s, color 0.3s;
-    cursor: pointer;
-  }
-  .reserve-btn:hover {
-    background: var(--ink);
-    color: var(--cream);
-  }
+  .hero-foot span { white-space: normal; }
+}
 
-  /* ── CONTACT STRIP ── */
-  .contact-strip {
-    background: var(--cream-dark);
-    padding: 52px 48px;
-    display: flex;
-    justify-content: center;
-    gap: 72px;
-    align-items: center;
-    border-top: 0.5px solid rgba(28,26,23,0.1);
-    flex-wrap: wrap;
-  }
-  .contact-item { text-align: center; }
-  .contact-item .label {
-    font-size: 9.5px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-  }
-  .contact-item .value {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 17px;
-    color: var(--ink);
-    letter-spacing: 0.05em;
-  }
-  .contact-item .value a {
-    color: var(--ink);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .contact-item .value a:hover { color: var(--accent); }
-
-  /* ── FOOTER ── */
-  footer {
-    padding: 8px 48px 52px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    border-top: 0.5px solid rgba(28,26,23,0.1);
-    text-align: center;
-  }
-  .ft-business {
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 0.08em;
-    padding: 16px 0;
-    width: 100%;
-    text-align: center;
-  }
-  .ft-bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .ft-copy {
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-  }
-  .ft-tagline {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 13px;
-    color: var(--ink-soft);
-    letter-spacing: 0.06em;
-  }
-
-  /* ── SCROLL REVEAL ── */
-  .scroll-reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.85s ease, transform 0.85s ease;
-  }
-  .scroll-reveal.visible {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    nav { padding: 20px 24px; }
-    nav.scrolled { padding: 14px 24px; }
-    .nav-links { display: none; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--cream); align-items: center; justify-content: center; gap: 32px; z-index: 99; }
-    .nav-links.open { display: flex; }
-    .nav-links a { font-size: 14px; }
-    .nav-toggle { display: flex; z-index: 101; }
-
-    .hero { padding: 0 16px 60px; }
-    .hero-scroll-hint { display: none; }
-
-    section { padding: 72px 24px; }
-
-    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .gallery-grid-2 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .gallery-tabs { overflow-x: auto; flex-wrap: nowrap; }
-    .about-visual { aspect-ratio: 4/3; }
-    .about-title { font-size: 30px; }
-
-    .gallery-masonry { columns: 2; }
-
-    .about { grid-template-columns: 1fr; gap: 40px; }
-
-    .pkg-grid { grid-template-columns: 1fr; }
-
-    .reserve { padding: 80px 24px; }
-
-    footer { padding: 24px; flex-direction: column; text-align: center; gap: 8px; }
-  }
+/* 높이가 낮은 화면(가로 모드 휴대폰, 작은 노트북 창) */
+@media (max-height: 480px) {
+  :root { --m: calc(26px * var(--s, 1)); }
+  .hero-symbol { height: 24vh; margin-bottom: calc(10px * var(--s, 1)); }
+  .hero-rule { height: calc(18px * var(--s, 1)); margin: calc(14px * var(--s, 1)) 0 calc(10px * var(--s, 1)); }
+  .hero-inner { translate: 0 -1vh; }
+}
 </style>
-<script data-goatcounter="https://lotv.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+
+<script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
-<body>
 
-<!-- ── NAV ── -->
-<nav id="mainNav">
-  <a class="nav-logo" href="#">
-    <span class="logo-text">LOTV</span>
-  </a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#gallery" onclick="closeMenu()">Gallery</a></li>
-    <li><a href="#about" onclick="closeMenu()">About</a></li>
-    <li><a href="#packages" onclick="closeMenu()">Package</a></li>
-    <li><a href="#reserve" onclick="closeMenu()">Reserve</a></li>
-  </ul>
-  <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
-    <span></span><span></span><span></span>
+<body data-page="home">
+
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
   </button>
-</nav>
+</header>
 
-<!-- ── HERO ── -->
-<section class="hero">
-  <div class="hero-bg">
-    <img src="hero.jpg" alt="LOTV 웨딩 스냅">
-  </div>
-  <div class="hero-overlay"></div>
-  <div class="hero-text">
-    <p class="hero-eyebrow">LOTV Snap</p>
-  </div>
-  <div class="hero-scroll-hint">Scroll</div>
-</section>
-
-<!-- ── ABOUT ── -->
-<section class="about" id="about">
-  <div class="about-visual scroll-reveal" style="background: var(--warm-white);">
-    <img src="about.jpg" alt="LOTV 대표 사진" style="width:100%; height:100%; object-fit:contain; display:block;">
-  </div>
-  <div class="about-content scroll-reveal" style="transition-delay: 0.15s;">
-    <div class="section-label">About LOTV</div>
-    <h2 class="about-title">Happiness always comes back.<br>Like Lily of the Valley,</h2>
-    <p class="about-body">
-      LOTV는<br>
-      단순히 '남기는 사진'이 아닌<br>
-      시간이 흐른 뒤에도 자연스럽게 꺼내보게 되는<br>
-      기억의 한 장을 담고자 시작되었습니다.
-    </p>
-    <div class="about-divider"></div>
-    <p class="about-body">
-      어릴 적, 한 장씩 꺼내보던 폴라로이드 사진처럼<br>
-      완벽하지 않아 더 따뜻하고,<br>
-      그래서 더 오래 머무는 순간들을 기록합니다.
-    </p>
-    <div class="about-tag-row" style="margin-top: 32px;">
-      <span class="about-tag">서브스냅</span>
-      <span class="about-tag">iPhone</span>
-      <span class="about-tag">Digital</span>
-      <span class="about-tag">Polaroid</span>
-    </div>
-  </div>
-</section>
-
-<!-- ── GALLERY ── -->
-<section class="gallery" id="gallery">
-  <div class="section-label scroll-reveal">Gallery</div>
-
-  <div class="gallery-tabs scroll-reveal">
-    <button class="gallery-tab active" data-venue="all">ALL</button>
-    <button class="gallery-tab" data-venue="hotel">호텔</button>
-    <button class="gallery-tab" data-venue="hall">웨딩홀</button>
-    <button class="gallery-tab" data-venue="studio">스튜디오</button>
-    <button class="gallery-tab" data-venue="firstbirthday">Baby</button>
-  </div>
-
-  <!-- ALL -->
-  <div class="gallery-venue active" data-venue="all">
-    <div class="gallery-thumb-grid">
-      <a href="gallery-shilla.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="silla/shilla_01.jpg" alt="신라호텔"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">신라호텔</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-ravidus.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">라비두스</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-josunpalace.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="josunpalace/josunpalace_main.jpg" alt="조선팰리스 강남"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">조선팰리스 강남</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-crest72.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="crest72/crest72_001.jpg" alt="크레스트72"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">크레스트72</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-rakgojai.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="rakgojai/rakgojai_main.jpg" alt="락고재 서울"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">락고재 서울</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-confidential-companion.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="confidential-companion/confidential-companion_main.jpg" alt="Confidential (Companion)"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">Confidential (Companion)</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-hsquare.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">H스퀘어웨딩홀</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-lasittatheater.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="lasitta-theater/lasitta-theater-001.jpg" alt="라시따시어터"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">라시따시어터</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-weddingsignature.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="wedding-signature/wedding-signature-001.jpg" alt="웨딩시그니처"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">웨딩시그니처</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-withers.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="withers/withers_01.jpg" alt="위더스 영등포"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">위더스 영등포</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-yeoyulli.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="yeoyulli/yeoyulli_01.jpg" alt="웨딩여율리"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">웨딩여율리</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-dongbu.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="dongbu/dongbu_01.jpg" alt="동부지방법원(BR only)"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">동부지방법원(BR only)</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-grandhill.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">그랜드힐 컨벤션</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-dressgarden.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="dressgarden/dressgarden_main.jpg" alt="드레스가든"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">드레스가든</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-thechapel.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="thechapel/thechapel_main.jpg" alt="더 채플앳 대치"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">더 채플앳 대치</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-thechapelnonhyeon.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">더 채플앳 논현</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-samsung.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="samsung/samsung_main.jpg" alt="삼성 금융캠퍼스"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">삼성 금융캠퍼스</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-foreclock.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="foreclock/foreclock_01.jpg" alt="포어클락 용인"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">포어클락 용인</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-    </div>
-    <p style="margin-top: 20px; font-size: 11px; color: var(--accent); letter-spacing: 0.08em;">* 고화질 이미지로 인해 로딩에 다소 시간이 소요될 수 있습니다.</p>
-  </div>
-
-  <!-- 호텔 -->
-  <div class="gallery-venue" data-venue="hotel">
-    <div class="gallery-thumb-grid">
-      <a href="gallery-shilla.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="silla/shilla_01.jpg" alt="신라호텔"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">신라호텔</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-josunpalace.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="josunpalace/josunpalace_main.jpg" alt="조선팰리스 강남"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">조선팰리스 강남</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-    </div>
-    <p style="margin-top: 20px; font-size: 11px; color: var(--accent); letter-spacing: 0.08em;">* 고화질 이미지로 인해 로딩에 다소 시간이 소요될 수 있습니다.</p>
-  </div>
-
-  <!-- 웨딩홀 -->
-  <div class="gallery-venue" data-venue="hall">
-    <div class="gallery-thumb-grid">
-      <a href="gallery-ravidus.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">라비두스</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-crest72.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="crest72/crest72_001.jpg" alt="크레스트72"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">크레스트72</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-hsquare.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">H스퀘어웨딩홀</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-lasittatheater.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="lasitta-theater/lasitta-theater-001.jpg" alt="라시따시어터"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">라시따시어터</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-weddingsignature.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="wedding-signature/wedding-signature-001.jpg" alt="웨딩시그니처"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">웨딩시그니처</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-withers.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="withers/withers_01.jpg" alt="위더스 영등포"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">위더스 영등포</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-yeoyulli.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="yeoyulli/yeoyulli_01.jpg" alt="웨딩여율리"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">웨딩여율리</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-dongbu.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="dongbu/dongbu_01.jpg" alt="동부지방법원(BR only)"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">동부지방법원(BR only)</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-grandhill.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">그랜드힐 컨벤션</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-dressgarden.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="dressgarden/dressgarden_main.jpg" alt="드레스가든"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">드레스가든</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-thechapel.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="thechapel/thechapel_main.jpg" alt="더 채플앳 대치"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">더 채플앳 대치</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-thechapelnonhyeon.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">더 채플앳 논현</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-samsung.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="samsung/samsung_main.jpg" alt="삼성 금융캠퍼스"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">삼성 금융캠퍼스</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-foreclock.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="foreclock/foreclock_01.jpg" alt="포어클락 용인"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">포어클락 용인</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-    </div>
-    <p style="margin-top: 20px; font-size: 11px; color: var(--accent); letter-spacing: 0.08em;">* 고화질 이미지로 인해 로딩에 다소 시간이 소요될 수 있습니다.</p>
-  </div>
-
-  <!-- 스튜디오 -->
-  <div class="gallery-venue" data-venue="studio">
-    <div class="gallery-thumb-grid">
-      <a href="gallery-rakgojai.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="rakgojai/rakgojai_main.jpg" alt="락고재 서울"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">락고재 서울</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-      <a href="gallery-confidential-companion.html" class="gallery-card">
-        <div class="gallery-card-img"><img src="confidential-companion/confidential-companion_main.jpg" alt="Confidential (Companion)"></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">Confidential (Companion)</span>
-          <span class="gallery-card-arrow">→</span>
-        </div>
-      </a>
-    </div>
-    <p style="margin-top: 20px; font-size: 11px; color: var(--accent); letter-spacing: 0.08em;">* 고화질 이미지로 인해 로딩에 다소 시간이 소요될 수 있습니다.</p>
-  </div>
-
-  <!-- 돌잔치 -->
-  <div class="gallery-venue" data-venue="firstbirthday">
-    <div class="gallery-thumb-grid">
-      <div class="gallery-card coming-soon">
-        <div class="gallery-card-img"><div class="gallery-card-placeholder"></div></div>
-        <div class="gallery-card-info">
-          <span class="gallery-card-name">Coming Soon</span>
-        </div>
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <nav class="drawer-nav" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </nav>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
       </div>
-    </div>
-    <p style="margin-top: 20px; font-size: 11px; color: var(--accent); letter-spacing: 0.08em;">* 갤러리 준비 중입니다.</p>
-  </div>
-
-</section>
-
-<!-- ── PACKAGES ── -->
-<section class="packages" id="packages">
-  <div class="section-label">Package</div>
-
-  <div class="pkg-grid scroll-reveal">
-
-    <!-- 메인 패키지 -->
-    <div class="pkg-card featured" style="grid-column: span 1;">
-      <span class="pkg-tag">LOTV SNAP</span>
-      <div class="pkg-name">LOTV Signature<br>Snap</div>
-      <div class="pkg-price">250,000원</div>
-      <div class="pkg-price-note">VAT 포함</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>예식 시작 약 60분 전 도착, 하객 맞이부터 플라워샤워까지</li>
-        <li>Polaroid 5장</li>
-        <li>Phone (iPhone 17 PRO &amp; XS) 및 Rico Camera 촬영</li>
-        <li>원본 600장 이상 전후 전체 전송</li>
-        <li>베스트컷 보정본 10장 전송</li>
-      </ul>
-      <div class="pkg-price-note" style="margin-top: 24px; margin-bottom: 8px;">추가 옵션</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>Polaroid 추가 (5장 기준) &nbsp;+30,000원</li>
-        <li>호텔식 2부 추가 &nbsp;+50,000원</li>
-        <li>첫예식 연출컷 (30분 기준) &nbsp;+50,000원</li>
-      </ul>
-    </div>
-
-    <!-- 리코 메인 패키지 -->
-    <div class="pkg-card" style="grid-column: span 1;">
-      <span class="pkg-tag">LOTV SNAP</span>
-      <div class="pkg-name">LOTV Signature<br>Snap with Rico</div>
-      <div class="pkg-price">350,000원</div>
-      <div class="pkg-price-note">VAT 포함</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>예식 시작 약 60분 전 도착, 하객 맞이부터 플라워샤워까지</li>
-        <li>Ricoh High-end Camera 메인 촬영</li>
-        <li>Polaroid 5장</li>
-        <li>Phone (iPhone 17 PRO &amp; XS) 서브 촬영</li>
-        <li>원본 600장 이상 전후 전체 전송</li>
-        <li>베스트컷 보정본 10장 전송</li>
-      </ul>
-      <div class="pkg-price-note" style="margin-top: 24px; margin-bottom: 8px;">추가 옵션</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>Polaroid 추가 (5장 기준) &nbsp;+30,000원</li>
-        <li>호텔식 2부 추가 &nbsp;+50,000원</li>
-        <li>첫예식 연출컷 (30분 기준) &nbsp;+50,000원</li>
-      </ul>
-    </div>
-
-    <!-- 돌잔치 패키지 -->
-    <div class="pkg-card" style="grid-column: span 1;">
-      <span class="pkg-tag">LOTV SNAP</span>
-      <div class="pkg-name">LOTV Signature<br>Snap for Baby</div>
-      <div class="pkg-price">400,000원</div>
-      <div class="pkg-price-note">VAT 포함</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>행사 시작 1시간 전 도착, 메인스냅 촬영 필수 진행(약 1시간 30분)</li>
-        <li>Polaroid 10장</li>
-        <li>Phone (iPhone 17 PRO &amp; XS) 및 Rico Camera 촬영</li>
-        <li>원본 전체 전송</li>
-        <li>베스트컷 보정본 10장 전송</li>
-      </ul>
-      <div class="pkg-price-note" style="margin-top: 24px; margin-bottom: 8px;">추가 옵션 (Baby 패키지 전용)</div>
-      <div class="pkg-divider"></div>
-      <ul class="pkg-features">
-        <li>30분 추가 촬영 &nbsp;+50,000원</li>
-      </ul>
-    </div>
-
-  </div>
-  <p class="pkg-note">
-    * 정확한 일정 확인 및 예약은 카카오톡 채널 LOTV로 문의해 주세요.<br>
-    * 날짜·웨딩홀 정보를 함께 보내주시면 더 빠른 확인이 가능합니다.
-  </p>
-</section>
-
-
-<!-- ── RESERVE ── -->
-<section class="reserve" id="reserve">
-  <div class="reserve-section-label scroll-reveal">Reservation<br>&amp; Policy</div>
-  <div class="scroll-reveal">
-
-    <!-- 환불 규정 -->
-    <div class="policy-box">
-      <p class="policy-notice">예약 신청 전 환불 및 취소 규정을<br>반드시 확인해 주세요.<br>예약 진행 시 해당 규정에<br>동의한 것으로 간주됩니다.</p>
-      <a class="policy-btn" href="https://blog.naver.com/lotv_snap/224299487971" target="_blank" rel="noopener">
-        환불 규정 확인 →
-      </a>
-    </div>
-
-    <div class="policy-divider"></div>
-
-    <h2 class="reserve-title">" Reserve the day<br><em>we'll capture together</em> "</h2>
-    <p class="reserve-sub" style="margin-top: 60px;">
-      함께할 소중한 날을 위해<br>
-      아래 정보를 카카오톡 채널 <strong>LOTV</strong>로 보내주세요.<br><br>
-      • 성함<br>
-      • 연락처<br>
-      • 일시<br>
-      • 베뉴명 (홀명 포함)<br>
-      • 추가 구성 신청 여부
-    </p>
-    <a class="reserve-btn" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">
-      카카오톡 채널 상담하기
-    </a>
-  </div>
-</section>
-
-<!-- ── CONTACT STRIP ── -->
-<div class="contact-strip">
-  <div class="contact-item">
-    <div class="label">Instagram</div>
-    <div class="value">
-      <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">@lotv.snap</a>
     </div>
   </div>
 </div>
 
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="ft-business">
-    <span>상호명 : 엘오티브이(LOTV) &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 사업자등록번호 : 349-29-02113</span>
-  </div>
-  <div class="ft-bottom">
-    <span class="ft-copy">© 2026 LOTV SNAP. All Rights Reserved.</span>
-    <span class="ft-tagline">Every moment we capture becomes a memory that lingers.</span>
-  </div>
-</footer>
+<main>
+  <!-- ── HERO (한 화면, 스크롤 없음) ── -->
+  <section class="hero" aria-label="LOTV">
+    <div class="hero-inner">
+      <img class="hero-symbol" src="lotv-mark.png" alt="" aria-hidden="true" draggable="false">
+      <h1 class="hero-mark" data-hero-mark aria-label="LOTV">
+        <span aria-hidden="true">L</span><span aria-hidden="true">O</span><span aria-hidden="true">T</span><span aria-hidden="true">V</span>
+      </h1>
+      <span class="hero-rule" aria-hidden="true"></span>
+      <p class="hero-name">Lily of the Valley Snap</p>
+      <p class="hero-ko">로토브 스냅</p>
+    </div>
+    <div class="hero-foot">
+      <span>상호명 : 엘오티브이(LOTV)</span>
+      <span>사업자등록번호 : 349-29-02113</span>
+      <span>© 2026 LOTV SNAP. All Rights Reserved.</span>
+    </div>
+  </section>
+</main>
 
-<script>
-  /* ── 스크롤 시 nav 스타일 변경 ── */
-  const nav = document.getElementById('mainNav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 60);
-  });
-
-  /* ── 모바일 메뉴 토글 ── */
-  const toggle = document.getElementById('navToggle');
-  const navLinks = document.getElementById('navLinks');
-  toggle.addEventListener('click', () => {
-    toggle.classList.toggle('open');
-    navLinks.classList.toggle('open');
-    document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
-  });
-  function closeMenu() {
-    toggle.classList.remove('open');
-    navLinks.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  /* ── 갤러리 탭 필터 (고급 모션) ── */
-  function switchVenue(nextVenue) {
-    const current = document.querySelector('.gallery-venue.active');
-    const next = document.querySelector(`.gallery-venue[data-venue="${nextVenue}"]`);
-    if (!next || current === next) return;
-
-    const STAGGER = 55;
-
-    // 나갈 때: 카드들이 살짝 위로 흐르며 조용히 사라짐
-    const currentCards = [...current.querySelectorAll('.gallery-card')];
-    currentCards.forEach((card, i) => {
-      card.style.transition = `transform 0.55s cubic-bezier(0.4,0,1,1) ${i * STAGGER}ms, opacity 0.45s ease ${i * STAGGER}ms`;
-      card.style.transform = 'translateY(-14px)';
-      card.style.opacity = '0';
-    });
-
-    const leaveDuration = 550 + currentCards.length * STAGGER;
-
-    setTimeout(() => {
-      current.classList.remove('active');
-      currentCards.forEach(card => {
-        card.style.transition = '';
-        card.style.transform = '';
-        card.style.opacity = '';
-      });
-
-      // 들어올 때: 아주 살짝 아래에서 천천히 스며들듯
-      next.classList.add('active');
-      const nextCards = [...next.querySelectorAll('.gallery-card')];
-      nextCards.forEach(card => {
-        card.style.transform = 'translateY(10px)';
-        card.style.opacity = '0';
-        card.style.transition = 'none';
-      });
-
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        nextCards.forEach((card, i) => {
-          card.style.transition = `transform 0.75s cubic-bezier(0.2,0,0,1) ${i * STAGGER}ms, opacity 0.7s ease ${i * STAGGER}ms`;
-          card.style.transform = 'translateY(0)';
-          card.style.opacity = '1';
-        });
-        setTimeout(() => {
-          nextCards.forEach(card => {
-            card.style.transition = '';
-            card.style.transform = '';
-            card.style.opacity = '';
-          });
-        }, 750 + nextCards.length * STAGGER);
-      }));
-    }, leaveDuration);
-  }
-
-  document.querySelectorAll('.gallery-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      switchVenue(tab.dataset.venue);
-    });
-  });
-
-  /* ── 썸네일 클릭 → 상세 사진 전환 ── */
-  document.querySelectorAll('.gallery-thumb-wrap').forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      const venue = thumb.closest('.gallery-venue');
-      const detail = thumb.dataset.detail;
-      venue.querySelectorAll('.gallery-thumb-wrap').forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      venue.querySelectorAll('.gallery-detail').forEach(d => {
-        d.classList.toggle('active', d.dataset.detail === detail);
-      });
-    });
-  });
-
-  
-  const reveals = document.querySelectorAll('.scroll-reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08 });
-  reveals.forEach(el => io.observe(el));
-  /* 페이지 로드 시 이미 보이는 요소 처리 */
-  reveals.forEach(el => {
-    if (el.getBoundingClientRect().top < window.innerHeight) {
-      el.classList.add('visible');
-    }
-  });
-</script>
-
-<!-- ── 카카오톡 플로팅 버튼 ── -->
-<style>
-  .kakao-float {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    z-index: 999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-  }
-  .kakao-float-btn {
-    width: 56px;
-    height: 56px;
-    background: #FEE500;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .kakao-float:hover .kakao-float-btn {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  }
-  .kakao-float-btn svg { width: 28px; height: 28px; }
-  .kakao-float-label {
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--ink-soft, #5A5650);
-    background: rgba(242,239,232,0.92);
-    padding: 3px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-  }
-</style>
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
 <a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
   <div class="kakao-float-btn">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
     </svg>
   </div>
   <span class="kakao-float-label">카카오톡 문의</span>
 </a>
 
+<script src="js/lotv.js"></script>
 </body>
 </html>

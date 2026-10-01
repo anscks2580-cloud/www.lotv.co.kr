@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="LOTV 카메라 안내 — Polaroid, iPhone, Ricoh High-End Camera로 담는 예식의 순간.">
+<meta property="og:title" content="Camera | LOTV 로토브 스냅">
+<title>Camera | LOTV l 로토브 스냅</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=7">
+<script>document.documentElement.classList.add('js');</script>
+
+<style>
+/* 문서형 섹션(.doc-*) — 공통 CSS가 늦게 반영돼도 이 페이지 레이아웃이 깨지지 않도록 페이지 안에도 포함 */
+/* ── 문서형 섹션 (Camera / Policy) ──
+   About과 같은 감성: 얇은 세리프 제목 + 작은 한글 라벨, 넉넉한 여백, 얇은 선
+   · 왼쪽 제목은 스크롤 중 살짝 따라오며(PC), 오른쪽 본문은 읽기 좋은 폭으로 좁힘 */
+.doc { padding-bottom: var(--section); }
+.doc-lead,
+.doc-row,
+.doc-outro {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0 var(--gap);
+}
+
+/* 머리말 (Policy 첫 문단) */
+.doc-lead { padding-bottom: clamp(calc(56px * var(--s, 1)), 6vw, calc(96px * var(--s, 1))); }
+.doc-lead .doc-text {
+  grid-column: 6 / span 6;
+  font-size: calc(17px * var(--s, 1));
+  line-height: 2;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+/* 섹션 */
+.doc-row {
+  padding: clamp(calc(56px * var(--s, 1)), 6.4vw, calc(104px * var(--s, 1))) 0;
+  border-top: 1px solid var(--line);
+}
+.doc-lead + .doc-row,
+.doc > .container > .doc-row:first-child { border-top-color: var(--ink); }
+
+.doc-label {
+  grid-column: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: calc(var(--header-h) + calc(40px * var(--s, 1)));
+}
+.doc-label h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(calc(30px * var(--s, 1)), 2.8vw, calc(40px * var(--s, 1)));
+  line-height: 1.08;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+}
+.doc-label small {
+  display: flex;
+  align-items: center;
+  margin-top: calc(18px * var(--s, 1));
+  font-size: calc(12px * var(--s, 1));
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+.doc-label small::before {
+  content: '';
+  width: calc(18px * var(--s, 1));
+  height: 1px;
+  margin-right: calc(12px * var(--s, 1));
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+.doc-body {
+  grid-column: 6 / span 6;
+  font-size: calc(15px * var(--s, 1));
+  line-height: 2.15;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+}
+/* 각 섹션의 첫 문단은 머리글처럼 조금 크고 진하게 */
+.doc-body > p:first-child {
+  font-size: calc(17px * var(--s, 1));
+  line-height: 2;
+  color: var(--ink);
+}
+.doc-body > * + * { margin-top: 1.5em; }
+.doc-body strong { font-weight: 400; color: var(--ink); }
+
+/* 항목 목록: Reservation 목록과 같은 얇은 선 */
+.doc-list {
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.doc-list li {
+  padding: calc(13px * var(--s, 1)) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: calc(14.5px * var(--s, 1));
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+}
+.doc-list .doc-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(13px * var(--s, 1));
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+/* 번호 목록 (Notice): 세리프 이탤릭 번호 */
+.doc-steps {
+  list-style: none;
+  counter-reset: doc;
+  display: flex;
+  flex-direction: column;
+  gap: calc(28px * var(--s, 1));
+}
+.doc-body > .doc-steps:first-child { margin-top: 0; }
+.doc-steps li {
+  position: relative;
+  padding-left: calc(52px * var(--s, 1));
+  counter-increment: doc;
+}
+.doc-steps li::before {
+  content: counter(doc, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: -0.1em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: calc(22px * var(--s, 1));
+  line-height: 1.5;
+  color: var(--accent);
+}
+
+/* 별표 주석: 왼쪽 얇은 선과 함께 한 단계 작게 */
+.doc-notes {
+  list-style: none;
+  padding-left: calc(18px * var(--s, 1));
+  border-left: 1px solid var(--accent);
+  font-size: calc(13.5px * var(--s, 1));
+  line-height: 2;
+  color: var(--ink-soft);
+}
+
+/* 맺음말: 가운데 정렬 + 브랜드 서명 */
+.doc-outro {
+  padding-top: clamp(calc(72px * var(--s, 1)), 8vw, calc(128px * var(--s, 1)));
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.doc-outro > * { grid-column: 1 / -1; }
+.doc-outro-text {
+  font-size: calc(17px * var(--s, 1));
+  line-height: 2.1;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.doc-sign {
+  margin-top: calc(28px * var(--s, 1));
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: calc(19px * var(--s, 1));
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .doc-label { position: static; grid-column: 1 / -1; margin-bottom: calc(28px * var(--s, 1)); }
+  .doc-body, .doc-lead .doc-text { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .doc-label h2 { font-size: calc(30px * var(--s, 1)); }
+  .doc-body > p:first-child, .doc-lead .doc-text, .doc-outro-text { font-size: calc(16px * var(--s, 1)); }
+  .doc-steps li { padding-left: calc(40px * var(--s, 1)); }
+  /* 좁은 화면: 본문 줄바꿈은 화면 폭에 맡겨 어색한 한 단어 줄을 없앰 */
+  .doc-body br { display: none; }
+}
+</style>
+
+<script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body data-page="camera">
+
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
+  </button>
+</header>
+
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <nav class="drawer-nav" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </nav>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <header class="page-head">
+    <div class="container">
+      <h1 class="page-title">Camera</h1>
+    </div>
+  </header>
+
+  <section class="doc" aria-label="카메라 안내">
+    <div class="container">
+
+      <div class="doc-row">
+        <div class="doc-label"><h2>Ricoh <br>High-End Camera</h2><small>리코 디지털카메라</small></div>
+        <div class="doc-body">
+          <p>리코 디지털카메라 특유의 색감으로 <br>예식의 순간들을 담아드립니다.</p>
+          <ul class="doc-list">
+            <li>하객 맞이 (신부대기실)</li>
+            <li>식 입장 전</li>
+            <li>플라워샤워</li>
+            <li>식 전후 연출컷</li>
+          </ul>
+          <p>리코 디지털카메라는 충분한 자연광 또는 밝은 조명 환경에서 <br>더욱 안정적이고 매력적인 결과물을 담아낼 수 있습니다.</p>
+          <p>어두운 홀에서 진행되는 예식의 경우 <br>신부대기실, 입장 전, 플라워샤워와 같이 <br>비교적 밝은 공간과 시간대의 촬영을 추천드립니다. <br>장비가 가진 특유의 색감과 질감 또한 <br>하나의 감성으로 이해해주시면 감사하겠습니다.</p>
+        </div>
+      </div>
+
+      <div class="doc-row">
+        <div class="doc-label"><h2>iPhone</h2><small>아이폰</small></div>
+        <div class="doc-body">
+          <p>폴라로이드의 느린 인화 과정과 <br>필름의 물성적 한계를 보완하기 위해 <br>촬영 전후의 시간은 아이폰으로 함께 기록해드립니다.</p>
+          <ul class="doc-list">
+            <li>촬영 후 24시간 이내 원본 전체 전달</li>
+            <li>베스트컷 10장 보정 제공</li>
+          </ul>
+          <p>과하지 않은 색감과 자연스러운 흐름으로 <br>그날의 분위기를 온전히 담아냅니다.</p>
+        </div>
+      </div>
+
+      <div class="doc-row">
+        <div class="doc-label"><h2>Polaroid</h2><small>폴라로이드</small></div>
+        <div class="doc-body">
+          <p>폴라로이드 스냅은 총 5장의 필름으로 구성되며 <br>예식의 주요 장면을 중심으로 차분하게 담아드립니다.</p>
+          <ul class="doc-list">
+            <li>하객 맞이 순간<span class="doc-sub">(신랑 단독 / 신랑 &amp; 부모님 / 신부 부모님 / 신부 대기실 등)</span></li>
+            <li>행진 및 플라워샤워</li>
+          </ul>
+          <p>폴라로이드 특성상 <br>디지털 카메라 대비 초점과 거리 표현에 제한이 있으며, <br>가까운 거리에서 더욱 안정적인 결과물을 담을 수 있습니다.</p>
+          <p>이러한 특성 또한 하나의 감성으로 이해해주시면 감사하겠습니다.</p>
+        </div>
+      </div>
+
+      <div class="doc-row">
+        <div class="doc-label"><h2>Guide</h2><small>촬영 안내</small></div>
+        <div class="doc-body">
+          <p>예식 시작 약 60분 전 도착하여 <br>하객 맞이부터 플라워샤워까지의 흐름을 정리해드립니다.</p>
+          <p>호텔예식 2부 기록을 원하시는 경우 <br>폴라로이드 필름 추가 및 시간 추가 옵션을 권해드립니다.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER (공통) ── -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand-block">
+        <a class="footer-brand" href="index.html">LOTV</a>
+        <p class="footer-tagline">Every moment we capture becomes a memory that lingers.</p>
+      </div>
+      <div class="footer-col footer-col--contact">
+        <span class="footer-label">Contact</span>
+        <ul>
+          <li><a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">Instagram @lotv.snap</a></li>
+          <li><a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 LOTV 로토브</a></li>
+        </ul>
+      </div>
+      <nav class="footer-col footer-col--menu" aria-label="하단 메뉴">
+        <span class="footer-label">Menu</span>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="camera.html">Camera</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="package.html">Package</a></li>
+          <li><a href="reserve.html">Reservation</a></li>
+          <li><a href="policy.html">Policy</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p><span>상호명 : 엘오티브이(LOTV)</span><span>사업자등록번호 : 349-29-02113</span></p>
+      <p class="footer-copy">© 2026 LOTV SNAP. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+<script src="js/lotv.js"></script>
+</body>
+</html>

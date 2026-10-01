@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="LOTV 갤러리 — 호텔, 웨딩홀, 스튜디오 본식 스냅 촬영 베뉴 모음.">
+<meta property="og:title" content="Gallery | LOTV 로토브 스냅">
+<title>Gallery | LOTV l 로토브 스냅</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=6">
+<script>document.documentElement.classList.add('js');</script>
+
+<style>
+/* ==========================================================================
+   GALLERY 전용 스타일 — 카드 마크업은 기존 index.html 것을 그대로 사용
+   ========================================================================== */
+/* 서브페이지 공통 머리(.page-head / .page-title / .page-sub)는 css/lotv.css */
+
+.gallery { padding-bottom: var(--section); }
+
+/* 탭 */
+.gallery-tabs {
+  display: flex;
+  gap: calc(4px * var(--s, 1));
+  margin-bottom: clamp(calc(40px * var(--s, 1)), 5vw, calc(64px * var(--s, 1)));
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gallery-tabs::-webkit-scrollbar { display: none; }
+.gallery-tab {
+  flex: 0 0 auto;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  padding: calc(14px * var(--s, 1)) calc(22px * var(--s, 1));
+  font-family: var(--sans);
+  font-size: calc(13.5px * var(--s, 1));
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s;
+}
+.gallery-tab:first-child { padding-left: 0; }
+.gallery-tab:hover { color: var(--ink); }
+.gallery-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* 베뉴 그룹 */
+.gallery-venue { display: none; }
+.gallery-venue.active { display: block; }
+
+.gallery-thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(calc(32px * var(--s, 1)), 3.4vw, calc(56px * var(--s, 1))) var(--gap);
+}
+.gallery-card {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16px * var(--s, 1));
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  will-change: transform, opacity;
+}
+.gallery-card-img {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cream);
+}
+.gallery-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.6s var(--ease-out), opacity 0.6s ease;
+}
+.gallery-card:hover .gallery-card-img img { transform: scale(1.02); }
+.gallery-card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: calc(12px * var(--s, 1));
+  border-bottom: 1px solid var(--line);
+}
+.gallery-card-name { font-size: calc(12.5px * var(--s, 1)); letter-spacing: 0.06em; }
+.gallery-card-arrow { font-size: calc(12px * var(--s, 1)); color: var(--accent); transition: transform 0.5s var(--ease-out), color 0.4s ease; }
+.gallery-card:hover .gallery-card-arrow { color: var(--ink); }
+.gallery-card:hover .gallery-card-arrow { transform: translateX(calc(4px * var(--s, 1))); }
+.gallery-card.coming-soon { opacity: 0.5; cursor: default; }
+.gallery-card-placeholder { width: 100%; height: 100%; }
+
+@media (max-width: 900px) {
+  .gallery-thumb-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .gallery-thumb-grid { gap: calc(28px * var(--s, 1)) calc(12px * var(--s, 1)); }
+  .gallery-card-name { font-size: calc(12px * var(--s, 1)); letter-spacing: 0.04em; }
+  .gallery-tab { padding: calc(14px * var(--s, 1)) calc(14px * var(--s, 1)); font-size: calc(13px * var(--s, 1)); letter-spacing: 0.12em; }
+}
+</style>
+
+<script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body data-page="gallery">
+
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
+  </button>
+</header>
+
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <nav class="drawer-nav" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </nav>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <header class="page-head">
+    <div class="container">
+      <h1 class="page-title">Gallery</h1>
+      <p class="page-sub">* 고화질 이미지로 인해 로딩에 다소 시간이 소요될 수 있습니다.</p>
+    </div>
+  </header>
+
+  <!-- ── GALLERY ── -->
+  <section class="gallery" id="gallery">
+    <div class="container">
+
+      <div class="gallery-tabs" role="tablist">
+        <button class="gallery-tab active" data-venue="all">ALL</button>
+        <button class="gallery-tab" data-venue="hotel">호텔</button>
+        <button class="gallery-tab" data-venue="hall">웨딩홀</button>
+        <button class="gallery-tab" data-venue="studio">스튜디오</button>
+        <button class="gallery-tab" data-venue="firstbirthday">Baby</button>
+      </div>
+
+  <!-- ALL -->
+  <div class="gallery-venue active" data-venue="all">
+    <div class="gallery-thumb-grid">
+      <a href="gallery-shilla.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="silla/shilla_01.jpg" alt="신라호텔"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">신라호텔</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-ravidus.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">라비두스</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-josunpalace.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="josunpalace/josunpalace_main.jpg" alt="조선팰리스 강남"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">조선팰리스 강남</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-crest72.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="crest72/crest72_001.jpg" alt="크레스트72"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">크레스트72</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-rakgojai.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="rakgojai/rakgojai_main.jpg" alt="락고재 서울"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">락고재 서울</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-confidential-companion.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="confidential-companion/confidential-companion_main.jpg" alt="Confidential (Companion)"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">Confidential (Companion)</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-hsquare.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">H스퀘어웨딩홀</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-lasittatheater.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="lasitta-theater/lasitta-theater-001.jpg" alt="라시따시어터"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">라시따시어터</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-weddingsignature.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="wedding-signature/wedding-signature-001.jpg" alt="웨딩시그니처"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">웨딩시그니처</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-withers.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="withers/withers_01.jpg" alt="위더스 영등포"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">위더스 영등포</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-yeoyulli.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="yeoyulli/yeoyulli_01.jpg" alt="웨딩여율리"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">웨딩여율리</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-dongbu.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="dongbu/dongbu_01.jpg" alt="동부지방법원(BR only)"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">동부지방법원(BR only)</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-grandhill.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">그랜드힐 컨벤션</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-dressgarden.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="dressgarden/dressgarden_main.jpg" alt="드레스가든"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">드레스가든</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-thechapel.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="thechapel/thechapel_main.jpg" alt="더 채플앳 대치"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">더 채플앳 대치</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-thechapelnonhyeon.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">더 채플앳 논현</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-samsung.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="samsung/samsung_main.jpg" alt="삼성 금융캠퍼스"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">삼성 금융캠퍼스</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-foreclock.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="foreclock/foreclock_01.jpg" alt="포어클락 용인"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">포어클락 용인</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 호텔 -->
+  <div class="gallery-venue" data-venue="hotel">
+    <div class="gallery-thumb-grid">
+      <a href="gallery-shilla.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="silla/shilla_01.jpg" alt="신라호텔"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">신라호텔</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-josunpalace.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="josunpalace/josunpalace_main.jpg" alt="조선팰리스 강남"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">조선팰리스 강남</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 웨딩홀 -->
+  <div class="gallery-venue" data-venue="hall">
+    <div class="gallery-thumb-grid">
+      <a href="gallery-ravidus.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="ravidus/ravidus_main.jpg" alt="라비두스"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">라비두스</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-crest72.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="crest72/crest72_001.jpg" alt="크레스트72"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">크레스트72</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-hsquare.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="hsquare/hsquare_001.jpg" alt="H스퀘어웨딩홀"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">H스퀘어웨딩홀</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-lasittatheater.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="lasitta-theater/lasitta-theater-001.jpg" alt="라시따시어터"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">라시따시어터</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-weddingsignature.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="wedding-signature/wedding-signature-001.jpg" alt="웨딩시그니처"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">웨딩시그니처</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-withers.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="withers/withers_01.jpg" alt="위더스 영등포"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">위더스 영등포</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-yeoyulli.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="yeoyulli/yeoyulli_01.jpg" alt="웨딩여율리"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">웨딩여율리</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-dongbu.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="dongbu/dongbu_01.jpg" alt="동부지방법원(BR only)"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">동부지방법원(BR only)</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-grandhill.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="grandhill/grandhill_01.jpg" alt="그랜드힐 컨벤션"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">그랜드힐 컨벤션</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-dressgarden.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="dressgarden/dressgarden_main.jpg" alt="드레스가든"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">드레스가든</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-thechapel.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="thechapel/thechapel_main.jpg" alt="더 채플앳 대치"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">더 채플앳 대치</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-thechapelnonhyeon.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">더 채플앳 논현</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-samsung.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="samsung/samsung_main.jpg" alt="삼성 금융캠퍼스"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">삼성 금융캠퍼스</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-foreclock.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="foreclock/foreclock_01.jpg" alt="포어클락 용인"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">포어클락 용인</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 스튜디오 -->
+  <div class="gallery-venue" data-venue="studio">
+    <div class="gallery-thumb-grid">
+      <a href="gallery-rakgojai.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="rakgojai/rakgojai_main.jpg" alt="락고재 서울"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">락고재 서울</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+      <a href="gallery-confidential-companion.html" class="gallery-card">
+        <div class="gallery-card-img"><img src="confidential-companion/confidential-companion_main.jpg" alt="Confidential (Companion)"></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">Confidential (Companion)</span>
+          <span class="gallery-card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 돌잔치 -->
+  <div class="gallery-venue" data-venue="firstbirthday">
+    <div class="gallery-thumb-grid">
+      <div class="gallery-card coming-soon">
+        <div class="gallery-card-img"><div class="gallery-card-placeholder"></div></div>
+        <div class="gallery-card-info">
+          <span class="gallery-card-name">Coming Soon</span>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top: calc(20px * var(--s, 1)); font-size: calc(11px * var(--s, 1)); color: var(--accent); letter-spacing: 0.08em;">* 갤러리 준비 중입니다.</p>
+  </div>
+
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER (공통) ── -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand-block">
+        <a class="footer-brand" href="index.html">LOTV</a>
+        <p class="footer-tagline">Every moment we capture becomes a memory that lingers.</p>
+      </div>
+      <div class="footer-col footer-col--contact">
+        <span class="footer-label">Contact</span>
+        <ul>
+          <li><a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">Instagram @lotv.snap</a></li>
+          <li><a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 LOTV 로토브</a></li>
+        </ul>
+      </div>
+      <nav class="footer-col footer-col--menu" aria-label="하단 메뉴">
+        <span class="footer-label">Menu</span>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="camera.html">Camera</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="package.html">Package</a></li>
+          <li><a href="reserve.html">Reservation</a></li>
+          <li><a href="policy.html">Policy</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p><span>상호명 : 엘오티브이(LOTV)</span><span>사업자등록번호 : 349-29-02113</span></p>
+      <p class="footer-copy">© 2026 LOTV SNAP. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+<script src="js/lotv.js"></script>
+<script>
+  /* ── 갤러리 탭 전환 (기존 동작 그대로) ── */
+  function switchVenue(nextVenue) {
+    const current = document.querySelector('.gallery-venue.active');
+    const next = document.querySelector(`.gallery-venue[data-venue="${nextVenue}"]`);
+    if (!next || current === next) return;
+
+    const STAGGER = 55;
+    const currentCards = [...current.querySelectorAll('.gallery-card')];
+    currentCards.forEach((card, i) => {
+      card.style.transition = `transform 0.55s cubic-bezier(0.4,0,1,1) ${i * STAGGER}ms, opacity 0.45s ease ${i * STAGGER}ms`;
+      card.style.transform = 'translateY(-14px)';
+      card.style.opacity = '0';
+    });
+    const leaveDuration = 550 + currentCards.length * STAGGER;
+
+    setTimeout(() => {
+      current.classList.remove('active');
+      currentCards.forEach(card => {
+        card.style.transition = ''; card.style.transform = ''; card.style.opacity = '';
+      });
+
+      next.classList.add('active');
+      const nextCards = [...next.querySelectorAll('.gallery-card')];
+      nextCards.forEach(card => {
+        card.style.transform = 'translateY(10px)';
+        card.style.opacity = '0';
+        card.style.transition = 'none';
+      });
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        nextCards.forEach((card, i) => {
+          card.style.transition = `transform 0.75s cubic-bezier(0.2,0,0,1) ${i * STAGGER}ms, opacity 0.7s ease ${i * STAGGER}ms`;
+          card.style.transform = 'translateY(0)';
+          card.style.opacity = '1';
+        });
+        setTimeout(() => {
+          nextCards.forEach(card => {
+            card.style.transition = ''; card.style.transform = ''; card.style.opacity = '';
+          });
+        }, 750 + nextCards.length * STAGGER);
+      }));
+    }, leaveDuration);
+  }
+
+  document.querySelectorAll('.gallery-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      switchVenue(tab.dataset.venue);
+    });
+  });
+</script>
+</body>
+</html>

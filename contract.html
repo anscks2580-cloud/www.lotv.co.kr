@@ -476,6 +476,12 @@ body {
   white-space: pre-wrap;
   word-break: break-all;
 }
+.cp-special-para {
+  margin-bottom: 8px;
+}
+.cp-special-para:last-child {
+  margin-bottom: 0;
+}
 
 /* 날짜 + 서명 영역 */
 .cp-date-row {
@@ -592,6 +598,19 @@ body {
   <!-- 방문자 통계 -->
   <div style="max-width:600px; margin:20px auto 0; font-size:12px; color:#5A5650;">
 
+    <!-- 기본: 메인 누적 수치만 -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 4px; border-bottom:1px solid rgba(0,0,0,0.12);">
+      <span>메인 누적 방문</span>
+      <span>
+        <strong id="mainTotal" style="font-size:14px;">…</strong>
+        <button type="button" id="statsToggle"
+          style="margin-left:12px; font-size:11px; padding:3px 10px; border:1px solid rgba(0,0,0,0.25); border-radius:4px; background:transparent; color:inherit; cursor:pointer;">상세 보기</button>
+      </span>
+    </div>
+
+    <!-- 상세 통계 (토글) -->
+    <div id="statsDetail" style="display:none; margin-top:10px;">
+
     <!-- 날짜별 조회 -->
     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
       <input type="date" id="statsDateFrom" style="font-size:12px; padding:4px 6px; border:1px solid rgba(0,0,0,0.2); border-radius:4px; color:inherit;">
@@ -615,6 +634,8 @@ body {
       <a href="https://lotv.goatcounter.com" target="_blank" rel="noopener"
          style="font-size:11px; color:inherit; opacity:0.45; text-decoration:underline;">대시보드 열기</a>
     </div>
+
+    </div><!-- /statsDetail -->
   </div>
 
   <script>
@@ -693,16 +714,35 @@ body {
 
     var lastResults = null;
 
-    Promise.all(pages.map(function(p) {
-      return Promise.all([
-        fetchCount(p.path, weekStartStr, today),
-        fetchCount(p.path)
-      ]);
-    })).then(function(results) {
-      lastResults = results;
-      renderRows(results);
-    }).catch(function() {
-      rowsEl.textContent = '불러오기 실패';
+    // 처음 진입 시: 메인 누적 수치만 조회
+    var mainTotalEl = document.getElementById('mainTotal');
+    fetchCount('/').then(function(v) { mainTotalEl.textContent = v; });
+
+    // 상세 보기를 처음 열 때만 전체 페이지 통계 조회
+    var detailLoaded = false;
+    function loadDetail() {
+      if (detailLoaded) return;
+      detailLoaded = true;
+      Promise.all(pages.map(function(p) {
+        return Promise.all([
+          fetchCount(p.path, weekStartStr, today),
+          fetchCount(p.path)
+        ]);
+      })).then(function(results) {
+        lastResults = results;
+        renderRows(results);
+      }).catch(function() {
+        rowsEl.textContent = '불러오기 실패';
+      });
+    }
+
+    var detailEl = document.getElementById('statsDetail');
+    var toggleBtn = document.getElementById('statsToggle');
+    toggleBtn.addEventListener('click', function() {
+      var open = detailEl.style.display !== 'none';
+      detailEl.style.display = open ? 'none' : 'block';
+      toggleBtn.textContent = open ? '상세 보기' : '접기';
+      if (!open) loadDetail();
     });
 
     // 날짜별(기간) 조회
@@ -772,7 +812,7 @@ body {
       <select id="f_product">
         <option value="">선택해주세요</option>
         <option value="LOTV Signature Snap">LOTV Signature Snap</option>
-        <option value="LOTV Signature Snap with Rico">LOTV Signature Snap with Rico</option>
+        <option value="LOTV Signature Snap with Ricoh">LOTV Signature Snap with Ricoh</option>
         <option value="LOTV Signature Snap for Baby">LOTV Signature Snap for Baby</option>
         <option value="Polaroid &amp; iPhone Memory Package (Promotion)">Polaroid &amp; iPhone Memory Package (Promotion)</option>
         <option value="Digital Camera Only Package (Promotion)">Digital Camera Only Package (Promotion)</option>
@@ -832,7 +872,7 @@ body {
 
     <div class="form-row">
       <label>특약사항</label>
-      <textarea id="f_special" rows="5" placeholder="계약 관련 특약 사항을 입력하세요.&#10;예: 예식 종료 후 30분 추가 촬영 포함 등"></textarea>
+      <textarea id="f_special" rows="12" placeholder="계약 관련 특약 사항을 입력하세요.&#10;예: 예식 종료 후 30분 추가 촬영 포함 등"></textarea>
     </div>
 
     <!-- 임시저장 -->
@@ -1093,6 +1133,14 @@ function updateOptionField() {
   opt.value = combined;
 }
 
+const STANDARD_SPECIAL = `1. 계약금 100,000원은 예약 확정을 위한 보증금으로, 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
+
+2. 계약 성립일로부터 7일 이내 취소 시 전액 환불되며, 이후 고객 사유로 취소하는 경우 계약 체결일 기준 LOTV SNAP 홈페이지 「POLICY」의 취소·환불 및 위약금 기준을 적용합니다.
+
+3. 계약자는 계약 전 「POLICY」 링크를 제공받아 내용을 확인하고 이에 동의하며, 해당 「POLICY」를 본 계약의 일부로 합니다.
+
+4. 단, LOTV SNAP의 귀책으로 촬영이 취소되거나 원본 전달이 불가능한 경우 지급된 금액을 전액 환불하며, 촬영자의 일방적 일정 취소 또는 노쇼 시 별도 배상 기준을 적용합니다.`;
+
 document.getElementById('f_product').addEventListener('change', function() {
   document.getElementById('productCustomWrap').style.display =
     this.value === '직접입력' ? 'flex' : 'none';
@@ -1101,42 +1149,18 @@ document.getElementById('f_product').addEventListener('change', function() {
 
   if (this.value === 'LOTV Signature Snap') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 5장/ 예식 주요 장면 중심 촬영
-- Phone (iPhone 17 PRO & XS) 및 Rico Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
-    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
-촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
-해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
-계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
-7일 이후 취소의 경우,
-LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
-단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
-지불된 금액의 2배를 배상합니다.
-또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
-  } else if (this.value === 'LOTV Signature Snap with Rico') {
+- Phone (iPhone 17 PRO & XS) 및 Ricoh Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    spec.value = STANDARD_SPECIAL;
+  } else if (this.value === 'LOTV Signature Snap with Ricoh') {
     baseOptionText = `- Ricoh High-end Camera 메인 촬영 / 예식 주요 장면 중심 촬영
 - Polaroid Snap 폴라로이드 필름 5장
 - Phone (iPhone 17 PRO & XS) 서브 촬영
 - 촬영 후 24시간 이내 원본 전체 전달 및 베스트컷 10장 보정 제공`;
-    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
-촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
-해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
-계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
-7일 이후 취소의 경우,
-LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
-단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
-지불된 금액의 2배를 배상합니다.
-또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
+    spec.value = STANDARD_SPECIAL;
   } else if (this.value === 'LOTV Signature Snap for Baby') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 10장/ 행사 주요 장면 중심 촬영
-- Phone (iPhone 17 PRO & XS) 및 Rico Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
-    spec.value = `계약금 100,000원은 예약 확정을 위한 최소 보증금이며
-촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
-해당 계약금은 계약 성립일로부터 7일 이내 취소 요청 시 전액 환불 가능하며
-계약 성립일 기준 7일 이후에는 예약 확정 및 일정 고정으로 인해 환불이 불가합니다.
-7일 이후 취소의 경우,
-LOTV SNAP의 블로그 "Reservation & Policy"에 명시된 기준에 따라 위약금이 적용됩니다.
-단, 촬영자(LOTV SNAP) 측의 일방적 일정 취소 또는 노쇼 발생 시,
-지불된 금액의 2배를 배상합니다.
-또한 촬영자의 귀책으로 인해 원본 데이터 손상 또는 전달이 불가능한 경우, 전액 환불 처리됩니다.`;
+- Phone (iPhone 17 PRO & XS) 및 Ricoh Camera 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
+    spec.value = STANDARD_SPECIAL;
   } else if (this.value === 'Polaroid & iPhone Memory Package (Promotion)') {
     baseOptionText = `- Polaroid Snap 폴라로이드 필름 3장/ 예식 주요 장면 중심 촬영
 - iPhone Snap Service 아이폰 기록 촬영/ 촬영 후 24시간 이내 원본 전체 전달/ 베스트컷 10장 보정 제공`;
@@ -1182,7 +1206,16 @@ function fillContract() {
   document.getElementById('cp_option').textContent  = g('f_option')  || '—';
 
   document.getElementById('cp_price').textContent   = g('f_price')   || '—';
-  document.getElementById('cp_special').textContent = g('f_special') || '';
+  const specEl = document.getElementById('cp_special');
+  specEl.innerHTML = '';
+  (g('f_special') || '').split(/\n\s*\n/).forEach(function(par) {
+    const t = par.trim();
+    if (!t) return;
+    const d = document.createElement('div');
+    d.className = 'cp-special-para';
+    d.textContent = t;
+    specEl.appendChild(d);
+  });
 
   // 날짜
   const cd = g('f_contractDate');

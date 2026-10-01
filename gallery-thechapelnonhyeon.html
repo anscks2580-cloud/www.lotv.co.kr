@@ -8,7 +8,10 @@
 <meta property="og:description" content="결혼식의 한 장면을 영원히. 본식 스냅 · 아이폰 감성 · 필름 무드">
 <meta property="og:url" content="https://www.lotv.co.kr/gallery-thechapelnonhyeon.html">
 <title>더 채플앳 논현 — LOTV Snap</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lotv.css?v=6">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,7 +39,7 @@
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 100;
-    padding: 24px 48px;
+    padding: calc(24px * var(--s, 1)) calc(48px * var(--s, 1));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -44,32 +47,32 @@
   }
   nav.scrolled {
     background: rgba(242,239,232,0.94);
-    backdrop-filter: blur(10px);
-    padding: 16px 48px;
+    backdrop-filter: blur(calc(10px * var(--s, 1)));
+    padding: calc(16px * var(--s, 1)) calc(48px * var(--s, 1));
     border-bottom: 0.5px solid rgba(28,26,23,0.08);
   }
   .nav-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: calc(12px * var(--s, 1));
     text-decoration: none;
     color: var(--ink);
   }
   .logo-text {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
+    font-size: calc(20px * var(--s, 1));
     font-weight: 300;
     letter-spacing: 0.18em;
   }
   .nav-links {
     display: flex;
-    gap: 40px;
+    gap: calc(40px * var(--s, 1));
     list-style: none;
   }
   .nav-links a {
     text-decoration: none;
     color: var(--ink-soft);
-    font-size: 11px;
+    font-size: calc(11px * var(--s, 1));
     letter-spacing: 0.2em;
     text-transform: uppercase;
     transition: color 0.2s;
@@ -79,32 +82,32 @@
   .nav-toggle {
     display: none;
     flex-direction: column;
-    gap: 5px;
+    gap: calc(5px * var(--s, 1));
     cursor: pointer;
     background: none;
     border: none;
-    padding: 4px;
+    padding: calc(4px * var(--s, 1));
   }
   .nav-toggle span {
     display: block;
-    width: 22px;
+    width: calc(22px * var(--s, 1));
     height: 0.5px;
     background: var(--ink);
     transition: transform 0.3s, opacity 0.3s;
   }
-  .nav-toggle.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(calc(5.5px * var(--s, 1))) rotate(45deg); }
   .nav-toggle.open span:nth-child(2) { opacity: 0; }
-  .nav-toggle.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(calc(-5.5px * var(--s, 1))) rotate(-45deg); }
 
   /* ── HERO ── */
   .page-hero {
     height: 60vh;
-    min-height: 360px;
+    min-height: calc(360px * var(--s, 1));
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
-    padding: 0 48px 60px;
+    padding: 0 calc(48px * var(--s, 1)) calc(60px * var(--s, 1));
   }
   .page-hero-bg {
     position: absolute;
@@ -129,58 +132,58 @@
   }
   .page-hero-back {
     position: absolute;
-    top: 100px;
-    left: 48px;
+    top: calc(100px * var(--s, 1));
+    left: calc(48px * var(--s, 1));
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: calc(8px * var(--s, 1));
     text-decoration: none;
     color: rgba(250,248,244,0.8);
-    font-size: 11px;
+    font-size: calc(11px * var(--s, 1));
     letter-spacing: 0.2em;
     text-transform: uppercase;
     transition: color 0.2s;
   }
   .page-hero-back:hover { color: var(--warm-white); }
-  .page-hero-back::before { content: '←'; font-size: 14px; }
+  .page-hero-back::before { content: '←'; font-size: calc(14px * var(--s, 1)); }
   .venue-label {
-    font-size: 10px;
+    font-size: calc(10px * var(--s, 1));
     letter-spacing: 0.35em;
     text-transform: uppercase;
     color: rgba(250,248,244,0.65);
-    margin-bottom: 12px;
+    margin-bottom: calc(12px * var(--s, 1));
   }
   .venue-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(32px, 5vw, 56px);
+    font-size: clamp(calc(32px * var(--s, 1)), 5vw, calc(56px * var(--s, 1)));
     font-weight: 300;
     letter-spacing: 0.04em;
     line-height: 1.1;
   }
   .venue-title em { font-style: italic; }
   .venue-date {
-    margin-top: 12px;
-    font-size: 11px;
+    margin-top: calc(12px * var(--s, 1));
+    font-size: calc(11px * var(--s, 1));
     letter-spacing: 0.2em;
     color: rgba(250,248,244,0.55);
   }
 
   /* ── GALLERY SECTION ── */
   .gallery-section {
-    padding: 80px 48px 120px;
-    max-width: 1400px;
+    padding: calc(80px * var(--s, 1)) calc(48px * var(--s, 1)) calc(120px * var(--s, 1));
+    max-width: calc(1400px * var(--s, 1));
     margin: 0 auto;
   }
 
   /* CSS Columns masonry layout (기존 사이트 패턴) */
   .masonry {
     columns: 3;
-    column-gap: 12px;
+    column-gap: calc(12px * var(--s, 1));
   }
   .masonry-item {
     break-inside: avoid;
-    margin-bottom: 12px;
+    margin-bottom: calc(12px * var(--s, 1));
     overflow: hidden;
     cursor: pointer;
     position: relative;
@@ -212,9 +215,9 @@
   }
   .lightbox-close {
     position: absolute;
-    top: 28px; right: 36px;
+    top: calc(28px * var(--s, 1)); right: calc(36px * var(--s, 1));
     color: rgba(250,248,244,0.6);
-    font-size: 28px;
+    font-size: calc(28px * var(--s, 1));
     cursor: pointer;
     background: none;
     border: none;
@@ -227,76 +230,155 @@
     top: 50%;
     transform: translateY(-50%);
     color: rgba(250,248,244,0.5);
-    font-size: 32px;
+    font-size: calc(32px * var(--s, 1));
     cursor: pointer;
     background: none;
     border: none;
-    padding: 20px;
+    padding: calc(20px * var(--s, 1));
     transition: color 0.2s;
   }
   .lightbox-prev:hover, .lightbox-next:hover { color: var(--warm-white); }
-  .lightbox-prev { left: 12px; }
-  .lightbox-next { right: 12px; }
+  .lightbox-prev { left: calc(12px * var(--s, 1)); }
+  .lightbox-next { right: calc(12px * var(--s, 1)); }
   .lightbox-counter {
     position: absolute;
-    bottom: 24px;
+    bottom: calc(24px * var(--s, 1));
     left: 50%;
     transform: translateX(-50%);
     color: rgba(250,248,244,0.4);
-    font-size: 11px;
+    font-size: calc(11px * var(--s, 1));
     letter-spacing: 0.2em;
   }
 
   /* ── FOOTER ── */
   footer {
     border-top: 0.5px solid rgba(28,26,23,0.12);
-    padding: 32px 48px;
+    padding: calc(32px * var(--s, 1)) calc(48px * var(--s, 1));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: calc(16px * var(--s, 1));
   }
-  .ft-business { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.05em; }
-  .ft-bottom { display: flex; gap: 24px; align-items: center; }
-  .ft-copy { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.05em; }
-  .ft-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; color: var(--accent); }
+  .ft-business { font-size: calc(11px * var(--s, 1)); color: var(--ink-soft); letter-spacing: 0.05em; }
+  .ft-bottom { display: flex; gap: calc(24px * var(--s, 1)); align-items: center; }
+  .ft-copy { font-size: calc(11px * var(--s, 1)); color: var(--ink-soft); letter-spacing: 0.05em; }
+  .ft-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: calc(13px * var(--s, 1)); color: var(--accent); }
 
   /* ── MOBILE ── */
   @media (max-width: 768px) {
-    nav { padding: 20px 24px; }
-    nav.scrolled { padding: 14px 24px; }
-    .nav-links { display: none; flex-direction: column; gap: 20px; position: absolute; top: 100%; left: 0; right: 0; background: rgba(242,239,232,0.97); padding: 24px; border-bottom: 0.5px solid rgba(28,26,23,0.08); }
+    nav { padding: calc(20px * var(--s, 1)) calc(24px * var(--s, 1)); }
+    nav.scrolled { padding: calc(14px * var(--s, 1)) calc(24px * var(--s, 1)); }
+    .nav-links { display: none; flex-direction: column; gap: calc(20px * var(--s, 1)); position: absolute; top: 100%; left: 0; right: 0; background: rgba(242,239,232,0.97); padding: calc(24px * var(--s, 1)); border-bottom: 0.5px solid rgba(28,26,23,0.08); }
     .nav-links.open { display: flex; }
     .nav-toggle { display: flex; }
 
-    .page-hero { padding: 0 24px 40px; }
-    .page-hero-back { left: 24px; top: 80px; }
-    .gallery-section { padding: 48px 16px 80px; }
-    .masonry { columns: 2; column-gap: 8px; }
-    .masonry-item { margin-bottom: 8px; }
-    footer { padding: 24px; flex-direction: column; text-align: center; gap: 8px; }
-    .ft-bottom { flex-direction: column; gap: 6px; }
+    .page-hero { padding: 0 calc(24px * var(--s, 1)) calc(40px * var(--s, 1)); }
+    .page-hero-back { left: calc(24px * var(--s, 1)); top: calc(80px * var(--s, 1)); }
+    .gallery-section { padding: calc(48px * var(--s, 1)) calc(16px * var(--s, 1)) calc(80px * var(--s, 1)); }
+    .masonry { columns: 2; column-gap: calc(8px * var(--s, 1)); }
+    .masonry-item { margin-bottom: calc(8px * var(--s, 1)); }
+    footer { padding: calc(24px * var(--s, 1)); flex-direction: column; text-align: center; gap: calc(8px * var(--s, 1)); }
+    .ft-bottom { flex-direction: column; gap: calc(6px * var(--s, 1)); }
   }
 </style>
 <script data-goatcounter="https://lotv.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-</head>
-<body>
+<style id="lotv-renewal">
+/* ── 리뉴얼 공통 오버라이드 (v2) ──────────────────────────────────────────
+   헤더·푸터·카카오는 css/lotv.css 공통. 여기서는 제목·여백·라이트박스만 정리.
+   사진 배치(그리드/컬럼)와 비율은 그대로.
+   ─────────────────────────────────────────────────────────────────────── */
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-weight: 300; line-height: 1.6; letter-spacing: 0.02em; }
+.site-footer .container { max-width: none; }
 
-<!-- ── NAV ── -->
-<nav id="mainNav">
-  <a class="nav-logo" href="index.html">
-    <span class="logo-text">LOTV</span>
-  </a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="index.html#gallery">Gallery</a></li>
-    <li><a href="index.html#about">About</a></li>
-    <li><a href="index.html#packages">Package</a></li>
-    <li><a href="index.html#reserve">Reserve</a></li>
-  </ul>
-  <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
-    <span></span><span></span><span></span>
+/* 제목: 영문은 Cormorant, 한글 베뉴명은 Noto Sans KR (시스템 명조로 떨어지지 않게) */
+.page-title,
+.gallery-hero-title,
+.venue-title { font-family: var(--title); font-weight: 300; }
+
+/* 타입 A: page-header + photo-grid */
+.page-header { padding: calc(var(--header-h) + clamp(calc(72px * var(--s, 1)), 10vw, calc(152px * var(--s, 1)))) var(--gutter) clamp(calc(40px * var(--s, 1)), 5vw, calc(72px * var(--s, 1))); }
+.page-eyebrow { font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; color: var(--accent); margin-bottom: calc(18px * var(--s, 1)); }
+.page-title { font-size: clamp(calc(28px * var(--s, 1)), 3vw, calc(44px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.15; }
+.photo-grid { padding-left: var(--gutter); padding-right: var(--gutter); padding-bottom: var(--section); }
+
+/* 타입 B: gallery-hero + 큰 메인 이미지 */
+.gallery-hero { padding: calc(var(--header-h) + clamp(calc(72px * var(--s, 1)), 10vw, calc(152px * var(--s, 1)))) var(--gutter) clamp(calc(40px * var(--s, 1)), 5vw, calc(72px * var(--s, 1))); background: var(--paper); }
+.gallery-hero-eyebrow { font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; margin-bottom: calc(18px * var(--s, 1)); }
+.gallery-hero-eyebrow::after { width: calc(28px * var(--s, 1)); height: 1px; opacity: 0.4; }
+.gallery-hero-title { font-size: clamp(calc(28px * var(--s, 1)), 3vw, calc(44px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.15; margin-bottom: calc(14px * var(--s, 1)); }
+.gallery-hero-sub { font-size: calc(11px * var(--s, 1)); letter-spacing: 0.1em; color: var(--accent); }
+.gallery-section { padding-left: var(--gutter); padding-right: var(--gutter); padding-top: clamp(calc(40px * var(--s, 1)), 5vw, calc(72px * var(--s, 1))); padding-bottom: var(--section); }
+.page-hero ~ .gallery-section { max-width: calc(var(--max) + var(--gutter) * 2); }   /* 타입 C: 본문 폭을 공통 기준선에 맞춤 */
+
+/* 타입 C: 풀블리드 page-hero */
+.page-hero { padding-left: var(--gutter); padding-right: var(--gutter); padding-bottom: clamp(calc(40px * var(--s, 1)), 5vw, calc(64px * var(--s, 1))); }
+.page-hero-back { left: var(--gutter); top: calc(var(--header-h) + calc(24px * var(--s, 1))); font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; }
+.venue-label { font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; margin-bottom: calc(14px * var(--s, 1)); }
+.venue-title { font-size: clamp(calc(30px * var(--s, 1)), 3.2vw, calc(46px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.1; }
+.venue-date { font-size: calc(11px * var(--s, 1)); letter-spacing: 0.1em; }
+
+/* 라이트박스: 어두운 막 대신 종이색 배경 위에 사진만 조용히 */
+.lightbox { background: var(--paper); }
+.lightbox-img { max-width: min(88vw, calc(1600px * var(--s, 1))); max-height: 84vh; }
+.lightbox-close,
+.lightbox-prev,
+.lightbox-next {
+  color: var(--ink);
+  opacity: 0.5;
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1;
+  transition: opacity 0.3s ease;
+}
+.lightbox-close:hover,
+.lightbox-prev:hover,
+.lightbox-next:hover { color: var(--ink); opacity: 1; }
+.lightbox-close { top: calc(var(--header-h) / 2 - calc(22px * var(--s, 1))); right: calc(var(--gutter) - calc(12px * var(--s, 1))); width: calc(44px * var(--s, 1)); height: calc(44px * var(--s, 1)); font-size: calc(20px * var(--s, 1)); }
+.lightbox-prev { left: calc(var(--gutter) - calc(20px * var(--s, 1))); font-size: calc(30px * var(--s, 1)); }
+.lightbox-next { right: calc(var(--gutter) - calc(20px * var(--s, 1))); font-size: calc(30px * var(--s, 1)); }
+.lightbox-counter { font-family: var(--sans); font-size: calc(10.5px * var(--s, 1)); letter-spacing: 0.16em; color: var(--accent); bottom: calc(calc(22px * var(--s, 1)) + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 640px) {
+  .lightbox-img { max-width: 100vw; max-height: 78vh; }
+  .lightbox-prev { left: 0; }
+  .lightbox-next { right: 0; }
+}
+
+/* 타입 C: 풀블리드 사진 위에서도 헤더가 읽히도록 항상 불투명 */
+.site-header { background: rgba(251, 250, 247, 0.92); -webkit-backdrop-filter: blur(calc(12px * var(--s, 1))); backdrop-filter: blur(calc(12px * var(--s, 1))); border-bottom-color: var(--line); }
+</style>
+</head>
+<body data-page="gallery">
+<!-- ── HEADER (공통) ── -->
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="LOTV 메인으로">LOTV</a>
+  <button class="menu-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" aria-label="메뉴 열기">
+    <span></span><span></span>
   </button>
-</nav>
+</header>
+
+<!-- ── DRAWER MENU (공통) ── -->
+<div class="drawer" id="site-drawer" aria-hidden="true" inert>
+  <div class="drawer-inner">
+    <div class="drawer-nav" role="navigation" aria-label="주요 메뉴">
+      <ul class="drawer-list">
+        <li><a class="drawer-link" href="about.html"   data-nav="about"><span class="drawer-en">About</span><span class="drawer-ko">소개</span></a></li>
+        <li><a class="drawer-link" href="camera.html"  data-nav="camera"><span class="drawer-en">Camera</span><span class="drawer-ko">카메라</span></a></li>
+        <li><a class="drawer-link" href="gallery.html" data-nav="gallery"><span class="drawer-en">Gallery</span><span class="drawer-ko">갤러리</span></a></li>
+        <li><a class="drawer-link" href="package.html" data-nav="package"><span class="drawer-en">Package</span><span class="drawer-ko">상품 안내</span></a></li>
+        <li><a class="drawer-link" href="reserve.html" data-nav="reserve"><span class="drawer-en">Reservation</span><span class="drawer-ko">예약 안내</span></a></li>
+        <li><a class="drawer-link" href="policy.html"  data-nav="policy"><span class="drawer-en">Policy</span><span class="drawer-ko">이용 규정</span></a></li>
+      </ul>
+    </div>
+    <div class="drawer-foot">
+      <p class="drawer-tagline">Lily of the Valley Snap</p>
+      <div class="drawer-contact">
+        <a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener"><small>Instagram</small>@lotv.snap</a>
+        <a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener"><small>KakaoTalk</small>LOTV 로토브</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ── PAGE HERO ── -->
 <section class="page-hero">
@@ -304,7 +386,7 @@
     <img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현">
   </div>
   <div class="page-hero-overlay"></div>
-  <a class="page-hero-back" href="index.html#gallery">Gallery</a>
+  <a class="page-hero-back" href="gallery.html">Gallery</a>
   <div class="page-hero-text">
     <p class="venue-label">웨딩홀 · WEDDING HALL</p>
     <h1 class="venue-title">더 채플앳 논현</h1>
@@ -354,30 +436,41 @@
   <div class="lightbox-counter" id="lbCounter"></div>
 </div>
 
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="ft-business">
-    <span>상호명 : 엘오티브이(LOTV) &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 사업자등록번호 : 349-29-02113</span>
+<!-- ── FOOTER (공통) ── -->
+<div class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand-block">
+        <a class="footer-brand" href="index.html">LOTV</a>
+        <p class="footer-tagline">Every moment we capture becomes a memory that lingers.</p>
+      </div>
+      <div class="footer-col footer-col--contact">
+        <span class="footer-label">Contact</span>
+        <ul>
+          <li><a href="https://instagram.com/lotv.snap" target="_blank" rel="noopener">Instagram @lotv.snap</a></li>
+          <li><a href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener">카카오톡 LOTV 로토브</a></li>
+        </ul>
+      </div>
+      <div class="footer-col footer-col--menu" role="navigation" aria-label="하단 메뉴">
+        <span class="footer-label">Menu</span>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="camera.html">Camera</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="package.html">Package</a></li>
+          <li><a href="reserve.html">Reservation</a></li>
+          <li><a href="policy.html">Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p><span>상호명 : 엘오티브이(LOTV)</span><span>사업자등록번호 : 349-29-02113</span></p>
+      <p class="footer-copy">© 2026 LOTV SNAP. All Rights Reserved.</p>
+    </div>
   </div>
-  <div class="ft-bottom">
-    <span class="ft-copy">© 2026 LOTV SNAP. All Rights Reserved.</span>
-    <span class="ft-tagline">Every moment we capture becomes a memory that lingers.</span>
-  </div>
-</footer>
+</div>
 
 <script>
-  /* ── NAV ── */
-  const nav = document.getElementById('mainNav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  });
-  const toggle = document.getElementById('navToggle');
-  const navLinks = document.getElementById('navLinks');
-  toggle.addEventListener('click', () => {
-    toggle.classList.toggle('open');
-    navLinks.classList.toggle('open');
-  });
-
   /* ── LIGHTBOX ── */
   const items = document.querySelectorAll('.masonry-item');
   const lb = document.getElementById('lightbox');
@@ -415,5 +508,16 @@
     if (e.key === 'ArrowRight') nextImg();
   });
 </script>
+<!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
+<a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
+  <div class="kakao-float-btn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3C6.477 3 2 6.806 2 11.5c0 2.93 1.738 5.519 4.381 7.077L5.5 22l4.13-2.2A11.6 11.6 0 0 0 12 20c5.523 0 10-3.806 10-8.5S17.523 3 12 3Z" fill="#3A1D1D"/>
+    </svg>
+  </div>
+  <span class="kakao-float-label">카카오톡 문의</span>
+</a>
+
+<script src="js/lotv.js"></script>
 </body>
 </html>
