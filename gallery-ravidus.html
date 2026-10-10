@@ -282,14 +282,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') changePhoto(1);
 });
 
-/* ── 이미지 보호 ── */
-document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
-<style>
-  img { -webkit-user-select: none; user-select: none; pointer-events: none; -webkit-touch-callout: none; }
-  .photo-item, .lightbox-img { pointer-events: auto; }
-</style>
 <!-- ── 카카오톡 플로팅 버튼 (공통) ── -->
 <a class="kakao-float" href="https://pf.kakao.com/_xdLaxjX" target="_blank" rel="noopener" aria-label="카카오톡 문의">
   <div class="kakao-float-btn">
@@ -299,6 +292,16 @@ document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.
   </div>
   <span class="kakao-float-label">카카오톡 문의</span>
 </a>
+
+<!-- ── 이미지 저장 방지 (공통) ── -->
+<style>
+  img { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; pointer-events: none; }
+  .lightbox-img { pointer-events: auto; }
+</style>
+<script>
+  document.addEventListener('contextmenu', function (e) { if (e.target.tagName === 'IMG' || e.target.closest('.lightbox, .photo-item, .gallery-col-item, .masonry-item, .gallery-card-img')) e.preventDefault(); });
+  document.addEventListener('dragstart', function (e) { if (e.target.tagName === 'IMG') e.preventDefault(); });
+</script>
 
 <script src="js/lotv.js"></script>
 </body>
