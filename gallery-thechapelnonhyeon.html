@@ -99,76 +99,6 @@
   .nav-toggle.open span:nth-child(2) { opacity: 0; }
   .nav-toggle.open span:nth-child(3) { transform: translateY(calc(-5.5px * var(--s, 1))) rotate(-45deg); }
 
-  /* ── HERO ── */
-  .page-hero {
-    height: 60vh;
-    min-height: calc(360px * var(--s, 1));
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-end;
-    padding: 0 calc(48px * var(--s, 1)) calc(60px * var(--s, 1));
-  }
-  .page-hero-bg {
-    position: absolute;
-    inset: 0;
-  }
-  .page-hero-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 30%;
-    display: block;
-  }
-  .page-hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(28,26,23,0.55) 0%, rgba(28,26,23,0.1) 60%, transparent 100%);
-  }
-  .page-hero-text {
-    position: relative;
-    z-index: 2;
-    color: var(--warm-white);
-  }
-  .page-hero-back {
-    position: absolute;
-    top: calc(100px * var(--s, 1));
-    left: calc(48px * var(--s, 1));
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: calc(8px * var(--s, 1));
-    text-decoration: none;
-    color: rgba(250,248,244,0.8);
-    font-size: calc(11px * var(--s, 1));
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-  .page-hero-back:hover { color: var(--warm-white); }
-  .page-hero-back::before { content: '←'; font-size: calc(14px * var(--s, 1)); }
-  .venue-label {
-    font-size: calc(10px * var(--s, 1));
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: rgba(250,248,244,0.65);
-    margin-bottom: calc(12px * var(--s, 1));
-  }
-  .venue-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(calc(32px * var(--s, 1)), 5vw, calc(56px * var(--s, 1)));
-    font-weight: 300;
-    letter-spacing: 0.04em;
-    line-height: 1.1;
-  }
-  .venue-title em { font-style: italic; }
-  .venue-date {
-    margin-top: calc(12px * var(--s, 1));
-    font-size: calc(11px * var(--s, 1));
-    letter-spacing: 0.2em;
-    color: rgba(250,248,244,0.55);
-  }
-
   /* ── GALLERY SECTION ── */
   .gallery-section {
     padding: calc(80px * var(--s, 1)) calc(48px * var(--s, 1)) calc(120px * var(--s, 1));
@@ -272,8 +202,6 @@
     .nav-links.open { display: flex; }
     .nav-toggle { display: flex; }
 
-    .page-hero { padding: 0 calc(24px * var(--s, 1)) calc(40px * var(--s, 1)); }
-    .page-hero-back { left: calc(24px * var(--s, 1)); top: calc(80px * var(--s, 1)); }
     .gallery-section { padding: calc(48px * var(--s, 1)) calc(16px * var(--s, 1)) calc(80px * var(--s, 1)); }
     .masonry { columns: 2; column-gap: calc(8px * var(--s, 1)); }
     .masonry-item { margin-bottom: calc(8px * var(--s, 1)); }
@@ -301,21 +229,13 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 .page-title { font-size: clamp(calc(28px * var(--s, 1)), 3vw, calc(44px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.15; }
 .photo-grid { padding-left: var(--gutter); padding-right: var(--gutter); padding-bottom: var(--section); }
 
-/* 타입 B: gallery-hero + 큰 메인 이미지 */
+/* 타입 B: gallery-hero */
 .gallery-hero { padding: calc(var(--header-h) + clamp(calc(72px * var(--s, 1)), 10vw, calc(152px * var(--s, 1)))) var(--gutter) clamp(calc(40px * var(--s, 1)), 5vw, calc(72px * var(--s, 1))); background: var(--paper); }
 .gallery-hero-eyebrow { font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; margin-bottom: calc(18px * var(--s, 1)); }
 .gallery-hero-eyebrow::after { width: calc(28px * var(--s, 1)); height: 1px; opacity: 0.4; }
 .gallery-hero-title { font-size: clamp(calc(28px * var(--s, 1)), 3vw, calc(44px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.15; margin-bottom: calc(14px * var(--s, 1)); }
 .gallery-hero-sub { font-size: calc(11px * var(--s, 1)); letter-spacing: 0.1em; color: var(--accent); }
-.gallery-section { padding-left: var(--gutter); padding-right: var(--gutter); padding-top: clamp(calc(40px * var(--s, 1)), 5vw, calc(72px * var(--s, 1))); padding-bottom: var(--section); }
-.page-hero ~ .gallery-section { max-width: calc(var(--max) + var(--gutter) * 2); }   /* 타입 C: 본문 폭을 공통 기준선에 맞춤 */
-
-/* 타입 C: 풀블리드 page-hero */
-.page-hero { padding-left: var(--gutter); padding-right: var(--gutter); padding-bottom: clamp(calc(40px * var(--s, 1)), 5vw, calc(64px * var(--s, 1))); }
-.page-hero-back { left: var(--gutter); top: calc(var(--header-h) + calc(24px * var(--s, 1))); font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; }
-.venue-label { font-family: var(--sans); font-size: calc(11px * var(--s, 1)); letter-spacing: 0.12em; text-transform: none; margin-bottom: calc(14px * var(--s, 1)); }
-.venue-title { font-size: clamp(calc(30px * var(--s, 1)), 3.2vw, calc(46px * var(--s, 1))); letter-spacing: 0.02em; line-height: 1.1; }
-.venue-date { font-size: calc(11px * var(--s, 1)); letter-spacing: 0.1em; }
+.gallery-section { padding-left: var(--gutter); padding-right: var(--gutter); padding-top: 0; padding-bottom: var(--section); max-width: none; margin: 0; }
 
 /* 라이트박스: 어두운 막 대신 종이색 배경 위에 사진만 조용히 */
 .lightbox { background: var(--paper); }
@@ -343,8 +263,6 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   .lightbox-next { right: 0; }
 }
 
-/* 타입 C: 풀블리드 사진 위에서도 헤더가 읽히도록 항상 불투명 */
-.site-header { background: rgba(251, 250, 247, 0.92); -webkit-backdrop-filter: blur(calc(12px * var(--s, 1))); backdrop-filter: blur(calc(12px * var(--s, 1))); border-bottom-color: var(--line); }
 </style>
 </head>
 <body data-page="gallery">
@@ -380,18 +298,11 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 </div>
 
 
-<!-- ── PAGE HERO ── -->
-<section class="page-hero">
-  <div class="page-hero-bg">
-    <img src="thechapelnonhyeon/thechapelnonhyeon_001.jpg" alt="더 채플앳 논현">
-  </div>
-  <div class="page-hero-overlay"></div>
-  <a class="page-hero-back" href="gallery.html">Gallery</a>
-  <div class="page-hero-text">
-    <p class="venue-label">웨딩홀 · WEDDING HALL</p>
-    <h1 class="venue-title">더 채플앳 논현</h1>
-  </div>
-</section>
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <p class="page-eyebrow">웨딩홀 · Wedding Hall</p>
+  <h1 class="page-title">더 채플앳 논현</h1>
+</div>
 
 <!-- ── GALLERY ── -->
 <div class="gallery-section">
