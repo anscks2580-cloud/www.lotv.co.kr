@@ -205,36 +205,86 @@ html.gift-intro .gift-opener {
 html.gift-intro-out .gift-opener { opacity: 0; visibility: hidden; }
 
 .gift-opener svg {
-  width: calc(64px * var(--s, 1));
-  height: calc(64px * var(--s, 1));
+  width: calc(76px * var(--s, 1));
+  height: calc(76px * var(--s, 1));
   overflow: visible;
   color: var(--ink-soft, #5A5650);
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
   animation: gi-in 0.8s cubic-bezier(0.2, 0, 0, 1) 0.1s forwards;
 }
-.gift-opener svg * { vector-effect: non-scaling-stroke; }
-.gift-opener .gift-lid {
-  transform-box: view-box;
-  transform-origin: 3.5px 12.5px;
-  animation: gi-lid 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+.gift-opener svg * { vector-effect: non-scaling-stroke; transform-box: view-box; }
+/* 상자는 배경색으로 채워서 뒤에서 터져 나오는 빛·입자를 가려줌 (깊이감) */
+.gift-opener .gift-box path,
+.gift-opener .gift-box rect { fill: var(--paper, #FAF8F4); }
+
+/* 1) 터지기 직전: 살짝 흔들리고 눌림 */
+.gift-opener .gift-box {
+  transform-origin: 12px 20.5px;
+  animation: gi-shake 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.75s both;
 }
+/* 2) 뚜껑이 튕겨 오름 */
+.gift-opener .gift-lid {
+  transform-origin: 12px 10.5px;
+  animation: gi-lid 0.75s cubic-bezier(0.18, 1.3, 0.4, 1) 1.15s forwards;
+}
+/* 3) 얇은 원형 파동 */
+.gift-opener .gift-ring {
+  transform-origin: 12px 10.5px;
+  opacity: 0;
+  animation: gi-ring 1s cubic-bezier(0.1, 0.6, 0.3, 1) 1.17s forwards;
+}
+/* 4) 사방으로 뻗는 빛줄기 */
 .gift-opener .gift-rays path {
+  vector-effect: none;             /* 점선 계산이 깨지지 않도록 일반 선 굵기로 */
+  stroke-width: 0.42;
   stroke-dasharray: 1 1;
   stroke-dashoffset: 1;
   opacity: 0;
-  animation: gi-ray 0.75s cubic-bezier(0.33, 0, 0.2, 1) 1s forwards;
+  animation: gi-ray 0.8s cubic-bezier(0.25, 0.7, 0.3, 1) 1.19s forwards;
 }
 .gift-opener .gift-rays path:nth-child(2),
-.gift-opener .gift-rays path:nth-child(3) { animation-delay: 1.06s; }
+.gift-opener .gift-rays path:nth-child(3) { animation-delay: 1.22s; }
+.gift-opener .gift-rays path:nth-child(4),
+.gift-opener .gift-rays path:nth-child(5) { animation-delay: 1.25s; }
+.gift-opener .gift-rays path:nth-child(6),
+.gift-opener .gift-rays path:nth-child(7) { animation-delay: 1.28s; }
+.gift-opener .gift-rays path:nth-child(8),
+.gift-opener .gift-rays path:nth-child(9) { animation-delay: 1.31s; }
+/* 5) 작은 입자가 흩어짐 */
+.gift-opener .gift-dots circle {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0;
+  animation: gi-dot 1.1s cubic-bezier(0.15, 0.75, 0.3, 1) 1.2s forwards;
+}
+.gift-opener .gift-dots circle:nth-child(even) { animation-delay: 1.26s; animation-duration: 1.25s; }
 
-@keyframes gi-in  { to { opacity: 1; transform: none; } }
-@keyframes gi-lid { to { transform: translate(-0.4px, -1.6px) rotate(-24deg); } }
+@keyframes gi-in { to { opacity: 1; transform: none; } }
+@keyframes gi-shake {
+  0%   { transform: none; }
+  18%  { transform: rotate(-4deg); }
+  36%  { transform: rotate(4deg); }
+  52%  { transform: rotate(-2deg); }
+  72%  { transform: scale(1.07, 0.88); }
+  86%  { transform: scale(0.97, 1.05); }
+  100% { transform: none; }
+}
+@keyframes gi-lid { to { transform: translate(-5px, -12px) rotate(-30deg); } }
+@keyframes gi-ring {
+  0%   { transform: scale(0.2); opacity: 0.5; }
+  100% { transform: scale(1.75); opacity: 0; }
+}
 @keyframes gi-ray {
   0%   { stroke-dashoffset: 1;  opacity: 0; }
-  30%  { opacity: 1; }
-  70%  { opacity: 1; }
+  25%  { opacity: 1; }
+  65%  { opacity: 1; }
   100% { stroke-dashoffset: -1; opacity: 0; }
+}
+@keyframes gi-dot {
+  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
 }
 
 /* 인트로 동안 본문 숨김 → 상자가 열린 뒤 천천히 떠오름 */
@@ -292,9 +342,13 @@ html.gift-intro-out .site-header { opacity: 1; transition: opacity 1s ease 0.5s;
 <!-- ── Gift 인트로 (선물 상자 열림) ── -->
 <div class="gift-opener" aria-hidden="true">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-    <g class="gift-rays"><path pathLength="1" d="M20.2 7.4l2.8-4.2"/><path pathLength="1" d="M21 9.6l4.4-1.9"/><path pathLength="1" d="M21.2 11.9l4.6-.1"/></g>
-    <g class="gift-body"><path d="M5 12.5v8h14v-8"/><path d="M12 12.5v8"/></g>
-    <g class="gift-lid"><rect x="3.5" y="8.5" width="17" height="4"/><path d="M12 8.5v4"/><path d="M12 8.5C10.6 5.2 6.5 4.6 6.5 7c0 1.2 1.6 1.5 5.5 1.5Z"/><path d="M12 8.5c1.4-3.3 5.5-3.9 5.5-1.5 0 1.2-1.6 1.5-5.5 1.5Z"/></g>
+    <circle class="gift-ring" cx="12" cy="10.5" r="10"/>
+    <g class="gift-rays"><path pathLength="1" d="M12.0 2.3L12.0 -2.7"/><path pathLength="1" d="M14.8 2.8L16.0 -0.4"/><path pathLength="1" d="M9.2 2.8L7.5 -1.9"/><path pathLength="1" d="M17.5 4.4L19.8 1.9"/><path pathLength="1" d="M6.5 4.4L3.2 0.7"/><path pathLength="1" d="M19.4 6.9L22.4 5.4"/><path pathLength="1" d="M4.6 6.9L0.1 4.7"/><path pathLength="1" d="M20.2 9.9L23.6 9.7"/><path pathLength="1" d="M3.8 9.9L-1.2 9.6"/></g>
+    <g class="gift-dots"><circle cx="12" cy="10.5" r="0.6" style="--dx:-15px;--dy:-8px"/><circle cx="12" cy="10.5" r="0.6" style="--dx:14px;--dy:-11px"/><circle cx="12" cy="10.5" r="0.6" style="--dx:-8px;--dy:-15px"/><circle cx="12" cy="10.5" r="0.6" style="--dx:18px;--dy:-3px"/><circle cx="12" cy="10.5" r="0.6" style="--dx:-19px;--dy:1px"/><circle cx="12" cy="10.5" r="0.6" style="--dx:7px;--dy:-17px"/></g>
+    <g class="gift-box">
+      <g class="gift-body"><path d="M5 12.5v8h14v-8"/><path d="M12 12.5v8"/></g>
+      <g class="gift-lid"><rect x="3.5" y="8.5" width="17" height="4"/><path d="M12 8.5v4"/><path d="M12 8.5C10.6 5.2 6.5 4.6 6.5 7c0 1.2 1.6 1.5 5.5 1.5Z"/><path d="M12 8.5c1.4-3.3 5.5-3.9 5.5-1.5 0 1.2-1.6 1.5-5.5 1.5Z"/></g>
+    </g>
   </svg>
 </div>
 
@@ -447,7 +501,7 @@ html.gift-intro-out .site-header { opacity: 1; transition: opacity 1s ease 0.5s;
     root.classList.add('gift-intro-out');
     setTimeout(function () { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); }, 900);
   }
-  setTimeout(finish, 1900);              // 상자가 열리고 빛이 스친 뒤 본문 등장
+  setTimeout(finish, 2500);              // 상자가 열리고 빛이 스친 뒤 본문 등장
   if (intro) intro.addEventListener('click', finish);   // 탭하면 바로 넘어감
   window.addEventListener('pageshow', function (e) { if (e.persisted) finish(); });
 })();
