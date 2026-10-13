@@ -12,6 +12,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/lotv.css?v=12">
 <script>document.documentElement.classList.add('js');</script>
+<script>
+/* Gift 인트로: 빈 화면 → 선물 상자가 열리며 본문 등장 (동작 줄이기 설정이면 생략) */
+try { if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('gift-intro'); } catch (e) {}
+</script>
 
 <style>
 /* 문서형 섹션(.doc-*) — 공통 CSS가 늦게 반영돼도 이 페이지 레이아웃이 깨지지 않도록 페이지 안에도 포함 */
@@ -185,6 +189,65 @@
   .doc-body br { display: none; }
 }
 
+/* ── Gift 인트로 ── */
+.gift-opener { display: none; }
+html.gift-intro .gift-opener {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper, #FAF8F4);
+  cursor: pointer;
+  transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+}
+html.gift-intro-out .gift-opener { opacity: 0; visibility: hidden; }
+
+.gift-opener svg {
+  width: calc(64px * var(--s, 1));
+  height: calc(64px * var(--s, 1));
+  overflow: visible;
+  color: var(--ink-soft, #5A5650);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: gi-in 0.8s cubic-bezier(0.2, 0, 0, 1) 0.1s forwards;
+}
+.gift-opener svg * { vector-effect: non-scaling-stroke; }
+.gift-opener .gift-lid {
+  transform-box: view-box;
+  transform-origin: 3.5px 12.5px;
+  animation: gi-lid 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+}
+.gift-opener .gift-rays path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: gi-ray 0.75s cubic-bezier(0.33, 0, 0.2, 1) 1s forwards;
+}
+.gift-opener .gift-rays path:nth-child(2),
+.gift-opener .gift-rays path:nth-child(3) { animation-delay: 1.06s; }
+
+@keyframes gi-in  { to { opacity: 1; transform: none; } }
+@keyframes gi-lid { to { transform: translate(-0.4px, -1.6px) rotate(-24deg); } }
+@keyframes gi-ray {
+  0%   { stroke-dashoffset: 1;  opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { stroke-dashoffset: -1; opacity: 0; }
+}
+
+/* 인트로 동안 본문 숨김 → 상자가 열린 뒤 천천히 떠오름 */
+html.gift-intro main,
+html.gift-intro .site-header { opacity: 0; }
+html.gift-intro main { transform: translateY(calc(16px * var(--s, 1))); }
+html.gift-intro-out main {
+  opacity: 1;
+  transform: none;
+  transition: opacity 1.1s ease 0.2s, transform 1.3s cubic-bezier(0.2, 0, 0, 1) 0.2s;
+}
+html.gift-intro-out .site-header { opacity: 1; transition: opacity 1s ease 0.5s; }
+
 /* ── Gift 페이지: 첫 문단을 페이지 제목(Gift) 왼쪽 라인에 맞춤 ── */
 .doc-lead .doc-text { grid-column: 1 / -1; }
 
@@ -225,6 +288,15 @@
 </head>
 
 <body data-page="gift">
+
+<!-- ── Gift 인트로 (선물 상자 열림) ── -->
+<div class="gift-opener" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="gift-rays"><path pathLength="1" d="M20.2 7.4l2.8-4.2"/><path pathLength="1" d="M21 9.6l4.4-1.9"/><path pathLength="1" d="M21.2 11.9l4.6-.1"/></g>
+    <g class="gift-body"><path d="M5 12.5v8h14v-8"/><path d="M12 12.5v8"/></g>
+    <g class="gift-lid"><rect x="3.5" y="8.5" width="17" height="4"/><path d="M12 8.5v4"/><path d="M12 8.5C10.6 5.2 6.5 4.6 6.5 7c0 1.2 1.6 1.5 5.5 1.5Z"/><path d="M12 8.5c1.4-3.3 5.5-3.9 5.5-1.5 0 1.2-1.6 1.5-5.5 1.5Z"/></g>
+  </svg>
+</div>
 
 <!-- ── HEADER (공통) ── -->
 <header class="site-header">
@@ -363,5 +435,22 @@
 </a>
 
 <script src="js/lotv.js?v=3"></script>
+<script>
+(function () {
+  var root = document.documentElement;
+  if (!root.classList.contains('gift-intro')) return;
+  var intro = document.querySelector('.gift-opener');
+  var done = false;
+  function finish() {
+    if (done) return;
+    done = true;
+    root.classList.add('gift-intro-out');
+    setTimeout(function () { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); }, 900);
+  }
+  setTimeout(finish, 1900);              // 상자가 열리고 빛이 스친 뒤 본문 등장
+  if (intro) intro.addEventListener('click', finish);   // 탭하면 바로 넘어감
+  window.addEventListener('pageshow', function (e) { if (e.persisted) finish(); });
+})();
+</script>
 </body>
 </html>
