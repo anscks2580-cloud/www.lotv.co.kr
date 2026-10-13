@@ -231,7 +231,7 @@ body {
   font-weight: 300;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background 0.4s;
   letter-spacing: 0.03em;
   width: 100%;
 }
@@ -292,6 +292,116 @@ body {
   accent-color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
+}
+
+/* ──────────────── QUICK FILL (문의 붙여넣기) ──────────────── */
+.quick-desc {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+.quick-textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  background: var(--cream);
+  border: 0.5px dashed var(--accent-light);
+  padding: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.25s;
+}
+.quick-textarea:focus { border-color: var(--accent); border-style: solid; }
+.quick-textarea::placeholder { color: var(--accent-light); }
+
+.quick-result {
+  margin-top: 16px;
+  font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: none;
+}
+.quick-result.show { display: block; }
+.qr-row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  align-items: baseline;
+}
+.qr-row:last-child { border-bottom: none; }
+.qr-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+.qr-val { color: var(--ink); word-break: break-all; line-height: 1.6; }
+.qr-ok::before { content: '✓ '; color: var(--accent); }
+.qr-miss { color: #a05050; }
+.qr-miss::before { content: '! '; }
+.qr-note {
+  display: block;
+  font-size: 10.5px;
+  color: #a07a40;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+.qr-mini-btn {
+  margin-left: 8px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 0.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.qr-mini-btn:hover { background: var(--accent); color: var(--cream); }
+
+.autofilled {
+  background: rgba(196,184,168,0.22) !important;
+}
+
+/* ──────────────── 카카오 장소 검색 ──────────────── */
+.venue-wrap { position: relative; }
+.venue-suggest {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 50;
+  list-style: none;
+  background: #fff;
+  border: 0.5px solid var(--accent-light);
+  box-shadow: 0 8px 24px rgba(28,26,23,0.10);
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.venue-suggest.show { display: block; }
+.vs-item {
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+}
+.vs-item:last-child { border-bottom: none; }
+.vs-item:hover, .vs-item.active { background: var(--cream); }
+.vs-name { font-size: 13px; color: var(--ink); }
+.vs-cat { font-size: 10px; color: var(--accent); margin-left: 4px; }
+.vs-addr { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+.vs-msg { padding: 10px 12px; font-size: 11.5px; color: var(--ink-soft); }
+.venue-hint {
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  margin-top: 6px;
 }
 
 /* ──────────────── BUTTONS ──────────────── */
@@ -773,6 +883,25 @@ body {
 
   <div class="form-wrap">
 
+    <!-- 문의 내용 붙여넣기 → 자동 입력 -->
+    <div class="form-section-label">Quick Fill</div>
+
+    <div class="quick-desc">
+      고객이 보낸 예약 문의(카톡·DM·문자)를 그대로 붙여넣고 <b>자동 입력</b>을 누르면<br>
+      성함 · 연락처 · 일시 · 장소가 아래 폼에 채워집니다. 채워진 칸은 음영으로 표시되니 검수 후 수정하세요.
+    </div>
+
+    <textarea id="q_raw" class="quick-textarea" placeholder="예)&#10;1. 성함 김민예&#10;2. 연락처 010 5578 5319&#10;3. 예식 일시 27년 5월 15일 6시&#10;4. 예식 장소 (홀 포함) 강남 삼성역 그랜드힐컨벤션"></textarea>
+
+    <div class="action-row" style="margin-top:12px;">
+      <button class="btn-download" style="flex:2;" onclick="applyQuickFill()">자동 입력</button>
+      <button class="btn-preview" onclick="clearQuickFill()">지우기</button>
+    </div>
+
+    <div class="quick-result" id="quickResult"></div>
+
+    <div class="form-sep"></div>
+
     <!-- 클라이언트 정보 -->
     <div class="form-section-label">Client</div>
 
@@ -803,7 +932,11 @@ body {
       </div>
       <div class="form-row">
         <label>장소</label>
-        <input type="text" id="f_venue" placeholder="베뉴명 (홀명)">
+        <div class="venue-wrap">
+          <input type="text" id="f_venue" placeholder="베뉴명 (홀명)" autocomplete="off">
+          <ul class="venue-suggest" id="venueSuggest"></ul>
+        </div>
+        <div class="venue-hint" id="venueHint">장소명을 입력하면 카카오 장소 검색 결과가 뜹니다</div>
       </div>
     </div>
 
@@ -1004,6 +1137,562 @@ function formatPhoneNumber(el) {
   el.value = v;
 }
 
+/* ═══════════════════════════════════════════════
+   예약 문의 자동 파싱 (Quick Fill)
+   ═══════════════════════════════════════════════ */
+
+/* 장소 표기 사전 — 카카오 검색 키가 없을 때 쓰는 보조 기능. 원하는 표기로 자유롭게 수정/추가하세요.
+   [검색 키워드(띄어쓰기 무시), 계약서에 들어갈 표기]
+   고객이 "강남 삼성역 그랜드힐컨벤션"처럼 적어도 키워드가 들어있으면 오른쪽 표기로 바뀝니다. */
+const VENUE_ALIAS = [
+  ['그랜드힐',         '그랜드힐컨벤션'],
+  ['신라호텔',         '서울신라호텔'],
+  ['락고재',           '락고재 서울'],
+  ['라비두스',         '라비두스'],
+  ['드레스가든',       '드레스가든'],
+  ['금융캠퍼스',       '삼성금융캠퍼스'],
+  ['크레스트72',       '크레스트72'],
+  ['채플앳대치',       '더채플앳대치'],
+  ['채플앳논현',       '더채플앳논현'],
+  ['포어클락',         '포어클락 용인'],
+  ['조선팰리스',       '조선 팰리스 서울 강남'],
+  ['h스퀘어',          'H스퀘어웨딩홀'],
+  ['라시따',           '라시따시어터'],
+  ['웨딩시그니처',     '웨딩시그니처'],
+  ['위더스',           '위더스 영등포'],
+  ['여율리',           '웨딩여율리'],
+  ['동부지방법원',     '서울동부지방법원'],
+  ['코트야드메리어트판교', '코트야드 바이 메리어트 서울 판교'],
+  ['더컨벤션반포',     '더컨벤션 반포']
+];
+
+function compact(s) { return (s || '').replace(/\s+/g, '').toLowerCase(); }
+function pad2(n) { return String(n).padStart(2, '0'); }
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* 장소 문자열 정리: "베뉴 (홀)" 형태로 + 사전 표기 적용 */
+function normalizeVenue(v) {
+  let main = v.trim().replace(/\s+/g, ' ');
+  let hall = '';
+
+  // 쉼표/슬래시로 홀 구분된 경우
+  const sep = main.match(/^(.+?)\s*[,，/]\s*(.+)$/);
+  if (sep) {
+    main = sep[1].trim();
+    hall = sep[2].trim();
+  } else {
+    // 괄호 안에 홀
+    const paren = main.match(/^(.+?)\s*\((.+)\)\s*$/);
+    if (paren) {
+      main = paren[1].trim();
+      hall = paren[2].trim();
+    } else {
+      // 마지막 단어가 홀명인 경우 (단독홀, 그랜드볼룸, 3층, PRD2 room 등)
+      const toks = main.split(' ');
+      if (toks.length > 1 && /(홀|볼룸|룸|room|층|관|가든|테라스)$/i.test(toks[toks.length - 1])) {
+        // "PRD2 room" 처럼 room 앞 단어까지 홀명으로 묶기
+        let cut = toks.length - 1;
+        if (/^room$/i.test(toks[cut]) && toks.length > 2) cut--;
+        hall = toks.slice(cut).join(' ');
+        main = toks.slice(0, cut).join(' ');
+      }
+    }
+  }
+
+  const rawMain = main;
+  let aliased = false;
+  const c = compact(main);
+  const sorted = VENUE_ALIAS.slice().sort((a, b) => b[0].length - a[0].length);
+  for (const [key, name] of sorted) {
+    if (c.includes(compact(key))) { main = name; aliased = true; break; }
+  }
+
+  return { text: hall ? `${main} (${hall})` : main, main, rawMain, hall, aliased };
+}
+
+/* 시각 보정: 오전/오후 표기 없으면 1~8시는 오후로 간주 */
+function adjHour(h, ap) {
+  h = +h;
+  let guessed = false;
+  if (ap) {
+    if (/(오후|저녁|밤|pm)/i.test(ap) && h < 12) h += 12;
+    else if (/낮/.test(ap) && h <= 5) h += 12;
+    else if (/(오전|am)/i.test(ap) && h === 12) h = 0;
+  } else if (h >= 1 && h <= 8) {
+    h += 12;
+    guessed = true;
+  }
+  return { h, guessed };
+}
+
+function findTime(s) {
+  let m = s.match(/(오전|오후|낮|저녁|밤|am|pm)?\s*(\d{1,2}):(\d{2})(?:\s*[-~]\s*(\d{1,2}):(\d{2}))?/i);
+  if (m) {
+    const a = adjHour(m[2], m[1]);
+    if (a.h > 23 || +m[3] > 59) return null;
+    let end = '';
+    if (m[4]) {
+      let eh = +m[4];
+      if (eh < a.h && eh + 12 <= 23) eh += 12;
+      end = `${pad2(eh)}:${m[5]}`;
+    }
+    return { time: `${pad2(a.h)}:${m[3]}`, end, guessed: a.guessed, raw: m[0] };
+  }
+  m = s.match(/(오전|오후|낮|저녁|밤)?\s*(\d{1,2})\s*시\s*(반|(\d{1,2})\s*분)?/);
+  if (m) {
+    const a = adjHour(m[2], m[1]);
+    if (a.h > 23) return null;
+    const mi = m[3] === '반' ? 30 : (m[4] ? +m[4] : 0);
+    return { time: `${pad2(a.h)}:${pad2(mi)}`, end: '', guessed: a.guessed, raw: m[0] };
+  }
+  return null;
+}
+
+function findDate(s) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  function mk(y, mo, d, raw) {
+    mo = +mo; d = +d;
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    let yearGuessed = false;
+    if (y == null) {
+      y = today.getFullYear();
+      if (new Date(y, mo - 1, d) < today) y++;
+      yearGuessed = true;
+    } else {
+      y = String(y).length === 2 ? 2000 + +y : +y;
+    }
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getMonth() !== mo - 1) return null; // 2/30 같은 날짜 거르기
+    return { iso: `${y}-${pad2(mo)}-${pad2(d)}`, dt, yearGuessed, raw };
+  }
+
+  let m;
+  if ((m = s.match(/(20\d{2}|\d{2})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?/)))
+    return mk(m[1], m[2], m[3], m[0]);
+  if ((m = s.match(/(20\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})/)))
+    return mk(m[1], m[2], m[3], m[0]);
+  if ((m = s.match(/(?:^|\D)((\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2}))(?!\d)/)))
+    return mk(m[2], m[3], m[4], m[1]);
+  if ((m = s.match(/(?:^|\D)((20\d{2})(\d{2})(\d{2}))(?!\d)/)))
+    return mk(m[2], m[3], m[4], m[1]);
+  if ((m = s.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일?/)))
+    return mk(null, m[1], m[2], m[0]);
+  if ((m = s.match(/(?:^|[^\d:])((\d{1,2})\s*[\/.]\s*(\d{1,2}))(?![\d:])/)))
+    return mk(null, m[2], m[3], m[1]);
+  return null;
+}
+
+function parseReservation(raw) {
+  const r = {
+    name: '', tel: '', date: null, time: null, venue: null,
+    consent: '', product: '', notes: [], warnings: {}
+  };
+
+  // 1) 줄 정리: 템플릿 안내문 제거 + 번호(1. 2.) 분리
+  const SKIP = /(reservation form|아래 내용|가능 일정|순차적으로|예약금|예약 확정|자동 취소|원활한 촬영|예약 규정|신중한 예약|^[﹡*✦※])/i;
+  const lines = [];
+  raw.replace(/\r/g, '').split('\n').forEach(l => {
+    let t = l.trim();
+    if (!t || SKIP.test(t)) return;
+    let num = null;
+    const m = t.match(/^(\d)\s*[.)]\s*/);
+    if (m) { num = +m[1]; t = t.slice(m[0].length).trim(); }
+    if (!t) return;
+    lines.push({ text: t, num, used: false, hasPhone: false, hasDate: false });
+  });
+
+  // 2) 연락처
+  const PHONE_RE = /(01[016789])[\s.\-]*(\d{3,4})[\s.\-]*(\d{4})(?!\d)/;
+  for (const ln of lines) {
+    const m = ln.text.match(PHONE_RE);
+    if (m) {
+      if (!r.tel) r.tel = `${m[1]}-${m[2]}-${m[3]}`;
+      ln.hasPhone = true;
+      ln.used = true;
+      ln.noPhone = ln.text.replace(m[0], ' ').trim();
+    } else {
+      ln.noPhone = ln.text;
+    }
+  }
+
+  // 3) 일시
+  let dateLine = null;
+  for (const ln of lines) {
+    if (/초상권|인원/.test(ln.noPhone)) continue;
+    const d = findDate(ln.noPhone);
+    if (d) { r.date = d; dateLine = ln; ln.hasDate = true; ln.used = true; break; }
+  }
+  if (dateLine) {
+    const rest = dateLine.noPhone.replace(r.date.raw, ' ');
+    r.time = findTime(rest);
+    // 요일 검증
+    const wd = dateLine.noPhone.match(/\(\s*([일월화수목금토])\s*(?:요일)?\s*\)/);
+    if (wd && DAY_KO[r.date.dt.getDay()] !== wd[1]) {
+      r.warnings.date = `요일 불일치: 문의엔 (${wd[1]}), 실제 ${r.date.iso}는 (${DAY_KO[r.date.dt.getDay()]})`;
+    }
+  }
+  if (!r.time) {
+    for (const ln of lines) {
+      if (ln.hasPhone && !ln.noPhone) continue;
+      if (/초상권|인원/.test(ln.noPhone)) continue;
+      const t = findTime(ln.noPhone);
+      if (t) { r.time = t; ln.used = true; break; }
+    }
+  }
+
+  // 4) 성함
+  const NAME_LABEL = /^(성함|이름|성명|예약자(?:\s*성함)?|신랑\s*[\/&]?\s*신부|신부|신랑|고객명)\s*[:：]?\s*/;
+  const NAME_ONLY  = /^[가-힣]{2,4}(\s*[\/,&·]\s*[가-힣]{2,4})?$/;
+  const NAME_STOP  = /^(안녕하세요|감사합니다|문의|문의드립니다|기본스냅|돌스냅|본식|예식|스냅|단독홀|미동의|동의)$/;
+  const cleanName  = s => s.replace(/(님|입니다|이에요|예요)$/, '').trim();
+
+  for (const ln of lines) {
+    const m = ln.noPhone.match(NAME_LABEL);
+    if (m) {
+      const v = cleanName(ln.noPhone.slice(m[0].length).split(/\s{2,}|,/)[0].trim());
+      if (v) { r.name = v; ln.used = true; break; }
+    }
+  }
+  if (!r.name) {
+    const cand = lines.find(ln => ln.num === 1 && NAME_ONLY.test(cleanName(ln.noPhone)) && !NAME_STOP.test(ln.noPhone))
+              || lines.find(ln => !ln.hasDate && NAME_ONLY.test(cleanName(ln.noPhone)) && !NAME_STOP.test(cleanName(ln.noPhone)) && !/홀$/.test(ln.noPhone));
+    if (cand) { r.name = cleanName(cand.noPhone); cand.used = true; }
+  }
+  if (!r.name) {
+    // "김민예 010-0000-0000" 처럼 전화번호 앞에 이름
+    const ph = lines.find(ln => ln.hasPhone && /([가-힣]{2,4})\s*$/.test(ln.noPhone));
+    if (ph) r.name = cleanName(ph.noPhone.match(/([가-힣]{2,4})\s*$/)[1]);
+  }
+
+  // 5) 장소
+  const VENUE_LABEL = /^(예식\s*|행사\s*)?(장소|베뉴|예식장|웨딩홀|홀)\s*(\(\s*홀\s*포함\s*\))?\s*[:：]?\s*/;
+  const VENUE_KW = /(홀|컨벤션|호텔|웨딩|채플|하우스|가든|메리어트|힐튼|하얏트|웨스틴|인터컨티넨탈|조선|신라|롯데|파크|타워|스퀘어|센터|캠퍼스|시어터|법원|레스토랑|한옥|교회|성당|클럽|볼룸|room|룸)/i;
+  const NOT_VENUE = /(문의|가능할|드립니다|예상|인원|초상권|여부|감사|안녕)/;
+  let venueRaw = '';
+
+  for (const ln of lines) {
+    const m = ln.noPhone.match(VENUE_LABEL);
+    if (m) {
+      const v = ln.noPhone.slice(m[0].length).trim();
+      if (v) { venueRaw = v; ln.used = true; break; }
+    }
+  }
+  if (!venueRaw) {
+    const cand = lines.find(ln => ln.num === 4 && !ln.hasPhone && !ln.hasDate && !NOT_VENUE.test(ln.noPhone))
+              || lines.find(ln => !ln.hasPhone && !ln.hasDate && !ln.used && VENUE_KW.test(ln.noPhone) && !NOT_VENUE.test(ln.noPhone) && ln.noPhone.length <= 50);
+    if (cand) { venueRaw = cand.noPhone; cand.used = true; }
+  }
+  if (venueRaw) r.venue = { raw: venueRaw, ...normalizeVenue(venueRaw) };
+
+  // 6) 초상권 동의
+  const cLine = lines.find(ln => /초상권/.test(ln.text));
+  if (cLine) {
+    cLine.used = true;
+    const val = cLine.text.split(/여부|[:：]/).pop().trim();
+    if (val && !/초상권/.test(val)) {
+      if (/(미동의|비동의|거부|불가|안\s*함|^x$|^no$)/i.test(val)) r.consent = '미동의';
+      else if (/(동의|가능|^o$|^yes$|^네$|^ok$)/i.test(val)) r.consent = '동의';
+      else r.consent = val;
+    }
+  }
+
+  // 7) 상품 힌트
+  if (/(돌\s*스냅|돌잔치|돌\s*촬영|백일|baby|베이비)/i.test(raw)) r.product = 'LOTV Signature Snap for Baby';
+  else if (/(리코|ricoh)/i.test(raw)) r.product = 'LOTV Signature Snap with Ricoh';
+  else if (/(기본\s*스냅|시그니처|signature)/i.test(raw)) r.product = 'LOTV Signature Snap';
+
+  // 8) 나머지 참고 줄
+  const GREET = /(안녕하세요|문의\s*드|문의드|가능할지|가능한지|감사합니다|부탁드립니다)/;
+  lines.forEach(ln => {
+    if (!ln.used && !GREET.test(ln.text)) r.notes.push(ln.text);
+  });
+
+  return r;
+}
+
+function markFilled(id) {
+  const el = document.getElementById(id);
+  el.classList.add('autofilled');
+}
+
+let lastConsent = '';
+
+function applyQuickFill() {
+  const raw = document.getElementById('q_raw').value;
+  const box = document.getElementById('quickResult');
+  if (!raw.trim()) {
+    box.innerHTML = '<div class="qr-row"><span class="qr-label">안내</span><span class="qr-val qr-miss">문의 내용을 붙여넣어 주세요.</span></div>';
+    box.classList.add('show');
+    return;
+  }
+
+  document.querySelectorAll('.autofilled').forEach(el => el.classList.remove('autofilled'));
+  const r = parseReservation(raw);
+
+  if (r.name)  { document.getElementById('f_name').value = r.name; markFilled('f_name'); }
+  if (r.tel)   { document.getElementById('f_tel').value = r.tel;   markFilled('f_tel'); }
+  if (r.date)  { document.getElementById('f_date_picker').value = r.date.iso; markFilled('f_date_picker'); }
+  if (r.time)  { document.getElementById('f_time_picker').value = r.time.time; markFilled('f_time_picker'); }
+  updateDateTime();
+  if (r.venue) { document.getElementById('f_venue').value = r.venue.text; markFilled('f_venue'); }
+
+  const productSel = document.getElementById('f_product');
+  let productApplied = false;
+  if (r.product && !productSel.value) {
+    productSel.value = r.product;
+    productSel.dispatchEvent(new Event('change'));
+    markFilled('f_product');
+    productApplied = true;
+  }
+
+  // 결과 표시
+  const rows = [];
+  const row = (label, val, notes) => {
+    const cls = val ? 'qr-ok' : 'qr-miss';
+    const txt = val ? escHtml(val) : '못 찾음 — 직접 입력';
+    const n = (notes || []).filter(Boolean).map(x => `<span class="qr-note">${escHtml(x)}</span>`).join('');
+    rows.push(`<div class="qr-row"><span class="qr-label">${label}</span><span class="qr-val"><span class="${cls}">${txt}</span>${n}</span></div>`);
+  };
+
+  row('성함', r.name);
+  row('연락처', r.tel);
+
+  let dateText = '';
+  const dateNotes = [];
+  if (r.date) {
+    dateText = document.getElementById('f_date').value;
+    if (r.time && r.time.end) dateText += ` ~ ${r.time.end}`;
+    if (r.date.yearGuessed) dateNotes.push(`연도 미기재 → ${r.date.dt.getFullYear()}년으로 추정`);
+    if (!r.time) dateNotes.push('시간 못 찾음 — 직접 입력');
+    else if (r.time.guessed) dateNotes.push(`오전/오후 미기재 → ${r.time.time}로 추정`);
+    if (r.warnings.date) dateNotes.push(r.warnings.date);
+  }
+  row('일시', dateText, dateNotes);
+
+  const venueNotes = [];
+  if (r.venue) {
+    if (KAKAO_JS_KEY) {
+      venueNotes.push(`원문: ${r.venue.raw} → 장소 칸 아래 검색 후보에서 선택하세요`);
+    } else {
+      venueNotes.push(r.venue.aliased
+        ? `원문: ${r.venue.raw} → 표기 사전 적용`
+        : '표기 사전에 없는 장소 — 표기 확인 필요');
+    }
+  }
+  row('장소', r.venue ? r.venue.text : '', venueNotes);
+
+  if (r.product) {
+    row('상품', r.product, [productApplied ? '문의 내용 기준 자동 선택' : '이미 선택된 상품이 있어 변경 안 함']);
+  }
+
+  lastConsent = r.consent;
+  if (r.consent) {
+    rows.push(`<div class="qr-row"><span class="qr-label">초상권</span><span class="qr-val"><span class="qr-ok">${escHtml(r.consent)}</span><button type="button" class="qr-mini-btn" onclick="addConsentToSpecial()">특약사항에 추가</button></span></div>`);
+  }
+
+  if (r.notes.length) {
+    rows.push(`<div class="qr-row"><span class="qr-label">기타</span><span class="qr-val" style="color:var(--ink-soft);">${r.notes.map(escHtml).join('<br>')}</span></div>`);
+  }
+
+  box.innerHTML = rows.join('');
+  box.classList.add('show');
+
+  // 카카오 장소 후보 자동 검색 (고객이 쓴 원문 기준, 홀명은 유지)
+  if (r.venue && KAKAO_JS_KEY) {
+    searchVenue(r.venue.rawMain || r.venue.main, r.venue.hall);
+    document.getElementById('f_venue').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   카카오 장소 검색 (Kakao Maps JavaScript SDK · 키워드 장소 검색)
+   ═══════════════════════════════════════════════ */
+
+/* 카카오 개발자센터 → 내 애플리케이션 → 앱 키 → JavaScript 키를 넣으세요. 비워두면 검색 기능 꺼짐 */
+const KAKAO_JS_KEY = 'db1fe1db7ee6213385d869a13fd3fe00';
+
+let kakaoPlaces = null;
+let kakaoLoading = null;
+
+/* SDK는 처음 검색할 때 한 번만 불러옴 */
+function loadKakao() {
+  if (kakaoPlaces) return Promise.resolve(kakaoPlaces);
+  if (kakaoLoading) return kakaoLoading;
+  kakaoLoading = new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + encodeURIComponent(KAKAO_JS_KEY) + '&libraries=services&autoload=false';
+    sc.onload = () => {
+      try {
+        window.kakao.maps.load(() => {
+          kakaoPlaces = new window.kakao.maps.services.Places();
+          resolve(kakaoPlaces);
+        });
+      } catch (e) { kakaoLoading = null; reject(e); }
+    };
+    sc.onerror = () => { kakaoLoading = null; reject(new Error('Kakao SDK 로드 실패 (키 또는 도메인 등록 확인)')); };
+    document.head.appendChild(sc);
+  });
+  return kakaoLoading;
+}
+
+function kakaoKeywordSearch(q) {
+  return loadKakao().then(places => new Promise((resolve, reject) => {
+    places.keywordSearch(q, (data, status) => {
+      const S = window.kakao.maps.services.Status;
+      if (status === S.OK) {
+        resolve(data.slice(0, 7).map(p => ({
+          name: p.place_name,
+          category: (p.category_name || '').split('>').pop().trim(),
+          roadAddress: p.road_address_name,
+          address: p.address_name
+        })));
+      } else if (status === S.ZERO_RESULT) {
+        resolve([]);
+      } else {
+        reject(new Error('Kakao 검색 오류: ' + status));
+      }
+    }, { size: 7 });
+  }));
+}
+
+let venueHall = '';
+let venueTimer = null;
+let venueSeq = 0;
+let venueItems = [];
+let venueActive = -1;
+
+function splitVenueInput(v) {
+  const m = v.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  return m ? { main: m[1].trim(), hall: m[2].trim() } : { main: v.trim(), hall: '' };
+}
+
+function closeVenueSuggest() {
+  const list = document.getElementById('venueSuggest');
+  list.classList.remove('show');
+  list.innerHTML = '';
+  venueItems = [];
+  venueActive = -1;
+}
+
+function renderVenueSuggest() {
+  const list = document.getElementById('venueSuggest');
+  if (!venueItems.length) {
+    list.innerHTML = '<li class="vs-msg">검색 결과 없음 — 지역명을 빼거나 키워드를 줄여보세요</li>';
+    return;
+  }
+  list.innerHTML = venueItems.map((it, i) =>
+    `<li class="vs-item${i === venueActive ? ' active' : ''}" data-i="${i}">
+       <div class="vs-name">${escHtml(it.name)}<span class="vs-cat">${escHtml(it.category || '')}</span></div>
+       <div class="vs-addr">${escHtml(it.roadAddress || it.address || '')}</div>
+     </li>`
+  ).join('');
+}
+
+async function searchVenue(q, hall) {
+  if (!KAKAO_JS_KEY || !q || q.length < 2) return;
+  venueHall = hall || '';
+  const list = document.getElementById('venueSuggest');
+  const seq = ++venueSeq;
+  list.innerHTML = '<li class="vs-msg">장소 찾는 중…</li>';
+  list.classList.add('show');
+  try {
+    const items = await kakaoKeywordSearch(q);
+    if (seq !== venueSeq) return; // 더 최근 검색이 있으면 무시
+    venueItems = items;
+    venueActive = venueItems.length ? 0 : -1;
+    renderVenueSuggest();
+  } catch (e) {
+    if (seq !== venueSeq) return;
+    list.innerHTML = '<li class="vs-msg">검색 실패 — 카카오 JavaScript 키와 사이트 도메인 등록을 확인하세요</li>';
+    console.error(e);
+  }
+}
+
+function pickVenue(i) {
+  const it = venueItems[i];
+  if (!it) return;
+  const el = document.getElementById('f_venue');
+  el.value = venueHall ? `${it.name} (${venueHall})` : it.name;
+  el.classList.add('autofilled');
+  closeVenueSuggest();
+}
+
+(function initVenueSearch() {
+  const el = document.getElementById('f_venue');
+  const list = document.getElementById('venueSuggest');
+  const hint = document.getElementById('venueHint');
+
+  if (!KAKAO_JS_KEY) {
+    hint.textContent = '장소 검색 미연결 — KAKAO_JS_KEY 설정 필요';
+    return;
+  }
+  hint.textContent = '장소명 입력 시 카카오 장소 후보 표시 · 홀명은 "베뉴 (홀명)"처럼 괄호로';
+
+  el.addEventListener('input', () => {
+    clearTimeout(venueTimer);
+    const { main, hall } = splitVenueInput(el.value);
+    if (main.length < 2) { closeVenueSuggest(); return; }
+    venueTimer = setTimeout(() => searchVenue(main, hall), 350);
+  });
+
+  el.addEventListener('keydown', e => {
+    if (!list.classList.contains('show') || !venueItems.length) {
+      if (e.key === 'Escape') closeVenueSuggest();
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      venueActive = (venueActive + 1) % venueItems.length;
+      renderVenueSuggest();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      venueActive = (venueActive - 1 + venueItems.length) % venueItems.length;
+      renderVenueSuggest();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      pickVenue(venueActive);
+    } else if (e.key === 'Escape') {
+      closeVenueSuggest();
+    }
+  });
+
+  // mousedown: blur보다 먼저 처리되도록
+  list.addEventListener('mousedown', e => {
+    const li = e.target.closest('.vs-item');
+    if (!li) return;
+    e.preventDefault();
+    pickVenue(+li.dataset.i);
+  });
+
+  el.addEventListener('blur', () => setTimeout(closeVenueSuggest, 150));
+})();
+
+function addConsentToSpecial() {
+  if (!lastConsent) return;
+  const spec = document.getElementById('f_special');
+  const line = `※ 인스타그램 및 웹 업로드 초상권: ${lastConsent}`;
+  if (spec.value.includes(line)) return;
+  spec.value = spec.value.trim() ? `${spec.value.trim()}\n\n${line}` : line;
+  markFilled('f_special');
+}
+
+function clearQuickFill() {
+  document.getElementById('q_raw').value = '';
+  const box = document.getElementById('quickResult');
+  box.innerHTML = '';
+  box.classList.remove('show');
+  document.querySelectorAll('.autofilled').forEach(el => el.classList.remove('autofilled'));
+  lastConsent = '';
+}
+
+// 직접 수정하면 음영 해제
+document.addEventListener('input', e => {
+  if (e.target.classList && e.target.classList.contains('autofilled')) e.target.classList.remove('autofilled');
+});
+
 /* ─── 임시저장 / 불러오기 ─── */
 const DRAFT_KEY = 'lotv_contract_draft';
 
@@ -1065,6 +1754,11 @@ function loadDraft() {
   // 옵션 내용이 직접 수정되어 있었을 경우를 위해 최종적으로 저장된 f_option으로 덮어씀
   if (data.f_option !== undefined) {
     document.getElementById('f_option').value = data.f_option;
+  }
+
+  // 특약사항도 저장된 내용으로 최종 덮어씀 (change 이벤트가 기본 문구로 바꾸는 것 방지)
+  if (data.f_special !== undefined) {
+    document.getElementById('f_special').value = data.f_special;
   }
 
   status.textContent = '임시저장 내용을 불러왔습니다.';
