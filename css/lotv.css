@@ -219,6 +219,7 @@ body.menu-open .menu-toggle span:nth-child(2) { width: calc(22px * var(--s, 1));
   color: var(--accent);
   white-space: nowrap;
 }
+.drawer-ko.drawer-emoji { font-size: calc(15px * var(--s, 1)); letter-spacing: 0; line-height: 1; }
 .drawer-link:hover .drawer-en,
 .drawer-link:focus-visible .drawer-en { color: var(--ink); transform: translateX(calc(8px * var(--s, 1))); }
 
