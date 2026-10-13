@@ -90,6 +90,22 @@
     });
   });
 
+  // Gift 메뉴: 선물 상자가 열리는 짧은 연출 후 이동
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  drawer.querySelectorAll('.drawer-link[data-nav="gift"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.defaultPrevented || reduceMotion) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      a.classList.add('is-opening');
+      setTimeout(function () { window.location.href = a.href; }, 700);
+    });
+  });
+  // 뒤로가기로 돌아왔을 때 연출 상태 초기화
+  window.addEventListener('pageshow', function () {
+    drawer.querySelectorAll('.drawer-link.is-opening').forEach(function (a) { a.classList.remove('is-opening'); });
+  });
+
   document.addEventListener('keydown', function (e) {
     if (!isOpen()) return;
     if (e.key === 'Escape') { closeMenu(); return; }

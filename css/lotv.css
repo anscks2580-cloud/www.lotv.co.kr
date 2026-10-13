@@ -219,7 +219,42 @@ body.menu-open .menu-toggle span:nth-child(2) { width: calc(22px * var(--s, 1));
   color: var(--accent);
   white-space: nowrap;
 }
-.drawer-ko.drawer-emoji svg { display: block; width: calc(15px * var(--s, 1)); height: calc(15px * var(--s, 1)); }
+.drawer-ko.drawer-emoji svg { display: block; width: calc(15px * var(--s, 1)); height: calc(15px * var(--s, 1)); overflow: visible; }
+
+/* Gift 아이콘: 누르면 뚜껑이 살짝 열리며 얇은 빛줄기 3개가 스쳐 지나감 (단색·절제된 모션) */
+.drawer-emoji .gift-lid {
+  transform-box: view-box;
+  transform-origin: 3.5px 12.5px;               /* 뚜껑 왼쪽 아래 모서리를 경첩처럼 */
+  transition: transform 0.5s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.drawer-emoji .gift-rays path {
+  stroke-width: 1;
+  stroke-dasharray: 1 1;          /* pathLength=1 기준: 선이 그려졌다가 바깥으로 빠져나감 */
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+@media (hover: hover) {
+  .drawer-link:hover .drawer-emoji .gift-lid { transform: translateY(-0.6px) rotate(-7deg); }
+}
+.drawer-link.is-opening .drawer-emoji .gift-lid {
+  transform: translate(-0.4px, -1.6px) rotate(-24deg);
+  transition-duration: 0.55s;
+}
+.drawer-link.is-opening .drawer-emoji .gift-rays path {
+  animation: gift-ray 0.52s cubic-bezier(0.33, 0, 0.2, 1) 0.12s forwards;
+}
+.drawer-link.is-opening .drawer-emoji .gift-rays path:nth-child(2),
+.drawer-link.is-opening .drawer-emoji .gift-rays path:nth-child(3) { animation-delay: 0.17s; }
+@keyframes gift-ray {
+  0%   { stroke-dashoffset: 1;  opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { stroke-dashoffset: -1; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-emoji .gift-lid { transition: none; }
+  .drawer-link.is-opening .drawer-emoji .gift-rays path { animation: none; }
+}
 .drawer-link:hover .drawer-en,
 .drawer-link:focus-visible .drawer-en { color: var(--ink); transform: translateX(calc(8px * var(--s, 1))); }
 
