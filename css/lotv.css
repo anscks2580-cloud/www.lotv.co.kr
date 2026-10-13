@@ -192,6 +192,7 @@ body.menu-open .menu-toggle span:nth-child(2) { width: calc(22px * var(--s, 1));
 .drawer.is-open .drawer-list li:nth-child(4) { transition-delay: 0.33s; }
 .drawer.is-open .drawer-list li:nth-child(5) { transition-delay: 0.40s; }
 .drawer.is-open .drawer-list li:nth-child(6) { transition-delay: 0.47s; }
+.drawer.is-open .drawer-list li:nth-child(7) { transition-delay: 0.54s; }
 
 .drawer-link {
   display: flex;
