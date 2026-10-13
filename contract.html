@@ -368,91 +368,70 @@ body {
   background: rgba(196,184,168,0.22) !important;
 }
 
-/* ──────────────── 카카오 장소 검색 ──────────────── */
-.venue-wrap { position: relative; }
-.venue-suggest {
-  display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  z-index: 50;
-  list-style: none;
-  background: #fff;
-  border: 0.5px solid var(--accent-light);
-  box-shadow: 0 8px 24px rgba(28,26,23,0.10);
-  max-height: 320px;
-  overflow-y: auto;
-  font-family: 'Noto Sans KR', sans-serif;
-}
-.venue-suggest.show { display: block; }
-.vs-item {
-  padding: 10px 12px;
-  border-bottom: 0.5px solid var(--border);
-  cursor: pointer;
-}
-.vs-item:last-child { border-bottom: none; }
-.vs-item:hover, .vs-item.active { background: var(--cream); }
-.vs-name { font-size: 13px; color: var(--ink); }
-.vs-cat { font-size: 10px; color: var(--accent); margin-left: 4px; }
-.vs-addr { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
-.vs-msg { padding: 10px 12px; font-size: 11.5px; color: var(--ink-soft); }
+/* ──────────────── 장소 (네이버 지도 + 표기 학습) ──────────────── */
 .venue-row { display: flex; gap: 10px; align-items: flex-end; }
-.venue-row .venue-wrap { flex: 1; }
-.btn-addr {
+.venue-row input { flex: 1; }
+.btn-naver {
   flex-shrink: 0;
   padding: 7px 12px;
   background: transparent;
-  border: 0.5px solid var(--accent);
-  color: var(--accent);
+  border: 0.5px solid #03C75A;
+  color: #03A34A;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 11px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
-.btn-addr:hover { background: var(--accent); color: var(--cream); }
-
-#postcodeModal {
+.btn-naver:hover { background: #03C75A; color: #fff; }
+.learned-bar {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.learned-bar button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.learned-list {
   display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1500;
-  background: rgba(28,26,23,0.6);
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-#postcodeModal.open { display: flex; }
-.postcode-box {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  height: 560px;
-  max-height: calc(100vh - 80px);
-  background: #fff;
+  margin-top: 6px;
+  max-height: 200px;
+  overflow-y: auto;
   border: 0.5px solid var(--border);
+  background: var(--cream);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
 }
-.postcode-head {
+.learned-list.show { display: block; }
+.ll-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 40px;
-  padding: 0 14px;
+  gap: 8px;
+  padding: 6px 10px;
   border-bottom: 0.5px solid var(--border);
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 12px;
-  color: var(--ink-soft);
 }
-.postcode-head button {
+.ll-row:last-child { border-bottom: none; }
+.ll-key { color: var(--ink-soft); word-break: break-all; }
+.ll-val { color: var(--ink); word-break: break-all; }
+.ll-del {
+  flex-shrink: 0;
   background: none;
   border: none;
-  font-size: 12px;
-  color: var(--ink-soft);
+  color: #a05050;
   cursor: pointer;
+  font-size: 11px;
 }
-#postcodeLayer { width: 100%; height: calc(100% - 40px); }
-
+.ll-empty { padding: 8px 10px; color: var(--ink-soft); }
 .venue-hint {
   font-size: 10px;
   color: var(--accent);
@@ -989,13 +968,12 @@ body {
       <div class="form-row">
         <label>장소</label>
         <div class="venue-row">
-          <div class="venue-wrap">
-            <input type="text" id="f_venue" placeholder="베뉴명 (홀명)" autocomplete="off">
-            <ul class="venue-suggest" id="venueSuggest"></ul>
-          </div>
-          <button type="button" class="btn-addr" onclick="openPostcode()">주소 검색</button>
+          <input type="text" id="f_venue" placeholder="베뉴명 (홀명)" autocomplete="off">
+          <button type="button" class="btn-naver" onclick="openNaverMap()">네이버 지도</button>
         </div>
-        <div class="venue-hint" id="venueHint">주소 검색으로 건물명 찾기 · 홀명은 "베뉴 (홀명)"처럼 괄호로</div>
+        <div class="venue-hint" id="venueHint">네이버 지도에서 이름 복사 → 붙여넣기 · 홀명은 "베뉴 (홀명)"처럼 괄호로</div>
+        <div class="learned-bar"><span id="learnedCount"></span><button type="button" onclick="toggleLearnedList()">목록</button></div>
+        <div class="learned-list" id="learnedList"></div>
       </div>
     </div>
 
@@ -1090,17 +1068,6 @@ body {
     <div class="preview-scale-wrap" id="previewScaleWrap">
       <!-- contractPaper가 여기로 복사됩니다 -->
     </div>
-  </div>
-</div>
-
-<!-- ───── 주소 검색 (카카오 우편번호 서비스) ───── -->
-<div id="postcodeModal">
-  <div class="postcode-box">
-    <div class="postcode-head">
-      <span>건물명 · 도로명 · 지번으로 검색</span>
-      <button type="button" onclick="closePostcode()">✕ 닫기</button>
-    </div>
-    <div id="postcodeLayer"></div>
   </div>
 </div>
 
@@ -1211,30 +1178,91 @@ function formatPhoneNumber(el) {
    예약 문의 자동 파싱 (Quick Fill)
    ═══════════════════════════════════════════════ */
 
-/* 장소 표기 사전 — 카카오 검색 키가 없을 때 쓰는 보조 기능. 원하는 표기로 자유롭게 수정/추가하세요.
+/* 장소 표기 고정 사전 (선택) — 직접 넣고 싶은 것만 추가하세요.
    [검색 키워드(띄어쓰기 무시), 계약서에 들어갈 표기]
-   고객이 "강남 삼성역 그랜드힐컨벤션"처럼 적어도 키워드가 들어있으면 오른쪽 표기로 바뀝니다. */
+   보통은 아래 '학습 사전'이 자동으로 채워지므로 비워둬도 됩니다. */
 const VENUE_ALIAS = [
-  ['그랜드힐',         '그랜드힐컨벤션'],
-  ['신라호텔',         '서울신라호텔'],
-  ['락고재',           '락고재 서울'],
-  ['라비두스',         '라비두스'],
-  ['드레스가든',       '드레스가든'],
-  ['금융캠퍼스',       '삼성금융캠퍼스'],
-  ['크레스트72',       '크레스트72'],
-  ['채플앳대치',       '더채플앳대치'],
-  ['채플앳논현',       '더채플앳논현'],
-  ['포어클락',         '포어클락 용인'],
-  ['조선팰리스',       '조선 팰리스 서울 강남'],
-  ['h스퀘어',          'H스퀘어웨딩홀'],
-  ['라시따',           '라시따시어터'],
-  ['웨딩시그니처',     '웨딩시그니처'],
-  ['위더스',           '위더스 영등포'],
-  ['여율리',           '웨딩여율리'],
-  ['동부지방법원',     '서울동부지방법원'],
-  ['코트야드메리어트판교', '코트야드 바이 메리어트 서울 판교'],
-  ['더컨벤션반포',     '더컨벤션 반포']
+  // ['그랜드힐', '그랜드힐컨벤션'],
 ];
+
+/* ─── 장소 표기 학습 사전 ───
+   계약서를 임시저장하거나 이미지로 다운로드할 때, 장소 칸의 최종 표기(네이버 지도 이름)를 기억합니다.
+   - 고객이 쓴 원문 → 최종 표기
+   - 최종 표기 → 최종 표기 (다음에 다른 식으로 써도 이름이 포함돼 있으면 매칭)
+   이 브라우저에만 저장됩니다. */
+const LEARN_KEY = 'lotv_venue_learned';
+let lastVenueRawMain = '';   // 마지막 자동 입력 때 고객이 쓴 장소 원문(홀 제외)
+
+function loadLearned() {
+  try { return JSON.parse(localStorage.getItem(LEARN_KEY) || '{}') || {}; }
+  catch (e) { return {}; }
+}
+function saveLearned(map) {
+  try { localStorage.setItem(LEARN_KEY, JSON.stringify(map)); } catch (e) {}
+}
+
+function lookupLearned(main) {
+  const map = loadLearned();
+  const c = compact(main);
+  if (!c) return null;
+  if (map[c]) return map[c];
+  let best = null, bestLen = 0;
+  for (const k in map) {
+    if (k.length < 3) continue;
+    const hit = c.includes(k) || (c.length >= 3 && k.includes(c));
+    if (hit && k.length > bestLen) { best = map[k]; bestLen = k.length; }
+  }
+  return best;
+}
+
+function learnVenue() {
+  const v = document.getElementById('f_venue').value.trim();
+  if (!v) return;
+  const finalMain = splitVenueInput(v).main;
+  if (!finalMain || finalMain.length < 2) return;
+  const map = loadLearned();
+  map[compact(finalMain)] = finalMain;
+  if (lastVenueRawMain && compact(lastVenueRawMain) !== compact(finalMain)) {
+    map[compact(lastVenueRawMain)] = finalMain;
+  }
+  saveLearned(map);
+  renderLearnedList();
+}
+
+function renderLearnedList() {
+  const map = loadLearned();
+  const keys = Object.keys(map).sort((a, b) => map[a].localeCompare(map[b], 'ko'));
+  const names = new Set(keys.map(k => map[k]));
+  const cnt = document.getElementById('learnedCount');
+  if (cnt) cnt.textContent = `학습된 장소 ${names.size}곳`;
+  const list = document.getElementById('learnedList');
+  if (!list) return;
+  if (!keys.length) {
+    list.innerHTML = '<div class="ll-empty">아직 없음 — 계약서를 임시저장하거나 다운로드하면 장소 표기가 저장됩니다</div>';
+    return;
+  }
+  list.innerHTML = keys.map(k =>
+    `<div class="ll-row"><span><span class="ll-key">${escHtml(k)}</span> → <span class="ll-val">${escHtml(map[k])}</span></span>` +
+    `<button type="button" class="ll-del" data-k="${escHtml(k)}">삭제</button></div>`
+  ).join('');
+}
+
+function toggleLearnedList() {
+  renderLearnedList();
+  document.getElementById('learnedList').classList.toggle('show');
+}
+
+function splitVenueInput(v) {
+  const m = (v || '').match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  return m ? { main: m[1].trim(), hall: m[2].trim() } : { main: (v || '').trim(), hall: '' };
+}
+
+function openNaverMap() {
+  const { main } = splitVenueInput(document.getElementById('f_venue').value);
+  const q = main || lastVenueRawMain;
+  const url = q ? 'https://map.naver.com/p/search/' + encodeURIComponent(q) : 'https://map.naver.com/';
+  window.open(url, '_blank', 'noopener');
+}
 
 function compact(s) { return (s || '').replace(/\s+/g, '').toLowerCase(); }
 function pad2(n) { return String(n).padStart(2, '0'); }
@@ -1272,11 +1300,17 @@ function normalizeVenue(v) {
   }
 
   const rawMain = main;
-  let aliased = false;
-  const c = compact(main);
-  const sorted = VENUE_ALIAS.slice().sort((a, b) => b[0].length - a[0].length);
-  for (const [key, name] of sorted) {
-    if (c.includes(compact(key))) { main = name; aliased = true; break; }
+  let aliased = '';
+  const learned = lookupLearned(main);
+  if (learned) {
+    main = learned;
+    aliased = 'learned';
+  } else {
+    const c = compact(main);
+    const sorted = VENUE_ALIAS.slice().sort((a, b) => b[0].length - a[0].length);
+    for (const [key, name] of sorted) {
+      if (c.includes(compact(key))) { main = name; aliased = 'fixed'; break; }
+    }
   }
 
   return { text: hall ? `${main} (${hall})` : main, main, rawMain, hall, aliased };
@@ -1452,8 +1486,15 @@ function parseReservation(raw) {
   }
   if (!venueRaw) {
     const cand = lines.find(ln => ln.num === 4 && !ln.hasPhone && !ln.hasDate && !NOT_VENUE.test(ln.noPhone))
-              || lines.find(ln => !ln.hasPhone && !ln.hasDate && !ln.used && VENUE_KW.test(ln.noPhone) && !NOT_VENUE.test(ln.noPhone) && ln.noPhone.length <= 50);
+              || lines.find(ln => !ln.hasPhone && !ln.hasDate && !ln.used && VENUE_KW.test(ln.noPhone) && !NOT_VENUE.test(ln.noPhone) && ln.noPhone.length <= 50)
+              || lines.find(ln => !ln.hasPhone && !ln.hasDate && !ln.used && !NOT_VENUE.test(ln.noPhone) && lookupLearned(normalizeVenue(ln.noPhone).rawMain));
     if (cand) { venueRaw = cand.noPhone; cand.used = true; }
+  }
+  if (!venueRaw) {
+    const GREET2 = /(안녕|문의|가능할|가능한지|드립니다|부탁|감사|예상|인원|초상권|여부|스냅|촬영)/;
+    const cand = lines.find(ln => !ln.hasPhone && !ln.hasDate && !ln.used && !GREET2.test(ln.noPhone)
+                                  && ln.noPhone.length >= 2 && ln.noPhone.length <= 40);
+    if (cand) { venueRaw = cand.noPhone; cand.used = true; r.venueGuessed = true; }
   }
   if (venueRaw) r.venue = { raw: venueRaw, ...normalizeVenue(venueRaw) };
 
@@ -1502,6 +1543,11 @@ function applyQuickFill() {
   document.querySelectorAll('.autofilled').forEach(el => el.classList.remove('autofilled'));
   const r = parseReservation(raw);
 
+  // 이전 고객 값이 남지 않도록 자동 입력 대상 칸은 먼저 비움
+  ['f_name', 'f_tel', 'f_date_picker', 'f_time_picker', 'f_venue'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
   if (r.name)  { document.getElementById('f_name').value = r.name; markFilled('f_name'); }
   if (r.tel)   { document.getElementById('f_tel').value = r.tel;   markFilled('f_tel'); }
   if (r.date)  { document.getElementById('f_date_picker').value = r.date.iso; markFilled('f_date_picker'); }
@@ -1544,13 +1590,10 @@ function applyQuickFill() {
 
   const venueNotes = [];
   if (r.venue) {
-    if (KAKAO_JS_KEY) {
-      venueNotes.push(`원문: ${r.venue.raw} → 장소 칸 아래 검색 후보에서 선택하세요`);
-    } else {
-      venueNotes.push(r.venue.aliased
-        ? `원문: ${r.venue.raw} → 표기 사전 적용`
-        : '표기 사전에 없는 장소 — 장소 칸 옆 [주소 검색]으로 확인');
-    }
+    if (r.venue.aliased === 'learned') venueNotes.push(`원문: ${r.venue.raw} → 학습된 표기 적용`);
+    else if (r.venue.aliased === 'fixed') venueNotes.push(`원문: ${r.venue.raw} → 고정 사전 적용`);
+    else venueNotes.push('처음 보는 장소 — 장소 칸 옆 [네이버 지도]로 이름 확인 후 수정');
+    if (r.venueGuessed) venueNotes.push('장소 표시가 없어 남은 줄로 추정 — 맞는지 확인');
   }
   row('장소', r.venue ? r.venue.text : '', venueNotes);
 
@@ -1570,183 +1613,8 @@ function applyQuickFill() {
   box.innerHTML = rows.join('');
   box.classList.add('show');
 
-  // 카카오 장소 후보 자동 검색 (고객이 쓴 원문 기준, 홀명은 유지)
-  if (r.venue && KAKAO_JS_KEY) {
-    searchVenue(r.venue.rawMain || r.venue.main, r.venue.hall);
-    document.getElementById('f_venue').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  lastVenueRawMain = r.venue ? r.venue.rawMain : '';
 }
-
-/* ═══════════════════════════════════════════════
-   카카오 장소 검색 (Kakao Maps JavaScript SDK · 키워드 장소 검색)
-   ═══════════════════════════════════════════════ */
-
-/* 카카오 개발자센터 → 내 애플리케이션 → 앱 키 → JavaScript 키를 넣으세요. 비워두면 검색 기능 꺼짐 */
-const KAKAO_JS_KEY = '';   // 키워드 자동완성용 (현재 미사용 — 주소 검색 버튼으로 대체). 키: db1fe1db7ee6213385d869a13fd3fe00
-
-let kakaoPlaces = null;
-let kakaoLoading = null;
-
-/* SDK는 처음 검색할 때 한 번만 불러옴 */
-function loadKakao() {
-  if (kakaoPlaces) return Promise.resolve(kakaoPlaces);
-  if (kakaoLoading) return kakaoLoading;
-  kakaoLoading = new Promise((resolve, reject) => {
-    const sc = document.createElement('script');
-    sc.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + encodeURIComponent(KAKAO_JS_KEY) + '&libraries=services&autoload=false';
-    sc.onload = () => {
-      if (!window.kakao || !window.kakao.maps) {
-        kakaoLoading = null;
-        reject(new Error('SDK'));
-        return;
-      }
-      try {
-        window.kakao.maps.load(() => {
-          kakaoPlaces = new window.kakao.maps.services.Places();
-          resolve(kakaoPlaces);
-        });
-      } catch (e) { kakaoLoading = null; reject(e); }
-    };
-    sc.onerror = () => { kakaoLoading = null; reject(new Error('SDK')); };
-    document.head.appendChild(sc);
-  });
-  return kakaoLoading;
-}
-
-function kakaoKeywordSearch(q) {
-  return loadKakao().then(places => new Promise((resolve, reject) => {
-    places.keywordSearch(q, (data, status) => {
-      const S = window.kakao.maps.services.Status;
-      if (status === S.OK) {
-        resolve(data.slice(0, 7).map(p => ({
-          name: p.place_name,
-          category: (p.category_name || '').split('>').pop().trim(),
-          roadAddress: p.road_address_name,
-          address: p.address_name
-        })));
-      } else if (status === S.ZERO_RESULT) {
-        resolve([]);
-      } else {
-        reject(new Error('SEARCH'));
-      }
-    }, { size: 7 });
-  }));
-}
-
-let venueHall = '';
-let venueTimer = null;
-let venueSeq = 0;
-let venueItems = [];
-let venueActive = -1;
-
-function splitVenueInput(v) {
-  const m = v.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
-  return m ? { main: m[1].trim(), hall: m[2].trim() } : { main: v.trim(), hall: '' };
-}
-
-function closeVenueSuggest() {
-  const list = document.getElementById('venueSuggest');
-  list.classList.remove('show');
-  list.innerHTML = '';
-  venueItems = [];
-  venueActive = -1;
-}
-
-function renderVenueSuggest() {
-  const list = document.getElementById('venueSuggest');
-  if (!venueItems.length) {
-    list.innerHTML = '<li class="vs-msg">검색 결과 없음 — 지역명을 빼거나 키워드를 줄여보세요</li>';
-    return;
-  }
-  list.innerHTML = venueItems.map((it, i) =>
-    `<li class="vs-item${i === venueActive ? ' active' : ''}" data-i="${i}">
-       <div class="vs-name">${escHtml(it.name)}<span class="vs-cat">${escHtml(it.category || '')}</span></div>
-       <div class="vs-addr">${escHtml(it.roadAddress || it.address || '')}</div>
-     </li>`
-  ).join('');
-}
-
-async function searchVenue(q, hall) {
-  if (!KAKAO_JS_KEY || !q || q.length < 2) return;
-  venueHall = hall || '';
-  const list = document.getElementById('venueSuggest');
-  const seq = ++venueSeq;
-  list.innerHTML = '<li class="vs-msg">장소 찾는 중…</li>';
-  list.classList.add('show');
-  try {
-    const items = await kakaoKeywordSearch(q);
-    if (seq !== venueSeq) return; // 더 최근 검색이 있으면 무시
-    venueItems = items;
-    venueActive = venueItems.length ? 0 : -1;
-    renderVenueSuggest();
-  } catch (e) {
-    if (seq !== venueSeq) return;
-    const msg = e && e.message === 'SEARCH'
-      ? '검색 실패 — 카카오 콘솔 [제품 설정 → 카카오맵] 활성화를 확인하세요'
-      : `검색 실패 — 카카오 콘솔 JavaScript SDK 도메인에 ${location.origin} 등록을 확인하세요`;
-    list.innerHTML = `<li class="vs-msg">${escHtml(msg)}</li>`;
-    console.error(e);
-  }
-}
-
-function pickVenue(i) {
-  const it = venueItems[i];
-  if (!it) return;
-  const el = document.getElementById('f_venue');
-  el.value = venueHall ? `${it.name} (${venueHall})` : it.name;
-  el.classList.add('autofilled');
-  closeVenueSuggest();
-}
-
-(function initVenueSearch() {
-  const el = document.getElementById('f_venue');
-  const list = document.getElementById('venueSuggest');
-  const hint = document.getElementById('venueHint');
-
-  if (!KAKAO_JS_KEY) {
-    hint.textContent = '주소 검색으로 건물명 찾기 · 홀명은 "베뉴 (홀명)"처럼 괄호로';
-    return;
-  }
-  hint.textContent = '장소명 입력 시 카카오 장소 후보 표시 · 홀명은 "베뉴 (홀명)"처럼 괄호로';
-
-  el.addEventListener('input', () => {
-    clearTimeout(venueTimer);
-    const { main, hall } = splitVenueInput(el.value);
-    if (main.length < 2) { closeVenueSuggest(); return; }
-    venueTimer = setTimeout(() => searchVenue(main, hall), 350);
-  });
-
-  el.addEventListener('keydown', e => {
-    if (!list.classList.contains('show') || !venueItems.length) {
-      if (e.key === 'Escape') closeVenueSuggest();
-      return;
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      venueActive = (venueActive + 1) % venueItems.length;
-      renderVenueSuggest();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      venueActive = (venueActive - 1 + venueItems.length) % venueItems.length;
-      renderVenueSuggest();
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      pickVenue(venueActive);
-    } else if (e.key === 'Escape') {
-      closeVenueSuggest();
-    }
-  });
-
-  // mousedown: blur보다 먼저 처리되도록
-  list.addEventListener('mousedown', e => {
-    const li = e.target.closest('.vs-item');
-    if (!li) return;
-    e.preventDefault();
-    pickVenue(+li.dataset.i);
-  });
-
-  el.addEventListener('blur', () => setTimeout(closeVenueSuggest, 150));
-})();
 
 function addConsentToSpecial() {
   if (!lastConsent) return;
@@ -1771,76 +1639,16 @@ document.addEventListener('input', e => {
   if (e.target.classList && e.target.classList.contains('autofilled')) e.target.classList.remove('autofilled');
 });
 
-/* ═══════════════════════════════════════════════
-   주소 검색 — 카카오(다음) 우편번호 서비스 (키·도메인 등록 불필요)
-   ═══════════════════════════════════════════════ */
-let postcodeLoading = null;
-let postcodeHall = '';
-
-function loadPostcode() {
-  if (window.daum && window.daum.Postcode) return Promise.resolve();
-  if (postcodeLoading) return postcodeLoading;
-  postcodeLoading = new Promise((resolve, reject) => {
-    const sc = document.createElement('script');
-    sc.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-    sc.onload = () => resolve();
-    sc.onerror = () => { postcodeLoading = null; reject(new Error('postcode load failed')); };
-    document.head.appendChild(sc);
-  });
-  return postcodeLoading;
-}
-
-/* 고객이 쓴 장소에서 지역·역 이름 같은 군더더기를 빼고 검색어로 사용 */
-function postcodeQuery(main) {
-  return main
-    .replace(/\S+역(?=\s|$)/g, '')
-    .replace(/(서울|경기|인천|강남|서초|송파|판교|분당|일산|수원|용인|성수|잠실|여의도|영등포)(?=\s)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-async function openPostcode() {
-  const el = document.getElementById('f_venue');
-  const { main, hall } = splitVenueInput(el.value);
-  postcodeHall = hall;
-
-  const modal = document.getElementById('postcodeModal');
-  const layer = document.getElementById('postcodeLayer');
-  layer.innerHTML = '';
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  try {
-    await loadPostcode();
-  } catch (e) {
-    layer.innerHTML = '<div class="vs-msg">주소 검색을 불러오지 못했습니다. 인터넷 연결을 확인하세요.</div>';
-    return;
-  }
-
-  new window.daum.Postcode({
-    width: '100%',
-    height: '100%',
-    oncomplete: function(data) {
-      const road = data.roadAddress || data.jibunAddress || '';
-      const name = data.buildingName || road;
-      el.value = postcodeHall ? `${name} (${postcodeHall})` : name;
-      el.classList.add('autofilled');
-      document.getElementById('venueHint').textContent =
-        `선택한 주소: ${road}${data.buildingName ? '' : ' · 건물명이 없어 도로명주소로 입력됨 — 베뉴명으로 수정하세요'}`;
-      closePostcode();
-    }
-  }).embed(layer, { q: postcodeQuery(main), autoClose: false });
-}
-
-function closePostcode() {
-  document.getElementById('postcodeModal').classList.remove('open');
-  document.getElementById('postcodeLayer').innerHTML = '';
-  document.body.style.overflow = '';
-}
-
-document.getElementById('postcodeModal').addEventListener('click', function(e) {
-  if (e.target === this) closePostcode();
+// 학습 목록: 삭제 버튼
+document.getElementById('learnedList').addEventListener('click', e => {
+  const b = e.target.closest('.ll-del');
+  if (!b) return;
+  const map = loadLearned();
+  delete map[b.dataset.k];
+  saveLearned(map);
+  renderLearnedList();
 });
+renderLearnedList();
 
 /* ─── 임시저장 / 불러오기 ─── */
 const DRAFT_KEY = 'lotv_contract_draft';
@@ -1861,6 +1669,7 @@ function saveDraft() {
     addonChecks: Array.from(document.querySelectorAll('.addon-check')).map(c => c.checked)
   };
   localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  learnVenue();
   const status = document.getElementById('draftStatus');
   const now = new Date();
   const hh = String(now.getHours()).padStart(2,'0');
@@ -2121,6 +1930,7 @@ async function downloadImage() {
   }
 
   fillContract();
+  learnVenue();
 
   const overlay = document.getElementById('loadingOverlay');
   const btn     = document.getElementById('downloadBtn');
