@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTV — Thank you 카드</title>
+<!-- robots 차단: 검색엔진에 노출 안 되도록 -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #F2EFE8;
+  --cream-dark: #E8E3D8;
+  --ink: #1C1A17;
+  --ink-soft: #5A5650;
+  --warm-white: #FAF8F4;
+  --accent: #9B8E7A;
+  --accent-light: #C4B8A8;
+  --border: rgba(155,142,122,0.25);
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Jost', 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* ──────────────── LOCK SCREEN ──────────────── */
+#lockScreen {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+.lock-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.lock-sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 56px;
+}
+.lock-card {
+  background: var(--warm-white);
+  border: 0.5px solid var(--border);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.lock-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.lock-desc {
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  margin-bottom: 32px;
+  line-height: 1.8;
+}
+.lock-input {
+  width: 100%;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 10px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  letter-spacing: 0.4em;
+  text-align: center;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.3s;
+  margin-bottom: 32px;
+}
+.lock-input:focus { border-color: var(--accent); }
+.lock-input::placeholder { color: var(--accent-light); font-size: 20px; letter-spacing: 0.3em; }
+.lock-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  padding: 14px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lock-btn:hover { background: var(--ink-soft); }
+.lock-error {
+  font-size: 11px;
+  color: #a05050;
+  letter-spacing: 0.08em;
+  margin-top: 16px;
+  min-height: 18px;
+}
+
+/* ──────────────── APP ──────────────── */
+#app { display: none; }
+.app-head {
+  text-align: center;
+  padding: 40px 24px 28px;
+}
+.app-head .lock-sub { margin-bottom: 0; }
+
+.app-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--warm-white);
+  border: 0.5px solid var(--border);
+  padding: 32px 28px;
+}
+.panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.panel-desc {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+
+.field { margin-bottom: 22px; }
+.field label {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.field input[type="text"],
+.field input[type="date"] {
+  width: 100%;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 8px 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink);
+  outline: none;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.field input:focus { border-bottom-color: var(--accent); }
+.field input + input { margin-top: 6px; }
+.field small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--accent-light);
+  letter-spacing: 0.04em;
+}
+
+.file-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  border: 0.5px dashed var(--accent);
+  background: transparent;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-align: center;
+  padding: 10px;
+}
+.file-btn:hover { background: var(--cream); }
+#photoInput { display: none; }
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.range-row input[type="range"] { flex: 1; accent-color: var(--ink); }
+.range-row button {
+  border: 0.5px solid var(--accent-light);
+  background: transparent;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+}
+.check-row input { accent-color: var(--ink); width: 16px; height: 16px; }
+
+.actions { display: flex; flex-direction: column; gap: 10px; margin-top: 32px; }
+.btn-main, .btn-sub {
+  width: 100%;
+  padding: 15px;
+  font-family: 'Jost', 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  border: 1px solid var(--ink);
+}
+.btn-main { background: var(--ink); color: var(--cream); }
+.btn-main:hover { background: var(--ink-soft); border-color: var(--ink-soft); }
+.btn-sub { background: transparent; color: var(--ink); }
+.btn-sub:hover { background: var(--ink); color: var(--cream); }
+.btn-main:disabled, .btn-sub:disabled { opacity: 0.4; cursor: default; }
+#shareBtn { display: none; }
+
+.preview-box { position: sticky; top: 24px; }
+.preview-frame {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(28,26,23,0.06), 0 12px 40px rgba(28,26,23,0.08);
+}
+#card {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: grab;
+}
+#card.dragging { cursor: grabbing; }
+.preview-hint {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 0.04em;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.status {
+  margin-top: 8px;
+  min-height: 16px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+@media (max-width: 820px) {
+  .app-wrap { grid-template-columns: 1fr; gap: 24px; padding: 0 16px 48px; }
+  .preview-box { position: static; order: -1; }
+  .panel { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ───── LOCK SCREEN ───── -->
+<div id="lockScreen">
+  <div class="lock-logo">LOTV</div>
+  <div class="lock-sub">Lily of the Valley Snap</div>
+  <div class="lock-card">
+    <div class="lock-title">Staff Only</div>
+    <div class="lock-desc">Thank you 카드 제작 페이지입니다.<br>비밀번호를 입력해 주세요.</div>
+    <input type="password" class="lock-input" id="pwInput" maxlength="8"
+           placeholder="· · · ·" autocomplete="off" inputmode="numeric">
+    <button class="lock-btn" type="button" onclick="checkPassword()">입장</button>
+    <div class="lock-error" id="lockError"></div>
+  </div>
+</div>
+
+<!-- ───── APP ───── -->
+<div id="app">
+  <header class="app-head">
+    <div class="lock-logo">LOTV</div>
+    <div class="lock-sub">Thank you Card Maker</div>
+  </header>
+
+  <div class="app-wrap">
+    <section class="panel" aria-label="카드 정보 입력">
+      <h1 class="panel-title">Thank you Card</h1>
+      <p class="panel-desc">사진 · 이름 · 날짜를 넣으면 카드가 자동으로 만들어집니다.<br>미리보기에서 사진을 드래그해 위치를 맞출 수 있어요.</p>
+
+      <div class="field">
+        <label>PHOTO · 사진</label>
+        <label class="file-btn" for="photoInput" id="fileLabel">사진 선택하기</label>
+        <input type="file" id="photoInput" accept="image/*">
+      </div>
+
+      <div class="field">
+        <label for="zoom">ZOOM · 사진 확대</label>
+        <div class="range-row">
+          <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
+          <button type="button" id="resetBtn">위치 초기화</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="check-row"><input type="checkbox" id="bw" checked> 흑백으로 변환</label>
+      </div>
+
+      <div class="field">
+        <label for="names">NAME · 이름</label>
+        <input type="text" id="names" placeholder="로로 &amp; 토브" autocomplete="off">
+        <small>예) 로로 &amp; 토브</small>
+      </div>
+
+      <div class="field">
+        <label for="date">DATE · 예식 일자</label>
+        <input type="date" id="date">
+        <small id="datePreview"></small>
+      </div>
+
+      <div class="field">
+        <label for="msg1">MESSAGE · 문구</label>
+        <input type="text" id="msg1" value="특별한 순간을 함께해 주셔서 감사합니다." autocomplete="off">
+        <input type="text" id="msg2" value="그날의 따뜻한 마음 오래도록 간직하겠습니다." autocomplete="off">
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-main" id="saveBtn">이미지 저장 (JPG)</button>
+        <button type="button" class="btn-sub" id="shareBtn">공유 · 사진 앱에 저장</button>
+      </div>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section class="preview-box" aria-label="미리보기">
+      <div class="preview-frame">
+        <canvas id="card" width="1080" height="1350"></canvas>
+      </div>
+      <p class="preview-hint">사진을 드래그해서 위치 조정 · 저장 크기 2160 × 2700</p>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ──────────────── 비밀번호 ──────────────── */
+const PASS = '9933';   // ← 계약서와 같은 비밀번호 (원하면 변경)
+
+function checkPassword() {
+  const input = document.getElementById('pwInput');
+  if (input.value === PASS) {
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render();
+  } else {
+    document.getElementById('lockError').textContent = '비밀번호가 올바르지 않습니다.';
+    input.value = '';
+    input.focus();
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') checkPassword();
+});
+
+/* ──────────────── 카드 레이아웃 (원본 1080 × 1350 기준) ──────────────── */
+const W = 1080, H = 1350;
+const EXPORT_SCALE = 2;                       // 저장 시 2배 해상도
+const PHOTO = { x: 279, y: 90, w: 522, h: 696 }; // 3:4 사진 칸
+const SERIF = '"Playfair Display", serif';
+const SANS  = '"Noto Sans KR", sans-serif';
+
+// top: 글자 윗선 위치(원본 카드 기준), ref: 위치를 잡는 기준 문장, max: 최대 폭
+const TEXT = {
+  title:  { font: '800 113px ' + SERIF, color: '#333333', top: 832,  ref: 'THANK YOU' },
+  sub:    { font: '800 58.5px ' + SERIF, color: '#333333', top: 943, ref: 'FOR CELEBRATING WITH US.' },
+  names:  { font: '600 40px ' + SANS,  color: '#333333', top: 1035, ref: '로로 & 토브', max: 900 },
+  date:   { font: '300 37px ' + SANS,  color: '#555555', top: 1088, ref: 'June 7, 2026', max: 900 },
+  msg1:   { font: '400 30.5px ' + SANS, color: '#333333', top: 1146, ref: '특별한 순간을 함께해 주셔서 감사합니다.', max: 960 },
+  msg2:   { font: '400 30.5px ' + SANS, color: '#333333', top: 1183, ref: '그날의 따뜻한 마음 오래도록 간직하겠습니다.', max: 960 },
+  footer: { font: '400 22px ' + SERIF, color: '#555555', top: 1303, ref: '© 2026 LOTV SNAP. All Rights Reserved.' }
+};
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const state = { img: null, zoom: 1, panX: 0, panY: 0 };
+const els = {
+  canvas: document.getElementById('card'),
+  photo:  document.getElementById('photoInput'),
+  label:  document.getElementById('fileLabel'),
+  zoom:   document.getElementById('zoom'),
+  bw:     document.getElementById('bw'),
+  names:  document.getElementById('names'),
+  date:   document.getElementById('date'),
+  datePv: document.getElementById('datePreview'),
+  msg1:   document.getElementById('msg1'),
+  msg2:   document.getElementById('msg2'),
+  status: document.getElementById('status')
+};
+
+// 오늘 날짜 기본값
+(function () {
+  const t = new Date();
+  els.date.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+})();
+
+function formatDate(v) {
+  if (!v) return '';
+  const [y, m, d] = v.split('-').map(Number);
+  return MONTHS[m - 1] + ' ' + d + ', ' + y;
+}
+function yearOf(v) { return v ? v.split('-')[0] : String(new Date().getFullYear()); }
+
+/* ──────────────── 폰트 로딩 ──────────────── */
+async function ensureFonts(texts) {
+  if (!document.fonts || !document.fonts.load) return;
+  const jobs = [];
+  Object.keys(TEXT).forEach(function (k) {
+    jobs.push(document.fonts.load(TEXT[k].font, (texts[k] || '') + TEXT[k].ref));
+  });
+  try { await Promise.all(jobs); } catch (e) {}
+}
+
+/* ──────────────── 사진 그리기 ──────────────── */
+function clampPan() {
+  if (!state.img) return;
+  const s = baseScale() * state.zoom;
+  const maxX = Math.max(0, (state.img.width * s - PHOTO.w) / 2);
+  const maxY = Math.max(0, (state.img.height * s - PHOTO.h) / 2);
+  state.panX = Math.min(maxX, Math.max(-maxX, state.panX));
+  state.panY = Math.min(maxY, Math.max(-maxY, state.panY));
+}
+function baseScale() {
+  return Math.max(PHOTO.w / state.img.width, PHOTO.h / state.img.height);
+}
+
+function drawPhoto(ctx, scale) {
+  const pw = Math.round(PHOTO.w * scale), ph = Math.round(PHOTO.h * scale);
+  const off = document.createElement('canvas');
+  off.width = pw; off.height = ph;
+  const o = off.getContext('2d');
+
+  if (!state.img) {
+    o.fillStyle = '#EDEBE6';
+    o.fillRect(0, 0, pw, ph);
+    o.fillStyle = '#9B8E7A';
+    o.font = '400 ' + (26 * scale) + 'px ' + SANS;
+    o.textAlign = 'center';
+    o.textBaseline = 'middle';
+    o.fillText('사진을 선택해 주세요', pw / 2, ph / 2);
+  } else {
+    const s = baseScale() * state.zoom * scale;
+    const iw = state.img.width * s, ih = state.img.height * s;
+    const dx = (pw - iw) / 2 + state.panX * scale;
+    const dy = (ph - ih) / 2 + state.panY * scale;
+    o.imageSmoothingEnabled = true;
+    o.imageSmoothingQuality = 'high';
+    o.drawImage(state.img, dx, dy, iw, ih);
+
+    if (els.bw.checked) {
+      const data = o.getImageData(0, 0, pw, ph);
+      const p = data.data;
+      for (let i = 0; i < p.length; i += 4) {
+        const g = 0.2126 * p[i] + 0.7152 * p[i + 1] + 0.0722 * p[i + 2];
+        p[i] = p[i + 1] = p[i + 2] = g;
+      }
+      o.putImageData(data, 0, 0);
+    }
+  }
+  ctx.drawImage(off, PHOTO.x * scale, PHOTO.y * scale);
+}
+
+/* ──────────────── 글자 그리기 ──────────────── */
+function drawText(ctx, key, text) {
+  if (!text) return;
+  const t = TEXT[key];
+  ctx.font = t.font;
+  // 기준 문장의 윗선으로 기본선(baseline)을 고정 → 어떤 글자를 넣어도 줄 위치가 일정
+  const refAscent = ctx.measureText(t.ref).actualBoundingBoxAscent;
+  const baseline = t.top + refAscent;
+  let w = ctx.measureText(text).width;
+  ctx.save();
+  ctx.fillStyle = t.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  if (t.max && w > t.max) {
+    // 너무 길면 가로로만 살짝 줄여서 한 줄 유지
+    const k = t.max / w;
+    ctx.translate(W / 2, baseline);
+    ctx.scale(k, 1);
+    ctx.fillText(text, 0, 0);
+  } else {
+    ctx.fillText(text, W / 2, baseline);
+  }
+  ctx.restore();
+}
+
+function texts() {
+  return {
+    title: 'THANK YOU',
+    sub: 'FOR CELEBRATING WITH US.',
+    names: els.names.value.trim() || '로로 & 토브',
+    date: formatDate(els.date.value),
+    msg1: els.msg1.value.trim(),
+    msg2: els.msg2.value.trim(),
+    footer: '© ' + yearOf(els.date.value) + ' LOTV SNAP. All Rights Reserved.'
+  };
+}
+
+function paint(ctx, scale, tx) {
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, W, H);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  drawPhoto(ctx, scale);
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  Object.keys(TEXT).forEach(function (k) { drawText(ctx, k, tx[k]); });
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+let renderToken = 0;
+async function render() {
+  const token = ++renderToken;
+  const tx = texts();
+  els.datePv.textContent = tx.date ? '카드 표기: ' + tx.date : '';
+  await ensureFonts(tx);
+  if (token !== renderToken) return;
+  paint(els.canvas.getContext('2d'), 1, tx);
+}
+
+/* 드래그 중에는 폰트 대기 없이 바로 다시 그림 */
+let rafId = 0;
+function quickRender() {
+  if (rafId) return;
+  rafId = requestAnimationFrame(function () {
+    rafId = 0;
+    paint(els.canvas.getContext('2d'), 1, texts());
+  });
+}
+
+/* ──────────────── 입력 이벤트 ──────────────── */
+['names', 'date', 'msg1', 'msg2'].forEach(function (k) {
+  els[k].addEventListener('input', render);
+});
+els.bw.addEventListener('change', render);
+els.zoom.addEventListener('input', function () {
+  state.zoom = parseFloat(els.zoom.value);
+  clampPan();
+  quickRender();
+});
+document.getElementById('resetBtn').addEventListener('click', function () {
+  state.zoom = 1; state.panX = 0; state.panY = 0;
+  els.zoom.value = 1;
+  render();
+});
+
+els.photo.addEventListener('change', function () {
+  const file = els.photo.files && els.photo.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = function () {
+    state.img = img;
+    state.zoom = 1; state.panX = 0; state.panY = 0;
+    els.zoom.value = 1;
+    els.label.textContent = file.name + ' (다른 사진으로 바꾸기)';
+    render();
+  };
+  img.onerror = function () {
+    els.status.textContent = '이 사진은 열 수 없어요. JPG 또는 PNG로 다시 선택해 주세요.';
+  };
+  img.src = url;
+});
+
+/* 미리보기에서 사진 드래그 */
+(function () {
+  const c = els.canvas;
+  let drag = null;
+  function toCard(e) {
+    const r = c.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+  }
+  c.addEventListener('pointerdown', function (e) {
+    if (!state.img) return;
+    const p = toCard(e);
+    if (p.x < PHOTO.x || p.x > PHOTO.x + PHOTO.w || p.y < PHOTO.y || p.y > PHOTO.y + PHOTO.h) return;
+    drag = { x: p.x, y: p.y, px: state.panX, py: state.panY };
+    c.setPointerCapture(e.pointerId);
+    c.classList.add('dragging');
+  });
+  c.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    const p = toCard(e);
+    state.panX = drag.px + (p.x - drag.x);
+    state.panY = drag.py + (p.y - drag.y);
+    clampPan();
+    quickRender();
+  });
+  function end() { drag = null; c.classList.remove('dragging'); }
+  c.addEventListener('pointerup', end);
+  c.addEventListener('pointercancel', end);
+})();
+
+/* ──────────────── 저장 / 공유 ──────────────── */
+function fileName() {
+  const n = (els.names.value.trim() || '이름').replace(/\s*&\s*/g, '_').replace(/[\\/:*?"<>|\s]+/g, '');
+  const d = (els.date.value || '').replace(/-/g, '');
+  return 'LOTV_ThankYou_' + n + (d ? '_' + d : '') + '.jpg';
+}
+
+async function makeBlob() {
+  const tx = texts();
+  await ensureFonts(tx);
+  const out = document.createElement('canvas');
+  out.width = W * EXPORT_SCALE;
+  out.height = H * EXPORT_SCALE;
+  paint(out.getContext('2d'), EXPORT_SCALE, tx);
+  return new Promise(function (res) { out.toBlob(res, 'image/jpeg', 0.95); });
+}
+
+function warnIfEmpty() {
+  if (!state.img) { els.status.textContent = '사진을 먼저 선택해 주세요.'; return true; }
+  if (!els.names.value.trim()) { els.status.textContent = '이름을 입력해 주세요.'; return true; }
+  return false;
+}
+
+document.getElementById('saveBtn').addEventListener('click', async function () {
+  if (warnIfEmpty()) return;
+  els.status.textContent = '저장 중…';
+  const blob = await makeBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName();
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  els.status.textContent = '저장했어요 · ' + fileName();
+});
+
+/* 휴대폰: 공유 시트로 바로 사진 앱 저장 / 카톡 전송 */
+(function () {
+  const btn = document.getElementById('shareBtn');
+  try {
+    const test = new File([new Blob(['x'], { type: 'image/jpeg' })], 't.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [test] })) btn.style.display = 'block';
+  } catch (e) {}
+  btn.addEventListener('click', async function () {
+    if (warnIfEmpty()) return;
+    els.status.textContent = '준비 중…';
+    const blob = await makeBlob();
+    const file = new File([blob], fileName(), { type: 'image/jpeg' });
+    try {
+      await navigator.share({ files: [file], title: 'Thank you Card' });
+      els.status.textContent = '';
+    } catch (e) {
+      els.status.textContent = '';
+    }
+  });
+})();
+</script>
+</body>
+</html>
