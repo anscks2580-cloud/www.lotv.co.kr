@@ -1525,6 +1525,11 @@ function loadKakao() {
     const sc = document.createElement('script');
     sc.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + encodeURIComponent(KAKAO_JS_KEY) + '&libraries=services&autoload=false';
     sc.onload = () => {
+      if (!window.kakao || !window.kakao.maps) {
+        kakaoLoading = null;
+        reject(new Error('SDK'));
+        return;
+      }
       try {
         window.kakao.maps.load(() => {
           kakaoPlaces = new window.kakao.maps.services.Places();
@@ -1532,7 +1537,7 @@ function loadKakao() {
         });
       } catch (e) { kakaoLoading = null; reject(e); }
     };
-    sc.onerror = () => { kakaoLoading = null; reject(new Error('Kakao SDK 로드 실패 (키 또는 도메인 등록 확인)')); };
+    sc.onerror = () => { kakaoLoading = null; reject(new Error('SDK')); };
     document.head.appendChild(sc);
   });
   return kakaoLoading;
@@ -1552,7 +1557,7 @@ function kakaoKeywordSearch(q) {
       } else if (status === S.ZERO_RESULT) {
         resolve([]);
       } else {
-        reject(new Error('Kakao 검색 오류: ' + status));
+        reject(new Error('SEARCH'));
       }
     }, { size: 7 });
   }));
@@ -1606,7 +1611,10 @@ async function searchVenue(q, hall) {
     renderVenueSuggest();
   } catch (e) {
     if (seq !== venueSeq) return;
-    list.innerHTML = '<li class="vs-msg">검색 실패 — 카카오 JavaScript 키와 사이트 도메인 등록을 확인하세요</li>';
+    const msg = e && e.message === 'SEARCH'
+      ? '검색 실패 — 카카오 콘솔 [제품 설정 → 카카오맵] 활성화를 확인하세요'
+      : `검색 실패 — 카카오 콘솔 JavaScript SDK 도메인에 ${location.origin} 등록을 확인하세요`;
+    list.innerHTML = `<li class="vs-msg">${escHtml(msg)}</li>`;
     console.error(e);
   }
 }
