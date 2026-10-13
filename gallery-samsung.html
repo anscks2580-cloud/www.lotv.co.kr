@@ -126,6 +126,16 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   .lightbox-next { right: 0; }
 }
 </style>
+<style id="lotv-columns">
+/* 사진 원본 비율 그대로 (자르지 않음) — 워터마크 위치가 모든 사진에서 동일하게 보이도록 */
+.photo-grid { display: block; columns: 3; column-gap: calc(16px * var(--s, 1)); }
+.photo-item { aspect-ratio: auto; break-inside: avoid; margin-bottom: calc(16px * var(--s, 1)); }
+.photo-item img { height: auto; object-fit: initial; }
+@media (max-width: 768px) {
+  .photo-grid { columns: 2; column-gap: calc(10px * var(--s, 1)); }
+  .photo-item { margin-bottom: calc(10px * var(--s, 1)); }
+}
+</style>
 </head>
 <body data-page="gallery">
 <!-- ── HEADER (공통) ── -->
