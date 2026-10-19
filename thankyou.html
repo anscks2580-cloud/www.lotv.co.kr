@@ -328,6 +328,7 @@ body {
   .preview-box { position: static; order: -1; }
   .panel { padding: 28px 20px; }
 }
+.i-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; border: 1px solid rgba(255,255,255,0.6); }
 </style>
 </head>
 <body>
@@ -383,6 +384,14 @@ body {
 
       <div class="field">
         <label class="check-row"><input type="checkbox" id="bw" checked> 흑백으로 변환</label>
+      </div>
+
+      <div class="field">
+        <label>COLOR · 글씨 색</label>
+        <div class="seg" role="group" aria-label="글씨 색">
+          <button type="button" data-color="black" aria-pressed="true"><i class="i-swatch" style="background:#333333"></i>검정</button>
+          <button type="button" data-color="brown" aria-pressed="false"><i class="i-swatch" style="background:#78482E"></i>갈색</button>
+        </div>
       </div>
 
       <div class="field">
@@ -457,14 +466,21 @@ const SANS  = '"Noto Sans KR", sans-serif';
 
 // top: 글자 윗선 위치(원본 카드 기준), ref: 위치를 잡는 기준 문장, max: 최대 폭
 const TEXT = {
-  title:  { font: '800 113px ' + SERIF, color: '#333333', top: 832,  ref: 'THANK YOU' },
-  sub:    { font: '800 58.5px ' + SERIF, color: '#333333', top: 943, ref: 'FOR CELEBRATING WITH US.' },
-  names:  { font: '600 40px ' + SANS,  color: '#333333', top: 1035, ref: '로로 & 토브', max: 900 },
-  date:   { font: '300 37px ' + SANS,  color: '#555555', top: 1088, ref: 'June 7, 2026', max: 900 },
-  msg1:   { font: '400 30.5px ' + SANS, color: '#333333', top: 1146, ref: '특별한 순간을 함께해 주셔서 감사합니다.', max: 960 },
-  msg2:   { font: '400 30.5px ' + SANS, color: '#333333', top: 1183, ref: '그날의 따뜻한 마음 오래도록 간직하겠습니다.', max: 960 },
-  footer: { font: '400 22px ' + SERIF, color: '#555555', top: 1303, ref: '© 2026 LOTV SNAP. All Rights Reserved.' }
+  title:  { font: '800 113px ' + SERIF, color: 'main', top: 832,  ref: 'THANK YOU' },
+  sub:    { font: '800 58.5px ' + SERIF, color: 'main', top: 943, ref: 'FOR CELEBRATING WITH US.' },
+  names:  { font: '600 40px ' + SANS,  color: 'main', top: 1035, ref: '로로 & 토브', max: 900 },
+  date:   { font: '300 37px ' + SANS,  color: 'soft', top: 1088, ref: 'June 7, 2026', max: 900 },
+  msg1:   { font: '400 30.5px ' + SANS, color: 'main', top: 1146, ref: '특별한 순간을 함께해 주셔서 감사합니다.', max: 960 },
+  msg2:   { font: '400 30.5px ' + SANS, color: 'main', top: 1183, ref: '그날의 따뜻한 마음 오래도록 간직하겠습니다.', max: 960 },
+  footer: { font: '400 22px ' + SERIF, color: 'soft', top: 1303, ref: '© 2026 LOTV SNAP. All Rights Reserved.' }
 };
+
+// 글씨 색 (검정 / 갈색)
+const PALETTES = {
+  black: { main: '#333333', soft: '#555555' },
+  brown: { main: '#78482E', soft: '#8A5E45' }
+};
+let textColor = 'black';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -500,7 +516,7 @@ function setOrient(o) {
   state.orient = o;
   PHOTO = LAYOUTS[o].photo;
   SHIFT = LAYOUTS[o].shift;
-  document.querySelectorAll('.seg button').forEach(function (b) {
+  document.querySelectorAll('.seg button[data-orient]').forEach(function (b) {
     b.setAttribute('aria-pressed', b.getAttribute('data-orient') === o ? 'true' : 'false');
   });
   state.panX = 0; state.panY = 0;
@@ -583,7 +599,7 @@ function drawText(ctx, key, text) {
   const baseline = t.top + (key === 'footer' ? 0 : SHIFT) + refAscent;
   let w = ctx.measureText(text).width;
   ctx.save();
-  ctx.fillStyle = t.color;
+  ctx.fillStyle = PALETTES[textColor][t.color];
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   if (t.max && w > t.max) {
@@ -642,9 +658,18 @@ function quickRender() {
 }
 
 /* ──────────────── 입력 이벤트 ──────────────── */
-document.querySelectorAll('.seg button').forEach(function (b) {
+document.querySelectorAll('.seg button[data-orient]').forEach(function (b) {
   b.addEventListener('click', function () {
     setOrient(b.getAttribute('data-orient'));
+    render();
+  });
+});
+document.querySelectorAll('.seg button[data-color]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    textColor = b.getAttribute('data-color');
+    document.querySelectorAll('.seg button[data-color]').forEach(function (x) {
+      x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+    });
     render();
   });
 });
