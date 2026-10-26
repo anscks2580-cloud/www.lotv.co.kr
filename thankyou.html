@@ -329,6 +329,10 @@ body {
   .panel { padding: 28px 20px; }
 }
 .i-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; border: 1px solid rgba(255,255,255,0.6); }
+
+/* 계약서 페이지 안에 들어갈 때 */
+html.embedded body { background: transparent; }
+html.embedded .app-head { display: none; }
 </style>
 </head>
 <body>
@@ -450,6 +454,20 @@ function checkPassword() {
 document.getElementById('pwInput').addEventListener('keydown', function (e) {
   if (e.key === 'Enter') checkPassword();
 });
+
+/* 계약서 페이지(햄버거 메뉴) 안에서 열린 경우: 이미 로그인됐으므로 입장 화면 생략 */
+(function () {
+  try {
+    if (/[?&]embed=1/.test(location.search) && window.parent !== window && window.parent.LOTV_AUTHED === true) {
+      document.documentElement.classList.add('embedded');
+      window.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        render();
+      });
+    }
+  } catch (e) {}
+})();
 
 /* ──────────────── 카드 레이아웃 (원본 1080 × 1350 기준) ──────────────── */
 const W = 1080, H = 1350;

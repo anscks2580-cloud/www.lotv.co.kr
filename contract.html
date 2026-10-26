@@ -11,6 +11,11 @@
 <!-- html2canvas (CDN) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- 파이어베이스 (보관함 · 달력) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -704,6 +709,536 @@ body {
   .form-row-2col { grid-template-columns: 1fr; gap: 0; }
   #contractPaper { width: 100%; min-height: unset; }
 }
+
+/* ──────────────── 햄버거 · 메뉴 ──────────────── */
+.menu-btn {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 900;
+  width: 44px;
+  height: 44px;
+  border: 0.5px solid var(--border);
+  background: var(--warm-white);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.menu-btn span {
+  display: block;
+  width: 18px;
+  height: 1px;
+  background: var(--ink);
+}
+.menu-btn:hover { background: var(--cream-dark); }
+
+.drawer-dim {
+  position: fixed;
+  inset: 0;
+  background: rgba(28,26,23,0.35);
+  z-index: 950;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.drawer-dim.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 300px;
+  max-width: 86vw;
+  background: var(--warm-white);
+  border-left: 0.5px solid var(--border);
+  z-index: 960;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 28px 24px;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.drawer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+}
+.drawer-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  line-height: 1;
+}
+.drawer-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 0.5px solid var(--border);
+  background: transparent;
+  padding: 18px 2px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.drawer-item .num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: var(--accent);
+  width: 18px;
+}
+.drawer-item.active { font-weight: 400; }
+.drawer-item.active::after {
+  content: '';
+  margin-left: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  align-self: center;
+}
+.drawer-item:hover { background: var(--cream); }
+.drawer-foot {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.drawer-foot button {
+  border: 0.5px solid var(--border);
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.view { display: none; width: 100%; flex-direction: column; align-items: center; }
+.view.active { display: flex; }
+
+/* ──────────────── 공통 패널 ──────────────── */
+.panel-wrap {
+  width: 100%;
+  max-width: 760px;
+  background: var(--warm-white);
+  border: 0.5px solid var(--border);
+  padding: 36px 32px;
+}
+.notice-box {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  background: var(--cream);
+  border: 0.5px dashed var(--accent-light);
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+.tool-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.chip-btn {
+  border: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 7px 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.chip-btn.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.search-input {
+  flex: 1;
+  min-width: 140px;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 7px 2px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+}
+.count-line {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+
+/* ──────────────── 보관함 ──────────────── */
+.month-group { margin-bottom: 10px; }
+.month-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: var(--cream);
+  padding: 12px 14px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink);
+  text-align: left;
+}
+.month-head .cnt { font-size: 11px; color: var(--accent); font-weight: 300; }
+.month-head .arrow { margin-left: auto; font-size: 10px; color: var(--accent); transition: transform 0.2s; }
+.month-group.open .month-head .arrow { transform: rotate(180deg); }
+.month-body { display: none; }
+.month-group.open .month-body { display: block; }
+
+.c-item { border-bottom: 0.5px solid var(--border); }
+.c-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 6px;
+}
+.c-title {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+}
+.c-code {
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.c-name { font-size: 14px; font-weight: 400; }
+.c-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.st-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.st-btn {
+  border: 1px solid;
+  background: transparent;
+  padding: 6px 10px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.st-btn.done { border-color: #2e8b57; color: #2e8b57; }
+.st-btn.fail { border-color: #c0392b; color: #c0392b; }
+.st-btn.done.on { background: #2e8b57; color: #fff; }
+.st-btn.fail.on { background: #c0392b; color: #fff; }
+.c-item.is-done .c-code { color: #2e8b57; }
+.c-item.is-fail .c-code, .c-item.is-fail .c-name { color: #c0392b; text-decoration: line-through; }
+
+.c-detail {
+  display: none;
+  padding: 4px 6px 20px;
+  gap: 20px;
+}
+.c-item.open .c-detail { display: flex; }
+.c-thumb {
+  width: 130px;
+  flex-shrink: 0;
+  aspect-ratio: 595 / 842;
+  background: var(--cream);
+  border: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--accent);
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.c-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.c-fields { flex: 1; min-width: 0; }
+.c-field {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  align-items: center;
+  font-size: 12.5px;
+  padding: 4px 0;
+}
+.c-field label { font-size: 11px; color: var(--ink-soft); }
+.c-field input {
+  border: none;
+  border-bottom: 0.5px solid var(--border);
+  background: transparent;
+  padding: 4px 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12.5px;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+}
+.c-field input:focus { border-color: var(--accent); }
+.c-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.c-actions button {
+  border: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.c-actions button.primary { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.c-actions button.danger { color: #c0392b; border-color: rgba(192,57,43,0.4); }
+.empty-line { text-align: center; padding: 40px 0; font-size: 12px; color: var(--accent); }
+
+/* 이미지 크게 보기 */
+#imgViewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,18,16,0.9);
+  z-index: 1500;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 50px 16px;
+}
+#imgViewer.open { display: flex; }
+#imgViewer img { max-width: 720px; width: 100%; background: #fff; }
+#imgViewer .iv-close {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+#imgViewer .iv-down {
+  position: fixed;
+  top: 14px;
+  left: 18px;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+/* ──────────────── 달력 ──────────────── */
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.cal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}
+.cal-nav { display: flex; gap: 6px; }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 0.5px solid var(--border);
+  border-left: 0.5px solid var(--border);
+}
+.cal-dow {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 8px 0;
+  color: var(--ink-soft);
+  border-right: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  background: var(--cream);
+}
+.cal-dow.sun { color: #c0392b; }
+.cal-dow.sat { color: #2b5ea7; }
+.cal-cell {
+  min-height: 92px;
+  border-right: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  padding: 6px 5px;
+  cursor: pointer;
+  position: relative;
+  min-width: 0;
+}
+.cal-cell:hover { background: var(--cream); }
+.cal-cell.other { background: rgba(232,227,216,0.35); }
+.cal-cell.other .cal-num { opacity: 0.4; }
+.cal-cell.today .cal-num {
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 50%;
+}
+.cal-cell.sel { outline: 1px solid var(--accent); outline-offset: -1px; }
+.cal-num {
+  font-size: 11px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.cal-cell.sun .cal-num { color: #c0392b; }
+.cal-cell.sat .cal-num { color: #2b5ea7; }
+.cal-cell.today .cal-num { color: var(--cream); }
+.cal-ev {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.35;
+  padding: 2px 4px;
+  margin-bottom: 3px;
+  background: rgba(46,139,87,0.12);
+  border-left: 2px solid #2e8b57;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-cell.dup .cal-ev { background: rgba(192,57,43,0.1); border-left-color: #c0392b; }
+.dup-badge {
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  font-size: 9px;
+  color: #fff;
+  background: #c0392b;
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+.cal-day-list { margin-top: 22px; }
+.cal-day-title { font-size: 13px; font-weight: 400; margin-bottom: 10px; }
+.cal-day-ev {
+  display: flex;
+  gap: 14px;
+  font-size: 12.5px;
+  padding: 10px 4px;
+  border-bottom: 0.5px solid var(--border);
+}
+.cal-day-ev .t { font-family: 'Jost', sans-serif; width: 46px; color: #2e8b57; }
+.cal-legend { font-size: 11px; color: var(--ink-soft); margin-top: 12px; }
+
+/* 중복 경고 */
+.dup-warn {
+  display: none;
+  margin-top: 10px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #c0392b;
+  background: rgba(192,57,43,0.07);
+  border-left: 2px solid #c0392b;
+  padding: 8px 10px;
+}
+.dup-warn.show { display: block; }
+
+/* 확인 창 */
+#confirmBox {
+  position: fixed;
+  inset: 0;
+  z-index: 1800;
+  background: rgba(28,26,23,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#confirmBox.open { display: flex; }
+.cf-card {
+  background: var(--warm-white);
+  width: 100%;
+  max-width: 380px;
+  padding: 28px 26px 22px;
+  border-top: 3px solid var(--ink);
+}
+.cf-card.green { border-top-color: #2e8b57; }
+.cf-card.red { border-top-color: #c0392b; }
+.cf-title { font-size: 15px; font-weight: 400; margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
+.cf-msg { font-size: 12.5px; line-height: 1.85; color: var(--ink-soft); white-space: pre-line; }
+.cf-msg .warn { display: block; margin-top: 12px; color: #c0392b; font-weight: 400; }
+.cf-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; }
+.cf-btns button {
+  border: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 9px 18px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.cf-btns .ok { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.cf-card.green .ok { background: #2e8b57; border-color: #2e8b57; }
+.cf-card.red .ok { background: #c0392b; border-color: #c0392b; }
+
+/* 저장 알림 */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 12px;
+  padding: 10px 18px;
+  z-index: 2100;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 땡큐카드 */
+.thanks-frame {
+  width: 100%;
+  max-width: 1120px;
+  border: none;
+  min-height: 80vh;
+  background: transparent;
+}
+
+@media (max-width: 680px) {
+  .panel-wrap { padding: 24px 16px; }
+  .c-row { flex-wrap: wrap; }
+  .c-title { flex-basis: 100%; flex-wrap: wrap; }
+  .st-btns { margin-left: auto; }
+  .c-detail { flex-direction: column; }
+  .c-thumb { width: 100%; max-width: 220px; }
+  .cal-cell { min-height: 64px; padding: 4px 2px; }
+  .cal-ev { font-size: 9px; padding: 1px 2px; }
+  .menu-btn { top: 12px; right: 12px; }
+}
 </style>
 </head>
 <body>
@@ -715,13 +1250,13 @@ body {
 
   <div class="lock-card">
     <div class="lock-title">Staff Only</div>
-    <div class="lock-desc">계약서 작성 페이지입니다.<br>비밀번호를 입력해 주세요.</div>
+    <div class="lock-desc">계약서 작성 · 보관함 · 달력 페이지입니다.<br>비밀번호를 입력해 주세요.</div>
     <input
       type="password"
       class="lock-input"
       id="pwInput"
       maxlength="8"
-      placeholder="· · · ·"
+      placeholder="· · · · · ·"
       autocomplete="off"
       inputmode="numeric"
     >
@@ -730,6 +1265,24 @@ body {
   </div>
 </div>
 
+<!-- ───── 햄버거 메뉴 ───── -->
+<button type="button" class="menu-btn" id="menuBtn" style="display:none;" onclick="openMenu()" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
+<div class="drawer-dim" id="drawerDim" onclick="closeMenu()"></div>
+<nav class="drawer" id="drawer" aria-label="메뉴">
+  <div class="drawer-head">
+    <span class="drawer-logo">LOTV</span>
+    <button type="button" class="drawer-close" onclick="closeMenu()" aria-label="메뉴 닫기">✕</button>
+  </div>
+  <button type="button" class="drawer-item" data-view="write" onclick="showView('write')"><span class="num">01</span>계약서 작성</button>
+  <button type="button" class="drawer-item" data-view="archive" onclick="showView('archive')"><span class="num">02</span>계약서 보관함</button>
+  <button type="button" class="drawer-item" data-view="calendar" onclick="showView('calendar')"><span class="num">03</span>예식 달력</button>
+  <button type="button" class="drawer-item" data-view="thanks" onclick="showView('thanks')"><span class="num">04</span>Thank you 카드</button>
+  <div class="drawer-foot">
+    <span>Staff Only</span>
+    <button type="button" onclick="logout()">로그아웃</button>
+  </div>
+</nav>
+
 <!-- ───── MAIN APP ───── -->
 <div id="app">
 
@@ -737,8 +1290,11 @@ body {
     <a class="app-logo" href="index.html">LOTV</a>
     <div class="app-logo-sub">Lily of the Valley Snap</div>
     <div class="app-divider"></div>
-    <div class="app-page-title">촬영 계약서 작성</div>
+    <div class="app-page-title" id="appPageTitle">촬영 계약서 작성</div>
   </div>
+
+  <!-- ───── 1. 계약서 작성 ───── -->
+  <div class="view active" id="view-write">
 
   <!-- 방문자 통계 -->
   <div style="max-width:600px; margin:20px auto 0; font-size:12px; color:#5A5650;">
@@ -959,6 +1515,7 @@ body {
           <input type="time" id="f_time_picker" style="width:100px; border:none; border-bottom:0.5px solid var(--accent-light); background:transparent; padding:8px 0; font-family:'Noto Sans KR',sans-serif; font-size:13px; color:var(--ink); outline:none; cursor:pointer;" onchange="updateDateTime()">
         </div>
         <input type="hidden" id="f_date">
+        <div class="dup-warn" id="dupWarn"></div>
       </div>
       <div class="form-row">
         <label>장소</label>
@@ -1052,9 +1609,75 @@ body {
       <button class="btn-preview" onclick="openPreview()">미리보기</button>
       <button class="btn-download" id="downloadBtn" onclick="downloadImage()">이미지 다운로드</button>
     </div>
+    <div style="font-size:11px; color:var(--accent); margin-top:10px; letter-spacing:0.04em;">이미지 다운로드 시 계약서 보관함에 자동 저장됩니다</div>
 
   </div>
+  </div><!-- /view-write -->
+
+  <!-- ───── 2. 계약서 보관함 ───── -->
+  <div class="view" id="view-archive">
+    <div class="panel-wrap">
+      <div class="form-section-label">Contracts</div>
+      <div class="notice-box" id="archiveNotice" style="display:none;"></div>
+
+      <div class="tool-row">
+        <button type="button" class="chip-btn on" data-filter="all">전체</button>
+        <button type="button" class="chip-btn" data-filter="pending">미확정</button>
+        <button type="button" class="chip-btn" data-filter="done">계약완</button>
+        <button type="button" class="chip-btn" data-filter="fail">계약불</button>
+        <input type="text" class="search-input" id="archiveSearch" placeholder="이름 · 홀 검색">
+      </div>
+      <div class="tool-row">
+        <button type="button" class="chip-btn" id="pastToggle">지난 예식 보기</button>
+        <button type="button" class="chip-btn" onclick="document.getElementById('bulkInput').click()">계약서 사진 추가</button>
+        <input type="file" id="bulkInput" accept="image/*,.json" multiple style="display:none;">
+      </div>
+      <div class="count-line" id="archiveCount"></div>
+      <div id="archiveList"><div class="empty-line">불러오는 중…</div></div>
+    </div>
+  </div>
+
+  <!-- ───── 3. 예식 달력 ───── -->
+  <div class="view" id="view-calendar">
+    <div class="panel-wrap" style="max-width:900px;">
+      <div class="cal-head">
+        <div class="cal-title" id="calTitle"></div>
+        <div class="cal-nav">
+          <button type="button" class="chip-btn" onclick="calMove(-1)">‹ 이전</button>
+          <button type="button" class="chip-btn" onclick="calToday()">오늘</button>
+          <button type="button" class="chip-btn" onclick="calMove(1)">다음 ›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">계약완으로 체크된 예식만 표시됩니다 · 같은 날 2건 이상이면 빨간색으로 표시됩니다</div>
+      <div class="cal-day-list" id="calDayList"></div>
+    </div>
+  </div>
+
+  <!-- ───── 4. 땡큐카드 ───── -->
+  <div class="view" id="view-thanks">
+    <iframe class="thanks-frame" id="thanksFrame" title="땡큐카드 만들기"></iframe>
+  </div>
+
 </div>
+
+<!-- ───── 확인 창 ───── -->
+<div id="confirmBox">
+  <div class="cf-card">
+    <div class="cf-title"></div>
+    <div class="cf-msg"></div>
+    <div class="cf-btns"><button type="button" class="cancel">취소</button><button type="button" class="ok">확인</button></div>
+  </div>
+</div>
+
+<!-- ───── 계약서 크게 보기 ───── -->
+<div id="imgViewer" onclick="if(event.target===this)closeViewer()">
+  <a class="iv-down" href="#" download>이미지 저장</a>
+  <button type="button" class="iv-close" onclick="closeViewer()">✕ 닫기</button>
+  <img alt="계약서">
+</div>
+
+<div id="toast"></div>
 
 <!-- ───── PREVIEW MODAL ───── -->
 <div id="previewModal">
@@ -1735,37 +2358,6 @@ function updateDateTime() {
   document.getElementById('f_date').value = result;
 }
 
-/* ═══════════════════════════════
-   비밀번호 설정 — 여기만 바꾸면 됩니다
-   ═══════════════════════════════ */
-const PASS = '9933';   // ← 원하는 비밀번호로 변경
-
-function checkPassword() {
-  const val = document.getElementById('pwInput').value;
-  const err = document.getElementById('lockError');
-  if (val === PASS) {
-    document.getElementById('lockScreen').style.display = 'none';
-    const app = document.getElementById('app');
-    app.style.display = 'flex';
-    // 오늘 날짜 자동 입력
-    const today = new Date();
-    const yy = String(today.getFullYear()).slice(2);
-    const mm = String(today.getMonth()+1).padStart(2,'0');
-    const dd = String(today.getDate()).padStart(2,'0');
-    document.getElementById('f_contractDate').value = `${yy}년 ${mm}월 ${dd}일`;
-  } else {
-    err.textContent = '비밀번호가 올바르지 않습니다.';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-}
-
-// Enter 키 입력
-document.getElementById('pwInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkPassword();
-  document.getElementById('lockError').textContent = '';
-});
-
 // 상품명 직접입력 토글
 let baseOptionText = '';
 
@@ -1924,6 +2516,13 @@ async function downloadImage() {
     return;
   }
 
+  const dDate = document.getElementById('f_date_picker').value;
+  const dDup = (typeof doneOnDate === 'function') ? doneOnDate(dDate) : [];
+  if (dDup.length) {
+    const go = await askConfirm({ title: '예식 중복 확인', tone: 'red', msg: `${prettyDate(dDate)}\n\n${dupLines(dDup)}`, warn: DUP_MSG, ok: '확인 후 계속', cancel: '취소' });
+    if (!go) return;
+  }
+
   fillContract();
   learnVenue();
 
@@ -1969,6 +2568,9 @@ async function downloadImage() {
     link.download = fileName;
     link.click();
 
+    // 보관함 자동 저장
+    await saveFromForm(canvas);
+
   } catch(err) {
     alert('이미지 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
     console.error(err);
@@ -1985,6 +2587,703 @@ async function downloadImage() {
     btn.disabled = false;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   파이어베이스 설정 — 콘솔에서 받은 값
+   ═══════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCP5wakGnA9ToM_NvYE9w2NCTVN3nNXzLc",
+  authDomain: "lotv-d8904.firebaseapp.com",
+  projectId: "lotv-d8904",
+  storageBucket: "lotv-d8904.firebasestorage.app",
+  messagingSenderId: "66688085295",
+  appId: "1:66688085295:web:6850ed5009deedc41585da"
+};
+const STAFF_EMAIL = 'staff@lotv.co.kr';
+const LOCAL_PASS_HASH = 'b81ff1b6eb594a0beddd22c4160912a2f1e37c5a8ab96c5819ff48c35111d182';   // 파이어베이스 설정 전 임시 입장용(비밀번호 해시)
+
+const FB_READY = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && window.firebase);
+let fbAuth = null, db = null;
+if (FB_READY) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  fbAuth = firebase.auth();
+  db = firebase.firestore();
+}
+
+/* ─── 입장 ─── */
+let appEntered = false;
+
+function checkPassword() {
+  const input = document.getElementById('pwInput');
+  const err = document.getElementById('lockError');
+  const val = input.value.trim();
+  if (!val) return;
+  if (!FB_READY) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(val)).then(buf => {
+      const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hex === LOCAL_PASS_HASH) enterApp();
+      else { err.textContent = '비밀번호가 올바르지 않습니다.'; input.value = ''; input.focus(); }
+    });
+    return;
+  }
+  err.textContent = '확인 중…';
+  fbAuth.signInWithEmailAndPassword(STAFF_EMAIL, val)
+    .then(() => { err.textContent = ''; })
+    .catch(e => {
+      console.error(e);
+      err.textContent = (e.code === 'auth/too-many-requests')
+        ? '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+        : '비밀번호가 올바르지 않습니다.';
+      input.value = '';
+      input.focus();
+    });
+}
+
+document.getElementById('pwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+  else document.getElementById('lockError').textContent = '';
+});
+
+if (FB_READY) {
+  fbAuth.onAuthStateChanged(user => {
+    if (user) enterApp();
+    else if (appEntered) location.reload();
+  });
+}
+
+function enterApp() {
+  if (appEntered) return;
+  appEntered = true;
+  window.LOTV_AUTHED = true;
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('menuBtn').style.display = 'flex';
+  // 오늘 날짜 자동 입력
+  const t = new Date();
+  document.getElementById('f_contractDate').value =
+    `${String(t.getFullYear()).slice(2)}년 ${pad2(t.getMonth()+1)}월 ${pad2(t.getDate())}일`;
+  startContractsListener();
+  const h = (location.hash || '').replace('#', '');
+  showView(VIEWS[h] ? h : 'write');
+}
+
+function logout() {
+  if (FB_READY) fbAuth.signOut();
+  else location.reload();
+}
+
+/* ─── 화면 전환 · 햄버거 ─── */
+const VIEWS = {
+  write:    '촬영 계약서 작성',
+  archive:  '계약서 보관함',
+  calendar: '예식 달력',
+  thanks:   'Thank you 카드'
+};
+let currentView = 'write';
+
+function showView(name) {
+  if (!VIEWS[name]) name = 'write';
+  currentView = name;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  document.querySelectorAll('.drawer-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  document.getElementById('appPageTitle').textContent = VIEWS[name];
+  if (history.replaceState) history.replaceState(null, '', name === 'write' ? location.pathname : '#' + name);
+  if (name === 'archive') renderArchive();
+  if (name === 'calendar') renderCalendar();
+  if (name === 'thanks') {
+    const fr = document.getElementById('thanksFrame');
+    if (!fr.getAttribute('src')) fr.setAttribute('src', 'thankyou.html?embed=1');
+  }
+  closeMenu();
+  window.scrollTo(0, 0);
+}
+
+function openMenu() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerDim').classList.add('open');
+}
+function closeMenu() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerDim').classList.remove('open');
+}
+
+// 땡큐카드 화면 높이 자동 맞춤
+setInterval(() => {
+  if (currentView !== 'thanks') return;
+  const fr = document.getElementById('thanksFrame');
+  try {
+    const h = fr.contentWindow.document.documentElement.scrollHeight;
+    if (h && Math.abs(fr.offsetHeight - h) > 4) fr.style.height = h + 'px';
+  } catch (e) {}
+}, 700);
+
+/* ─── 공용 도구 ─── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function askConfirm(opt) {
+  return new Promise(resolve => {
+    const box = document.getElementById('confirmBox');
+    const card = box.querySelector('.cf-card');
+    card.className = 'cf-card ' + (opt.tone || '');
+    box.querySelector('.cf-title').innerHTML = '⚠️ ' + escHtml(opt.title || '확인');
+    const msgEl = box.querySelector('.cf-msg');
+    msgEl.textContent = opt.msg || '';
+    if (opt.warn) {
+      const w = document.createElement('span');
+      w.className = 'warn';
+      w.textContent = opt.warn;
+      msgEl.appendChild(w);
+    }
+    box.querySelector('.ok').textContent = opt.ok || '확인';
+    box.querySelector('.cancel').textContent = opt.cancel || '취소';
+    box.classList.add('open');
+    const done = v => {
+      box.classList.remove('open');
+      box.querySelector('.ok').onclick = null;
+      box.querySelector('.cancel').onclick = null;
+      resolve(v);
+    };
+    box.querySelector('.ok').onclick = () => done(true);
+    box.querySelector('.cancel').onclick = () => done(false);
+  });
+}
+
+function codeOf(date) { return date ? date.slice(2).replace(/-/g, '') : '------'; }
+function dowOf(date) { return date ? DAY_KO[new Date(date + 'T00:00:00').getDay()] : ''; }
+function prettyDate(date) {
+  if (!date) return '날짜 미입력';
+  const [y, m, d] = date.split('-');
+  return `${y}.${m}.${d} (${dowOf(date)})`;
+}
+function todayStr() {
+  const t = new Date();
+  return `${t.getFullYear()}-${pad2(t.getMonth()+1)}-${pad2(t.getDate())}`;
+}
+const STATUS_TEXT = { pending: '미확정', done: '계약완', fail: '계약불' };
+
+/* ─── 데이터 ─── */
+let contracts = [];
+let contractsLoaded = false;
+
+function startContractsListener() {
+  if (!FB_READY) {
+    contractsLoaded = true;
+    renderArchive();
+    renderCalendar();
+    return;
+  }
+  db.collection('contracts').onSnapshot(snap => {
+    contracts = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    contracts.sort((a, b) => ((a.date || '9') + (a.time || '')).localeCompare((b.date || '9') + (b.time || '')));
+    contractsLoaded = true;
+    if (currentView === 'archive') renderArchive();
+    if (currentView === 'calendar') renderCalendar();
+    updateDupWarn();
+  }, err => {
+    console.error(err);
+    const n = document.getElementById('archiveNotice');
+    n.style.display = 'block';
+    n.textContent = '보관함을 불러오지 못했습니다. 보안 규칙 또는 로그인 상태를 확인해 주세요. (' + err.code + ')';
+  });
+}
+
+function doneOnDate(date, exceptId) {
+  if (!date) return [];
+  return contracts.filter(c => c.status === 'done' && c.date === date && c.id !== exceptId);
+}
+function dupLines(list) {
+  return list.map(c => `· ${c.time || '시간 미입력'}  ${c.name || ''}${c.venue ? '  ' + c.venue : ''}`).join('\n');
+}
+const DUP_MSG = '해당 날짜에 예식이 이미 존재합니다. 시간을 확인하여야 합니다.';
+
+/* 작성 화면: 날짜 고르면 바로 중복 확인 */
+let lastWarnedDate = '';
+function updateDupWarn(fromPicker) {
+  const el = document.getElementById('dupWarn');
+  if (!el) return;
+  const date = document.getElementById('f_date_picker').value;
+  const list = doneOnDate(date);
+  if (list.length) {
+    el.innerHTML = '';
+    el.appendChild(document.createTextNode(DUP_MSG));
+    list.forEach(c => {
+      const d = document.createElement('div');
+      d.textContent = `· ${c.time || '시간 미입력'}  ${c.name || ''}${c.venue ? '  ' + c.venue : ''}`;
+      el.appendChild(d);
+    });
+    el.classList.add('show');
+    if (fromPicker && lastWarnedDate !== date) {
+      lastWarnedDate = date;
+      askConfirm({ title: '예식 중복 확인', tone: 'red', msg: `${prettyDate(date)}\n\n${dupLines(list)}`, warn: DUP_MSG, ok: '확인했습니다', cancel: '닫기' });
+    }
+  } else {
+    el.classList.remove('show');
+    el.innerHTML = '';
+  }
+}
+document.getElementById('f_date_picker').addEventListener('change', () => updateDupWarn(true));
+
+/* ─── 이미지 압축 (데이터베이스 한 칸 1MB 제한 맞춤) ─── */
+function compressCanvas(srcCanvas, maxW) {
+  const w = Math.min(maxW || 1240, srcCanvas.width);
+  const h = Math.round(srcCanvas.height * w / srcCanvas.width);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(srcCanvas, 0, 0, w, h);
+  let q = 0.85, data = c.toDataURL('image/jpeg', q);
+  while (data.length > 880000 && q > 0.4) { q -= 0.08; data = c.toDataURL('image/jpeg', q); }
+  if (data.length > 880000) return compressCanvas(c, Math.round(w * 0.8));
+  return data;
+}
+function fileToCanvas(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      resolve(c);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function saveContractDoc(fields, imageData, existingId) {
+  const ts = firebase.firestore.FieldValue.serverTimestamp();
+  const ref = existingId ? db.collection('contracts').doc(existingId) : db.collection('contracts').doc();
+  const data = Object.assign({}, fields, { updatedAt: ts, hasImage: !!imageData || !!fields.hasImage });
+  if (!existingId) { data.createdAt = ts; if (!data.status) data.status = 'pending'; }
+  await ref.set(data, { merge: true });
+  if (imageData) await db.collection('contractImages').doc(ref.id).set({ data: imageData, updatedAt: ts });
+  return ref.id;
+}
+
+/* 계약서 이미지 다운로드할 때 보관함에 자동 저장 */
+async function saveFromForm(canvas) {
+  if (!FB_READY) return;
+  const g = id => document.getElementById(id).value.trim();
+  const productSel = g('f_product');
+  const fields = {
+    name: g('f_name'),
+    tel: g('f_tel'),
+    date: g('f_date_picker'),
+    time: g('f_time_picker'),
+    venue: g('f_venue'),
+    product: productSel === '직접입력' ? g('f_product_custom') : productSel,
+    price: g('f_price'),
+    contractDate: g('f_contractDate'),
+    source: 'form'
+  };
+  const same = contracts.find(c => c.name === fields.name && c.date === fields.date && c.status !== 'fail');
+  try {
+    const img = compressCanvas(canvas, 1240);
+    await saveContractDoc(fields, img, same ? same.id : null);
+    toast(same ? '보관함의 같은 계약서를 새 내용으로 바꿨습니다' : '보관함에 저장했습니다');
+  } catch (e) {
+    console.error(e);
+    alert('이미지는 저장됐지만 보관함 저장에 실패했습니다.\n' + (e.message || e));
+  }
+}
+
+/* ─── 보관함 화면 ─── */
+let archiveFilter = 'all';
+let showPast = false;
+const openMonths = new Set();
+const openItems = new Set();
+
+document.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => {
+  archiveFilter = b.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('on', x === b));
+  renderArchive();
+}));
+document.getElementById('archiveSearch').addEventListener('input', () => renderArchive());
+document.getElementById('pastToggle').addEventListener('click', function () {
+  showPast = !showPast;
+  this.classList.toggle('on', showPast);
+  this.textContent = showPast ? '지난 예식 숨기기' : '지난 예식 보기';
+  renderArchive();
+});
+
+function renderArchive() {
+  const box = document.getElementById('archiveList');
+  const notice = document.getElementById('archiveNotice');
+  if (!FB_READY) {
+    notice.style.display = 'block';
+    notice.textContent = '파이어베이스 설정 전이라 보관함을 쓸 수 없습니다. 설정값을 넣으면 바로 사용할 수 있어요.';
+    box.innerHTML = '';
+    document.getElementById('archiveCount').textContent = '';
+    return;
+  }
+  if (!contractsLoaded) return;
+
+  const q = compact(document.getElementById('archiveSearch').value);
+  const today = todayStr();
+  let list = contracts.filter(c => {
+    if (archiveFilter !== 'all' && (c.status || 'pending') !== archiveFilter) return false;
+    if (!showPast && c.date && c.date < today && !q) return false;
+    if (q && !compact((c.name || '') + (c.venue || '') + codeOf(c.date)).includes(q)) return false;
+    return true;
+  });
+
+  const cnt = { pending: 0, done: 0, fail: 0 };
+  contracts.forEach(c => cnt[c.status || 'pending']++);
+  document.getElementById('archiveCount').textContent =
+    `전체 ${contracts.length}건 · 계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}` +
+    (list.length !== contracts.length ? `  —  표시 ${list.length}건` : '');
+
+  if (!list.length) {
+    box.innerHTML = `<div class="empty-line">${contracts.length ? '조건에 맞는 계약서가 없습니다' : '아직 저장된 계약서가 없습니다'}</div>`;
+    return;
+  }
+
+  // 월별로 묶기
+  const groups = {};
+  list.forEach(c => {
+    const k = c.date ? c.date.slice(0, 7) : '미정';
+    (groups[k] = groups[k] || []).push(c);
+  });
+  const thisMonth = today.slice(0, 7);
+  let html = '';
+  Object.keys(groups).sort().forEach(k => {
+    const items = groups[k];
+    const label = k === '미정' ? '날짜 미입력' : `${k.slice(0, 4)}년 ${Number(k.slice(5))}월`;
+    if (!openMonths.has('_init_' + k)) {
+      openMonths.add('_init_' + k);
+      if (k === '미정' || k >= thisMonth) openMonths.add(k);
+    }
+    const isOpen = openMonths.has(k) || !!q;
+    html += `<div class="month-group${isOpen ? ' open' : ''}" data-month="${k}">
+      <button type="button" class="month-head" data-act="month">${label} <span class="cnt">${items.length}건</span><span class="arrow">▼</span></button>
+      <div class="month-body">${items.map(itemHtml).join('')}</div>
+    </div>`;
+  });
+  box.innerHTML = html;
+  // 펼쳐져 있던 항목 이미지 다시 그리기
+  box.querySelectorAll('.c-item.open').forEach(el => loadThumb(el.dataset.id));
+}
+
+function itemHtml(c) {
+  const st = c.status || 'pending';
+  const sub = [c.time, c.venue].filter(Boolean).join(' · ');
+  const open = openItems.has(c.id);
+  const f = (key, label, type, val) =>
+    `<div class="c-field"><label>${label}</label><input type="${type}" data-k="${key}" value="${escHtml(val != null ? val : (c[key] || ''))}"></div>`;
+  return `<div class="c-item is-${st}${open ? ' open' : ''}" data-id="${c.id}">
+    <div class="c-row">
+      <button type="button" class="c-title" data-act="toggle">
+        <span class="c-code">${codeOf(c.date)}</span>
+        <span class="c-name">${escHtml(c.name || '(이름 없음)')}</span>
+        <span class="c-sub">${escHtml(sub)}</span>
+      </button>
+      <div class="st-btns">
+        <button type="button" class="st-btn done${st === 'done' ? ' on' : ''}" data-act="done">계약완</button>
+        <button type="button" class="st-btn fail${st === 'fail' ? ' on' : ''}" data-act="fail">계약불</button>
+      </div>
+    </div>
+    <div class="c-detail">
+      <div class="c-thumb" data-act="view">${c.hasImage ? '불러오는 중…' : '이미지 없음'}</div>
+      <div class="c-fields">
+        ${f('name', '성함', 'text')}
+        ${f('date', '예식일', 'date')}
+        ${f('time', '시간', 'time')}
+        ${f('venue', '장소', 'text')}
+        ${f('product', '상품', 'text')}
+        ${f('price', '금액', 'text')}
+        ${f('tel', '연락처', 'text')}
+        ${f('contractDate', '작성일', 'text')}
+        <div class="c-actions">
+          <button type="button" class="primary" data-act="save">수정 저장</button>
+          <button type="button" data-act="replaceImg">이미지 교체</button>
+          <button type="button" class="danger" data-act="delete">삭제</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const thumbCache = {};
+async function loadThumb(id) {
+  const el = document.querySelector(`.c-item[data-id="${id}"] .c-thumb`);
+  const c = contracts.find(x => x.id === id);
+  if (!el || !c || !c.hasImage) return;
+  try {
+    if (!thumbCache[id]) {
+      const snap = await db.collection('contractImages').doc(id).get();
+      thumbCache[id] = snap.exists ? snap.data().data : '';
+    }
+    if (thumbCache[id]) el.innerHTML = `<img src="${thumbCache[id]}" alt="계약서">`;
+    else el.textContent = '이미지 없음';
+  } catch (e) {
+    el.textContent = '불러오기 실패';
+  }
+}
+
+document.getElementById('archiveList').addEventListener('click', async e => {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const act = btn.dataset.act;
+  if (act === 'month') {
+    const g = btn.closest('.month-group');
+    const k = g.dataset.month;
+    if (openMonths.has(k)) openMonths.delete(k); else openMonths.add(k);
+    g.classList.toggle('open');
+    return;
+  }
+  const item = btn.closest('.c-item');
+  if (!item) return;
+  const id = item.dataset.id;
+  const c = contracts.find(x => x.id === id);
+  if (!c) return;
+
+  if (act === 'toggle') {
+    if (openItems.has(id)) openItems.delete(id); else openItems.add(id);
+    item.classList.toggle('open');
+    if (item.classList.contains('open')) loadThumb(id);
+  } else if (act === 'done' || act === 'fail') {
+    changeStatus(c, act);
+  } else if (act === 'view') {
+    if (thumbCache[id]) openViewer(thumbCache[id], `${codeOf(c.date)} ${c.name || ''}.jpg`);
+  } else if (act === 'save') {
+    const data = {};
+    item.querySelectorAll('.c-field input').forEach(inp => data[inp.dataset.k] = inp.value.trim());
+    if (c.status === 'done' && data.date && data.date !== c.date) {
+      const dup = doneOnDate(data.date, c.id);
+      if (dup.length) {
+        const ok = await askConfirm({ title: '예식 중복 확인', tone: 'red', msg: `${prettyDate(data.date)}\n\n${dupLines(dup)}`, warn: DUP_MSG, ok: '그래도 저장', cancel: '취소' });
+        if (!ok) return;
+      }
+    }
+    try {
+      await db.collection('contracts').doc(id).set(Object.assign(data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }), { merge: true });
+      toast('수정했습니다');
+    } catch (err) { alert('저장 실패: ' + err.message); }
+  } else if (act === 'delete') {
+    const ok = await askConfirm({ title: '계약서 삭제', tone: 'red', msg: `${codeOf(c.date)} ${c.name || ''}\n\n보관함과 달력에서 완전히 지워지고 되돌릴 수 없습니다.`, ok: '삭제', cancel: '취소' });
+    if (!ok) return;
+    try {
+      await db.collection('contractImages').doc(id).delete();
+      await db.collection('contracts').doc(id).delete();
+      openItems.delete(id);
+      toast('삭제했습니다');
+    } catch (err) { alert('삭제 실패: ' + err.message); }
+  } else if (act === 'replaceImg') {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/*';
+    inp.onchange = async () => {
+      const file = inp.files[0];
+      if (!file) return;
+      try {
+        const cv = await fileToCanvas(file);
+        const img = compressCanvas(cv, 1240);
+        await saveContractDoc({ hasImage: true }, img, id);
+        thumbCache[id] = img;
+        loadThumb(id);
+        toast('이미지를 바꿨습니다');
+      } catch (err) { alert('이미지 교체 실패: ' + err.message); }
+    };
+    inp.click();
+  }
+});
+
+async function changeStatus(c, target) {
+  const cur = c.status || 'pending';
+  const next = cur === target ? 'pending' : target;
+  const head = `${prettyDate(c.date)} ${c.time || ''}\n${c.name || ''}${c.venue ? ' · ' + c.venue : ''}`;
+  let opt;
+  if (next === 'done') {
+    const dup = doneOnDate(c.date, c.id);
+    opt = {
+      title: '계약완으로 바꿀까요?', tone: 'green', ok: '계약완 처리',
+      msg: `${head}\n\n계약완으로 바꾸면 이 예식이 달력에 바로 표시됩니다.` + (dup.length ? `\n\n같은 날 이미 확정된 예식\n${dupLines(dup)}` : ''),
+      warn: dup.length ? DUP_MSG : ''
+    };
+  } else if (next === 'fail') {
+    opt = {
+      title: '계약불로 바꿀까요?', tone: 'red', ok: '계약불 처리',
+      msg: `${head}\n\n계약불로 바꾸면` + (cur === 'done' ? ' 달력에서 이 예식이 빠지고,' : '') + ' 계약이 성사되지 않은 건으로 표시됩니다.'
+    };
+  } else {
+    opt = {
+      title: '미확정으로 되돌릴까요?', tone: '', ok: '되돌리기',
+      msg: `${head}\n\n${STATUS_TEXT[cur]} 체크를 해제합니다.` + (cur === 'done' ? '\n달력에서 이 예식이 빠집니다.' : '')
+    };
+  }
+  const ok = await askConfirm(opt);
+  if (!ok) return;
+  try {
+    await db.collection('contracts').doc(c.id).set({
+      status: next,
+      statusAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    toast(next === 'done' ? '계약완 — 달력에 표시했습니다' : next === 'fail' ? '계약불로 표시했습니다' : '미확정으로 되돌렸습니다');
+  } catch (e) { alert('변경 실패: ' + e.message); }
+}
+
+/* 이미지 크게 보기 */
+function openViewer(src, name) {
+  const v = document.getElementById('imgViewer');
+  v.querySelector('img').src = src;
+  const a = v.querySelector('.iv-down');
+  a.href = src;
+  a.download = name || '계약서.jpg';
+  v.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeViewer() {
+  document.getElementById('imgViewer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ─── 계약서 사진 여러 장 추가 (파일명: 271102 송문찬.jpg) ─── */
+document.getElementById('bulkInput').addEventListener('change', async function () {
+  const files = Array.from(this.files || []);
+  this.value = '';
+  if (!files.length || !FB_READY) return;
+
+  // 함께 고른 .json 파일이 있으면 시간·장소 등을 같이 채움
+  let extra = {};
+  for (const f of files.filter(f => /\.json$/i.test(f.name))) {
+    try { Object.assign(extra, JSON.parse(await f.text())); } catch (e) { alert(f.name + ' 파일을 읽지 못했습니다.'); }
+  }
+  const imgs = files.filter(f => /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+  const parsed = [], bad = [];
+  imgs.forEach(f => {
+    const base = f.name.replace(/\.[^.]+$/, '').trim();
+    const m = base.match(/^(\d{2})(\d{2})(\d{2})\s*(.+)$/);
+    if (!m) { bad.push(f.name); return; }
+    parsed.push({ file: f, base, date: `20${m[1]}-${m[2]}-${m[3]}`, name: m[4].trim() });
+  });
+  if (!parsed.length) {
+    alert('파일 이름이 "271102 송문찬.jpg" 형식이어야 합니다.');
+    return;
+  }
+  const exists = parsed.filter(p => contracts.some(c => c.date === p.date && c.name === p.name));
+  const ok = await askConfirm({
+    title: '계약서 사진 추가',
+    msg: `${parsed.length}장을 보관함에 올립니다.` +
+      (exists.length ? `\n이미 있는 ${exists.length}건은 이미지만 새로 바꿉니다.` : '') +
+      (bad.length ? `\n\n이름 형식이 달라 건너뛰는 파일 ${bad.length}개:\n${bad.slice(0, 6).join('\n')}${bad.length > 6 ? '\n…' : ''}` : '') +
+      '\n\n새로 올리는 건은 미확정 상태로 들어갑니다.',
+    ok: '올리기'
+  });
+  if (!ok) return;
+
+  const overlay = document.getElementById('loadingOverlay');
+  const txt = overlay.querySelector('.loading-text');
+  overlay.classList.add('show');
+  let n = 0, fail = 0;
+  for (const p of parsed) {
+    n++;
+    txt.textContent = `계약서 올리는 중… ${n} / ${parsed.length}`;
+    try {
+      const cv = await fileToCanvas(p.file);
+      const img = compressCanvas(cv, 1240);
+      const ex = extra[p.base] || {};
+      const fields = Object.assign({ name: p.name, date: p.date, source: 'upload', fileName: p.file.name }, ex);
+      const same = contracts.find(c => c.date === p.date && c.name === p.name);
+      if (same) {
+        await saveContractDoc({ hasImage: true, fileName: p.file.name }, img, same.id);
+        delete thumbCache[same.id];
+      } else {
+        await saveContractDoc(fields, img, null);
+      }
+    } catch (e) {
+      console.error(p.file.name, e);
+      fail++;
+    }
+  }
+  overlay.classList.remove('show');
+  txt.textContent = '이미지 생성 중…';
+  alert(`완료: ${parsed.length - fail}장 올림` + (fail ? ` / 실패 ${fail}장` : ''));
+});
+
+/* ─── 달력 ─── */
+let calYear, calMonth, calSel = '';
+(function () { const t = new Date(); calYear = t.getFullYear(); calMonth = t.getMonth(); })();
+
+function calMove(d) {
+  calMonth += d;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+function calToday() {
+  const t = new Date();
+  calYear = t.getFullYear(); calMonth = t.getMonth(); calSel = todayStr();
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  document.getElementById('calTitle').textContent = `${calYear}. ${pad2(calMonth + 1)}`;
+  const byDate = {};
+  contracts.filter(c => c.status === 'done' && c.date).forEach(c => (byDate[c.date] = byDate[c.date] || []).push(c));
+
+  const first = new Date(calYear, calMonth, 1);
+  const start = new Date(calYear, calMonth, 1 - first.getDay());
+  const today = todayStr();
+  let html = ['일', '월', '화', '수', '목', '금', '토']
+    .map((d, i) => `<div class="cal-dow${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${d}</div>`).join('');
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    if (i === 35 && d.getMonth() !== calMonth) break;
+    const ds = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    const evs = byDate[ds] || [];
+    const cls = ['cal-cell'];
+    if (d.getMonth() !== calMonth) cls.push('other');
+    if (ds === today) cls.push('today');
+    if (ds === calSel) cls.push('sel');
+    if (d.getDay() === 0) cls.push('sun');
+    if (d.getDay() === 6) cls.push('sat');
+    if (evs.length > 1) cls.push('dup');
+    html += `<div class="${cls.join(' ')}" data-date="${ds}">
+      <span class="cal-num">${d.getDate()}</span>
+      ${evs.length > 1 ? `<span class="dup-badge">${evs.length}건</span>` : ''}
+      ${evs.map(c => `<span class="cal-ev" title="${escHtml((c.time || '') + ' ' + (c.name || '') + ' ' + (c.venue || ''))}">${escHtml(c.time || '')} ${escHtml(c.name || '')}</span>`).join('')}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  renderCalDay(byDate);
+}
+
+function renderCalDay(byDate) {
+  const box = document.getElementById('calDayList');
+  if (!FB_READY) { box.innerHTML = '<div class="empty-line">파이어베이스 설정 후 사용할 수 있습니다</div>'; return; }
+  if (!calSel) {
+    const n = Object.keys(byDate).filter(k => k.startsWith(`${calYear}-${pad2(calMonth + 1)}`)).reduce((s, k) => s + byDate[k].length, 0);
+    box.innerHTML = `<div class="cal-legend">이번 달 확정 예식 ${n}건 · 날짜를 누르면 자세히 볼 수 있습니다</div>`;
+    return;
+  }
+  const evs = byDate[calSel] || [];
+  let html = `<div class="cal-day-title">${prettyDate(calSel)}</div>`;
+  if (evs.length > 1) html += `<div class="dup-warn show">${DUP_MSG}</div>`;
+  html += evs.length
+    ? evs.map(c => `<div class="cal-day-ev"><span class="t">${escHtml(c.time || '--:--')}</span><span>${escHtml(c.name || '')}</span><span style="color:var(--ink-soft)">${escHtml(c.venue || '')}</span></div>`).join('')
+    : '<div class="cal-legend">확정된 예식이 없습니다</div>';
+  box.innerHTML = html;
+}
+
+document.getElementById('calGrid').addEventListener('click', e => {
+  const cell = e.target.closest('.cal-cell');
+  if (!cell) return;
+  calSel = cell.dataset.date;
+  const d = new Date(calSel + 'T00:00:00');
+  if (d.getMonth() !== calMonth) { calYear = d.getFullYear(); calMonth = d.getMonth(); }
+  renderCalendar();
+});
 </script>
 </body>
 </html>
