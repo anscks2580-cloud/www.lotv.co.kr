@@ -3162,6 +3162,12 @@ document.getElementById('bulkInput').addEventListener('change', async function (
     try { Object.assign(extra, JSON.parse(await f.text())); } catch (e) { alert(f.name + ' 파일을 읽지 못했습니다.'); }
   }
   const imgs = files.filter(f => /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+
+  // 등록용 파일만 고른 경우: 이미 올라간 계약서의 빈칸(연락처 등)만 채움
+  if (!imgs.length && Object.keys(extra).length) {
+    await applyExtraOnly(extra);
+    return;
+  }
   const parsed = [], bad = [];
   imgs.forEach(f => {
     const base = f.name.replace(/\.[^.]+$/, '').trim();
@@ -3198,7 +3204,7 @@ document.getElementById('bulkInput').addEventListener('change', async function (
       const fields = Object.assign({ name: p.name, date: p.date, source: 'upload', fileName: p.file.name }, ex);
       const same = contracts.find(c => c.date === p.date && c.name === p.name);
       if (same) {
-        await saveContractDoc({ hasImage: true, fileName: p.file.name }, img, same.id);
+        await saveContractDoc(Object.assign(fillEmpty(same, ex), { hasImage: true, fileName: p.file.name }), img, same.id);
         delete thumbCache[same.id];
       } else {
         await saveContractDoc(fields, img, null);
@@ -3212,6 +3218,43 @@ document.getElementById('bulkInput').addEventListener('change', async function (
   txt.textContent = '이미지 생성 중…';
   alert(`완료: ${parsed.length - fail}장 올림` + (fail ? ` / 실패 ${fail}장` : ''));
 });
+
+/* 기존 계약서에 비어 있는 칸만 골라냄 (이미 적힌 값은 건드리지 않음) */
+function fillEmpty(cur, ex) {
+  const out = {};
+  ['name', 'tel', 'date', 'time', 'venue', 'product', 'price', 'contractDate', 'memo'].forEach(k => {
+    if (ex[k] && !cur[k]) out[k] = ex[k];
+  });
+  return out;
+}
+
+async function applyExtraOnly(extra) {
+  const plan = [];
+  Object.keys(extra).forEach(key => {
+    const ex = extra[key];
+    const m = key.match(/^(\d{2})(\d{2})(\d{2})\s*(.+)$/);
+    const name = ex.name || (m ? m[4].trim() : '');
+    const dates = [ex.date, m ? `20${m[1]}-${m[2]}-${m[3]}` : ''].filter(Boolean);
+    const cur = contracts.find(c => c.name === name && dates.includes(c.date));
+    if (!cur) return;
+    const add = fillEmpty(cur, ex);
+    if (Object.keys(add).length) plan.push({ cur, add });
+  });
+  if (!plan.length) { alert('채울 빈칸이 없습니다.'); return; }
+  const ok = await askConfirm({
+    title: '빈칸 채우기',
+    msg: `${plan.length}건의 비어 있는 칸(연락처 등)을 채웁니다.\n이미 적혀 있는 내용은 바꾸지 않습니다.`,
+    ok: '채우기'
+  });
+  if (!ok) return;
+  let fail = 0;
+  for (const p of plan) {
+    try {
+      await db.collection('contracts').doc(p.cur.id).set(Object.assign(p.add, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }), { merge: true });
+    } catch (e) { console.error(e); fail++; }
+  }
+  alert(`완료: ${plan.length - fail}건 채움` + (fail ? ` / 실패 ${fail}건` : ''));
+}
 
 /* ─── 달력 ─── */
 let calYear, calMonth, calSel = '';
