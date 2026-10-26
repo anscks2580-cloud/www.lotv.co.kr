@@ -961,6 +961,8 @@ body {
 .st-btn.done { border-color: #2e8b57; color: #2e8b57; }
 .st-btn.fail { border-color: #c0392b; color: #c0392b; }
 .st-btn.done.on { background: #2e8b57; color: #fff; }
+.st-btn.del { border-color: var(--accent-light); color: var(--ink-soft); }
+.st-btn.del:hover { border-color: #1C1A17; color: #1C1A17; }
 .st-btn.fail.on { background: #c0392b; color: #fff; }
 .c-item.is-done .c-code { color: #2e8b57; }
 .c-item.is-fail .c-code, .c-item.is-fail .c-name { color: #c0392b; text-decoration: line-through; }
@@ -2993,6 +2995,7 @@ function itemHtml(c) {
       <div class="st-btns">
         <button type="button" class="st-btn done${st === 'done' ? ' on' : ''}" data-act="done">계약완</button>
         <button type="button" class="st-btn fail${st === 'fail' ? ' on' : ''}" data-act="fail">계약불</button>
+        <button type="button" class="st-btn del" data-act="delete">삭제</button>
       </div>
     </div>
     <div class="c-detail">
@@ -3073,7 +3076,11 @@ document.getElementById('archiveList').addEventListener('click', async e => {
       toast('수정했습니다');
     } catch (err) { alert('저장 실패: ' + err.message); }
   } else if (act === 'delete') {
-    const ok = await askConfirm({ title: '계약서 삭제', tone: 'red', msg: `${codeOf(c.date)} ${c.name || ''}\n\n보관함과 달력에서 완전히 지워지고 되돌릴 수 없습니다.`, ok: '삭제', cancel: '취소' });
+    const ok = await askConfirm({
+      title: '계약서를 삭제할까요?', tone: 'red', ok: '삭제', cancel: '취소',
+      msg: `${prettyDate(c.date)} ${c.time || ''}\n${c.name || ''}${c.venue ? ' · ' + c.venue : ''}\n현재 상태: ${STATUS_TEXT[c.status || 'pending']}`,
+      warn: '삭제하면 계약서 이미지와 정보가 보관함' + (c.status === 'done' ? '과 달력에서' : '에서') + ' 완전히 지워지며 되돌릴 수 없습니다.'
+    });
     if (!ok) return;
     try {
       await db.collection('contractImages').doc(id).delete();
