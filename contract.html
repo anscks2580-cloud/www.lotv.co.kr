@@ -1119,16 +1119,19 @@ body {
 .cal-ev {
   display: block;
   font-size: 10.5px;
-  line-height: 1.35;
-  padding: 2px 4px;
+  line-height: 1.4;
+  padding: 3px 4px;
   margin-bottom: 3px;
   background: rgba(46,139,87,0.12);
   border-left: 2px solid #2e8b57;
   color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
+.cal-ev .ev-t { font-family: 'Jost', sans-serif; font-weight: 400; color: #2e8b57; }
+.cal-ev .ev-v { color: var(--ink-soft); }
+.cal-ev .ev-n { font-weight: 400; }
+.cal-cell.dup .cal-ev .ev-t { color: #c0392b; }
 .cal-cell.dup .cal-ev { background: rgba(192,57,43,0.1); border-left-color: #c0392b; }
 .dup-badge {
   position: absolute;
@@ -1236,7 +1239,7 @@ body {
   .c-detail { flex-direction: column; }
   .c-thumb { width: 100%; max-width: 220px; }
   .cal-cell { min-height: 64px; padding: 4px 2px; }
-  .cal-ev { font-size: 9px; padding: 1px 2px; }
+  .cal-ev { font-size: 9px; padding: 2px; line-height: 1.3; }
   .menu-btn { top: 12px; right: 12px; }
 }
 </style>
@@ -3252,11 +3255,16 @@ function renderCalendar() {
     html += `<div class="${cls.join(' ')}" data-date="${ds}">
       <span class="cal-num">${d.getDate()}</span>
       ${evs.length > 1 ? `<span class="dup-badge">${evs.length}건</span>` : ''}
-      ${evs.map(c => `<span class="cal-ev" title="${escHtml((c.time || '') + ' ' + (c.name || '') + ' ' + (c.venue || ''))}">${escHtml(c.time || '')} ${escHtml(c.name || '')}</span>`).join('')}
+      ${evs.map(c => `<span class="cal-ev" title="${escHtml([c.time, c.venue, c.name].filter(Boolean).join(' '))}"><span class="ev-t">${escHtml(c.time || '')}</span> <span class="ev-v">${escHtml(shortVenue(c.venue))}</span> <span class="ev-n">${escHtml(c.name || '')}</span></span>`).join('')}
     </div>`;
   }
   grid.innerHTML = html;
   renderCalDay(byDate);
+}
+
+/* 달력 칸용 홀 이름: 주소(| 뒤)는 빼고 표시 */
+function shortVenue(v) {
+  return (v || '').split(/\s*[|ㅣ]\s*/)[0].trim();
 }
 
 function renderCalDay(byDate) {
@@ -3271,7 +3279,7 @@ function renderCalDay(byDate) {
   let html = `<div class="cal-day-title">${prettyDate(calSel)}</div>`;
   if (evs.length > 1) html += `<div class="dup-warn show">${DUP_MSG}</div>`;
   html += evs.length
-    ? evs.map(c => `<div class="cal-day-ev"><span class="t">${escHtml(c.time || '--:--')}</span><span>${escHtml(c.name || '')}</span><span style="color:var(--ink-soft)">${escHtml(c.venue || '')}</span></div>`).join('')
+    ? evs.map(c => `<div class="cal-day-ev"><span class="t">${escHtml(c.time || '--:--')}</span><span style="color:var(--ink-soft)">${escHtml(c.venue || '')}</span><span>${escHtml(c.name || '')}</span></div>`).join('')
     : '<div class="cal-legend">확정된 예식이 없습니다</div>';
   box.innerHTML = html;
 }
