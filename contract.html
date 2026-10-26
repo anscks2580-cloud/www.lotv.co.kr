@@ -961,6 +961,37 @@ body {
 .st-btn.done { border-color: #2e8b57; color: #2e8b57; }
 .st-btn.fail { border-color: #c0392b; color: #c0392b; }
 .st-btn.done.on { background: #2e8b57; color: #fff; }
+.rv-btns { display: flex; gap: 4px; flex-shrink: 0; margin-right: 4px; }
+.rv-btn {
+  border: 1px solid var(--accent-light);
+  background: transparent;
+  padding: 5px 8px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.rv-btn.yes.on { background: #2b5ea7; border-color: #2b5ea7; color: #fff; }
+.rv-btn.no.on { background: #8a8580; border-color: #8a8580; color: #fff; }
+.c-memo-mark { font-size: 10px; color: var(--accent); flex-shrink: 0; }
+.c-field textarea {
+  border: 0.5px solid var(--border);
+  background: transparent;
+  padding: 6px 8px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+}
+.c-field.memo { align-items: start; }
+.c-field.memo label { padding-top: 6px; }
+.month-head .sum { font-size: 11px; color: var(--ink-soft); font-weight: 300; }
 .st-btn.del { border-color: var(--accent-light); color: var(--ink-soft); }
 .st-btn.del:hover { border-color: #1C1A17; color: #1C1A17; }
 .st-btn.fail.on { background: #c0392b; color: #fff; }
@@ -1235,6 +1266,7 @@ body {
 
 @media (max-width: 680px) {
   .panel-wrap { padding: 24px 16px; }
+  .rv-btns { margin-right: auto; }
   .c-row { flex-wrap: wrap; }
   .c-title { flex-basis: 100%; flex-wrap: wrap; }
   .st-btns { margin-left: auto; }
@@ -2770,6 +2802,9 @@ function todayStr() {
   const t = new Date();
   return `${t.getFullYear()}-${pad2(t.getMonth()+1)}-${pad2(t.getDate())}`;
 }
+function priceNum(v) { const n = String(v || '').replace(/[^\d]/g, ''); return n ? Number(n) : 0; }
+function won(n) { return n.toLocaleString('ko-KR') + '원'; }
+function sumPrice(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + priceNum(c.price), 0); }
 const STATUS_TEXT = { pending: '미확정', done: '계약완', fail: '계약불' };
 
 /* ─── 데이터 ─── */
@@ -2944,9 +2979,10 @@ function renderArchive() {
 
   const cnt = { pending: 0, done: 0, fail: 0 };
   contracts.forEach(c => cnt[c.status || 'pending']++);
+  const rvYes = contracts.filter(c => c.review === 'yes').length;
   document.getElementById('archiveCount').textContent =
-    `전체 ${contracts.length}건 · 계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}` +
-    (list.length !== contracts.length ? `  —  표시 ${list.length}건` : '');
+    `전체 ${contracts.length}건 · 합계 ${won(sumPrice(contracts))} (계약불 제외)  |  계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}  |  리뷰 참 ${rvYes}` +
+    (list.length !== contracts.length ? `  —  표시 ${list.length}건 · ${won(sumPrice(list))}` : '');
 
   if (!list.length) {
     box.innerHTML = `<div class="empty-line">${contracts.length ? '조건에 맞는 계약서가 없습니다' : '아직 저장된 계약서가 없습니다'}</div>`;
@@ -2970,7 +3006,7 @@ function renderArchive() {
     }
     const isOpen = openMonths.has(k) || !!q;
     html += `<div class="month-group${isOpen ? ' open' : ''}" data-month="${k}">
-      <button type="button" class="month-head" data-act="month">${label} <span class="cnt">${items.length}건</span><span class="arrow">▼</span></button>
+      <button type="button" class="month-head" data-act="month">${label} <span class="cnt">${items.length}건</span><span class="sum">${won(sumPrice(items))}</span><span class="arrow">▼</span></button>
       <div class="month-body">${items.map(itemHtml).join('')}</div>
     </div>`;
   });
@@ -2992,6 +3028,11 @@ function itemHtml(c) {
         <span class="c-name">${escHtml(c.name || '(이름 없음)')}</span>
         <span class="c-sub">${escHtml(sub)}</span>
       </button>
+      ${c.memo ? '<span class="c-memo-mark" title="' + escHtml(c.memo) + '">메모</span>' : ''}
+      <div class="rv-btns">
+        <button type="button" class="rv-btn yes${c.review === 'yes' ? ' on' : ''}" data-act="rvyes">리뷰 참</button>
+        <button type="button" class="rv-btn no${c.review === 'no' ? ' on' : ''}" data-act="rvno">리뷰 불</button>
+      </div>
       <div class="st-btns">
         <button type="button" class="st-btn done${st === 'done' ? ' on' : ''}" data-act="done">계약완</button>
         <button type="button" class="st-btn fail${st === 'fail' ? ' on' : ''}" data-act="fail">계약불</button>
@@ -3009,6 +3050,7 @@ function itemHtml(c) {
         ${f('price', '금액', 'text')}
         ${f('tel', '연락처', 'text')}
         ${f('contractDate', '작성일', 'text')}
+        <div class="c-field memo"><label>메모</label><textarea data-k="memo" placeholder="간단한 메모">${escHtml(c.memo || '')}</textarea></div>
         <div class="c-actions">
           <button type="button" class="primary" data-act="save">수정 저장</button>
           <button type="button" data-act="replaceImg">이미지 교체</button>
@@ -3059,11 +3101,18 @@ document.getElementById('archiveList').addEventListener('click', async e => {
     if (item.classList.contains('open')) loadThumb(id);
   } else if (act === 'done' || act === 'fail') {
     changeStatus(c, act);
+  } else if (act === 'rvyes' || act === 'rvno') {
+    const v = act === 'rvyes' ? 'yes' : 'no';
+    const next = c.review === v ? '' : v;
+    try {
+      await db.collection('contracts').doc(id).set({ review: next }, { merge: true });
+      toast(next === 'yes' ? '리뷰 이벤트 참여로 표시했습니다' : next === 'no' ? '리뷰 이벤트 불참으로 표시했습니다' : '리뷰 표시를 해제했습니다');
+    } catch (err) { alert('저장 실패: ' + err.message); }
   } else if (act === 'view') {
     if (thumbCache[id]) openViewer(thumbCache[id], `${codeOf(c.date)} ${c.name || ''}.jpg`);
   } else if (act === 'save') {
     const data = {};
-    item.querySelectorAll('.c-field input').forEach(inp => data[inp.dataset.k] = inp.value.trim());
+    item.querySelectorAll('.c-field input, .c-field textarea').forEach(inp => data[inp.dataset.k] = inp.value.trim());
     if (c.status === 'done' && data.date && data.date !== c.date) {
       const dup = doneOnDate(data.date, c.id);
       if (dup.length) {
