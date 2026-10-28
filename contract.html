@@ -1276,6 +1276,75 @@ body {
   .cal-ev { font-size: 9px; padding: 2px; line-height: 1.3; }
   .menu-btn { top: 12px; right: 12px; }
 }
+/* 계약서 사진 올리기 전 확인 창 */
+#bulkReview {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  background: rgba(28,26,23,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#bulkReview.open { display: flex; }
+.br-card {
+  background: var(--warm-white);
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  padding: 26px 24px 20px;
+  border-top: 3px solid var(--ink);
+}
+.br-sub { font-size: 12px; line-height: 1.7; color: var(--ink-soft); }
+.br-sum { font-size: 12px; color: var(--accent); margin: 8px 0 12px; }
+.br-list { overflow-y: auto; flex: 1; border-top: 0.5px solid var(--border); }
+.br-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 4px;
+  border-bottom: 0.5px solid var(--border);
+}
+.br-row.off { opacity: 0.45; }
+.br-chk { padding-top: 4px; }
+.br-chk input { width: 16px; height: 16px; accent-color: var(--ink); }
+.br-thumb {
+  width: 74px;
+  flex: 0 0 74px;
+  border: 0.5px solid var(--border);
+  background: #fff;
+  cursor: zoom-in;
+}
+.br-noimg { height: 100px; display: flex; align-items: center; justify-content: center; color: #c0392b; cursor: default; }
+.br-body { flex: 1; min-width: 0; }
+.br-file { font-size: 11px; color: var(--accent); margin-bottom: 8px; word-break: break-all; }
+.br-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 8px; }
+.br-f { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.br-f span { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.05em; }
+.br-f input {
+  width: 100%;
+  min-width: 0;
+  border: 0.5px solid var(--accent-light);
+  background: #fff;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 7px;
+  font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+}
+.br-f input:focus { outline: none; border-color: var(--ink); }
+.br-state { font-size: 11.5px; margin-top: 8px; color: #2e8b57; }
+.br-row.dup .br-state { color: var(--accent); }
+.br-row.bad .br-state { color: #c0392b; }
+@media (max-width: 680px) {
+  .br-card { padding: 22px 14px 16px; }
+  .br-grid { grid-template-columns: repeat(2, 1fr); }
+  .br-thumb { width: 54px; flex-basis: 54px; }
+}
 </style>
 </head>
 <body>
@@ -1704,6 +1773,17 @@ body {
     <div class="cf-title"></div>
     <div class="cf-msg"></div>
     <div class="cf-btns"><button type="button" class="cancel">취소</button><button type="button" class="ok">확인</button></div>
+  </div>
+</div>
+
+<!-- ───── 계약서 사진 올리기 전 확인 ───── -->
+<div id="bulkReview">
+  <div class="br-card">
+    <div class="cf-title">계약서 사진 확인</div>
+    <div class="br-sub">계약서 안의 글자를 읽어서 채웠습니다. 틀린 곳은 고친 뒤 올려주세요. 사진을 누르면 크게 볼 수 있습니다.</div>
+    <div class="br-sum" id="brSum"></div>
+    <div class="br-list" id="brList"></div>
+    <div class="cf-btns"><button type="button" class="cancel">취소</button><button type="button" class="ok">올리기</button></div>
   </div>
 </div>
 
@@ -3220,7 +3300,217 @@ function closeViewer() {
   document.body.style.overflow = '';
 }
 
-/* ─── 계약서 사진 여러 장 추가 (파일명: 271102 송문찬.jpg) ─── */
+/* ─── 계약서 사진 여러 장 추가 ───
+   파일 이름은 상관없음. 계약서 안의 글자를 읽어서(글자 인식)
+   이름·예식일·시간·장소·연락처·상품·금액을 찾고, 올리기 전에 확인 창에서 고칠 수 있게 함.
+   파일 이름이 "271102 송문찬.jpg" 형식이면 그 날짜·이름을 우선 사용 */
+const OCR_SRC = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+let ocrMain = null, ocrKor = null, ocrFailed = false;
+
+function loadOcrScript() {
+  return new Promise((resolve, reject) => {
+    if (window.Tesseract) return resolve();
+    const s = document.createElement('script');
+    s.src = OCR_SRC;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('글자 인식 도구를 불러오지 못했습니다'));
+    document.head.appendChild(s);
+  });
+}
+async function getOcr() {
+  if (ocrFailed) return null;
+  try {
+    if (!ocrMain) {
+      await loadOcrScript();
+      ocrMain = await Tesseract.createWorker('kor+eng', 1);
+      ocrKor = await Tesseract.createWorker('kor', 1);
+      await ocrKor.setParameters({ tessedit_pageseg_mode: '7' }); // 한 줄 읽기
+    }
+    return { main: ocrMain, kor: ocrKor };
+  } catch (e) {
+    console.error(e);
+    ocrFailed = true;
+    return null;
+  }
+}
+
+/* 글자 인식용으로 크기 맞춤 (너무 작으면 키우고, 너무 크면 줄임) */
+function ocrCanvasOf(cv) {
+  const target = cv.width < 1600 ? 1800 : (cv.width > 2600 ? 2400 : cv.width);
+  if (target === cv.width) return cv;
+  const c = document.createElement('canvas');
+  c.width = target;
+  c.height = Math.round(cv.height * target / cv.width);
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff';
+  x.fillRect(0, 0, c.width, c.height);
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(cv, 0, 0, c.width, c.height);
+  return c;
+}
+function cropCanvas(cv, b, pad) {
+  const x0 = Math.max(0, b.x0 - pad), y0 = Math.max(0, b.y0 - pad);
+  const x1 = Math.min(cv.width, b.x1 + pad), y1 = Math.min(cv.height, b.y1 + pad);
+  const c = document.createElement('canvas');
+  c.width = x1 - x0; c.height = y1 - y0;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff';
+  x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(cv, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
+  return c;
+}
+
+const EMPTY_MARK = /^[\s—–\-_.·]*$/;
+function cleanVal(v) { v = (v || '').trim(); return EMPTY_MARK.test(v) ? '' : v; }
+function cleanName(v) {
+  v = cleanVal(v).replace(/[^가-힣a-zA-Z\s&,·]/g, ' ').replace(/\s+/g, ' ').trim();
+  // 한글 사이 띄어쓰기(송 문 찬)는 붙임
+  return v.replace(/([가-힣])\s+(?=[가-힣])/g, '$1');
+}
+function validIso(y, m, d) {
+  y = +y; m = +m; d = +d;
+  if (m < 1 || m > 12 || d < 1 || d > 31) return '';
+  const dt = new Date(y, m - 1, d);
+  if (dt.getMonth() !== m - 1) return '';
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+
+/* 계약서 글자 → 항목 */
+function parseContractText(lines) {
+  const r = { name: '', tel: '', date: '', time: '', venue: '', product: '', price: '', contractDate: '' };
+  const val = re => {
+    for (const l of lines) {
+      const m = l.match(re);
+      if (m) return l.slice(m.index + m[0].length).replace(/^[\s:：|]+/, '').trim();
+    }
+    return '';
+  };
+  const all = lines.join('\n');
+
+  r.name = cleanName(val(/^성\s*함/)) || cleanName(val(/성\s*명\s*[:：]/));
+
+  const tm = all.match(/01[016789]\s*[-.]?\s*\d{3,4}\s*[-.]?\s*\d{4}/);
+  if (tm) {
+    const d = tm[0].replace(/\D/g, '');
+    r.tel = d.length === 11 ? `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}` : `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  }
+
+  // 예식 일시: "2027.03.14 (일) 13:20"
+  const DRE = /(20\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})/;
+  let dl = val(/^일\s*시/);
+  let dm = dl.match(DRE);
+  if (!dm) {
+    const ln = lines.find(l => DRE.test(l) && !/년/.test(l));
+    if (ln) { dl = ln; dm = ln.match(DRE); }
+  }
+  if (dm) {
+    r.date = validIso(dm[1], dm[2], dm[3]);
+    const rest = dl.slice(dm.index + dm[0].length);
+    const t = rest.match(/(\d{1,2})\s*[:：.]\s*(\d{2})/);
+    if (t && +t[1] < 24 && +t[2] < 60) r.time = `${pad2(t[1])}:${t[2]}`;
+  }
+
+  r.venue = cleanVal(val(/^장\s*소/));
+
+  const pv = cleanVal(val(/^상\s*품\s*명/));
+  if (pv) {
+    const opts = Array.from(document.querySelectorAll('#f_product option'))
+      .map(o => o.value).filter(v => v && v !== '직접입력');
+    const c = compact(pv);
+    let hit = opts.find(o => compact(o) === c);
+    if (!hit) {
+      const has = w => c.includes(w);
+      if (has('digital')) hit = opts.find(o => /digital/i.test(o));
+      else if (has('polaroid') || has('memory')) hit = opts.find(o => /polaroid/i.test(o));
+      else if (has('signature') || has('snap')) {
+        hit = has('ricoh') ? opts.find(o => /ricoh/i.test(o))
+          : has('baby') ? opts.find(o => /signature.*baby/i.test(o))
+          : opts.find(o => o === 'LOTV Signature Snap');
+      }
+    }
+    r.product = hit || pv;
+  }
+
+  const pr = val(/금\s*액/).replace(/[oO]/g, '0').replace(/[^\d]/g, '');
+  if (pr) r.price = Number(pr).toLocaleString('ko-KR') + '원';
+
+  const cm = all.match(/(20\d{2})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if (cm && validIso(cm[1], cm[2], cm[3])) r.contractDate = `${cm[1].slice(2)}년 ${pad2(cm[2])}월 ${pad2(cm[3])}일`;
+
+  return r;
+}
+
+/* 장소: 보관함·학습 사전에 있는 이름과 비슷하면 그 표기로 맞춤 */
+function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
+function similar(a, b) {
+  const A = bigrams(a), B = bigrams(b);
+  if (!A.length || !B.length) return 0;
+  const pool = B.slice();
+  let hit = 0;
+  A.forEach(x => { const i = pool.indexOf(x); if (i >= 0) { hit++; pool.splice(i, 1); } });
+  return 2 * hit / (A.length + B.length);
+}
+function matchKnownVenue(v) {
+  if (!v) return v;
+  const known = new Set();
+  contracts.forEach(c => { if (c.venue) known.add(c.venue); });
+  Object.values(loadLearned()).forEach(x => x && known.add(x));
+  const c = compact(v);
+  let best = '', score = 0;
+  known.forEach(k => {
+    const s = similar(c, compact(k));
+    if (s > score) { score = s; best = k; }
+  });
+  return score >= 0.6 ? best : v;
+}
+
+/* 이미지 한 장 읽기 */
+async function readContract(cv) {
+  const ocr = await getOcr();
+  if (!ocr) return null;
+  const src = ocrCanvasOf(cv);
+  const { data } = await ocr.main.recognize(src);
+  const lines = (data.lines || []).map(l => ({ text: (l.text || '').trim(), words: l.words || [] })).filter(l => l.text);
+  const r = parseContractText(lines.map(l => l.text));
+
+  // 한글 칸(성함·장소)은 한글 전용으로 한 줄만 다시 읽어서 정확도 보완
+  async function reread(labelRe) {
+    const ln = lines.find(l => l.words.length > 1 && labelRe.test(compact(l.words[0].text)));
+    if (!ln) return '';
+    const vw = ln.words.slice(1);
+    const b = vw.reduce((a, w) => ({
+      x0: Math.min(a.x0, w.bbox.x0), y0: Math.min(a.y0, w.bbox.y0),
+      x1: Math.max(a.x1, w.bbox.x1), y1: Math.max(a.y1, w.bbox.y1)
+    }), { x0: 1e9, y0: 1e9, x1: 0, y1: 0 });
+    const res = await ocr.kor.recognize(cropCanvas(src, b, 14));
+    return (res.data.text || '').trim();
+  }
+  if (!/^[가-힣]{2,5}$/.test(r.name)) {
+    const k = cleanName(await reread(/^성함$/));
+    if (/^[가-힣]{2,6}$/.test(k)) r.name = k;
+  }
+  // 한글 장소에 영어 대문자 조각(AH, EH 등)이 섞여 읽히면 한글 전용 결과로 바꿈
+  if (/[가-힣]/.test(r.venue) && /(^|\s)[A-Z]{1,3}(\s|$)/.test(r.venue)) {
+    const k = cleanVal(await reread(/^장소$/));
+    if (k) r.venue = k;
+  }
+  r.venue = matchKnownVenue(r.venue);
+  return r;
+}
+
+/* 파일 이름에서 찾을 수 있는 정보 */
+function infoFromFileName(fn) {
+  const base = fn.replace(/\.[^.]+$/, '').trim();
+  let m = base.match(/^(\d{2})(\d{2})(\d{2})\s+(.+)$/) || base.match(/^(\d{2})(\d{2})(\d{2})([가-힣].*)$/);
+  if (m) {
+    const iso = validIso('20' + m[1], m[2], m[3]);
+    if (iso) return { date: iso, name: m[4].trim(), sure: true };
+  }
+  m = base.match(/^LOTV_계약서_([^_]+)(?:_(.+))?_\d{8}$/);
+  if (m) return { name: m[1].trim(), venue: (m[2] || '').trim() };
+  return {};
+}
+
 document.getElementById('bulkInput').addEventListener('change', async function () {
   const files = Array.from(this.files || []);
   this.value = '';
@@ -3231,53 +3521,67 @@ document.getElementById('bulkInput').addEventListener('change', async function (
   for (const f of files.filter(f => /\.json$/i.test(f.name))) {
     try { Object.assign(extra, JSON.parse(await f.text())); } catch (e) { alert(f.name + ' 파일을 읽지 못했습니다.'); }
   }
-  const imgs = files.filter(f => /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+  const imgs = files.filter(f => /\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(f.name) || /^image\//.test(f.type));
 
   // 등록용 파일만 고른 경우: 이미 올라간 계약서의 빈칸(연락처 등)만 채움
   if (!imgs.length && Object.keys(extra).length) {
     await applyExtraOnly(extra);
     return;
   }
-  const parsed = [], bad = [];
-  imgs.forEach(f => {
-    const base = f.name.replace(/\.[^.]+$/, '').trim();
-    const m = base.match(/^(\d{2})(\d{2})(\d{2})\s*(.+)$/);
-    if (!m) { bad.push(f.name); return; }
-    parsed.push({ file: f, base, date: `20${m[1]}-${m[2]}-${m[3]}`, name: m[4].trim() });
-  });
-  if (!parsed.length) {
-    alert('파일 이름이 "271102 송문찬.jpg" 형식이어야 합니다.');
-    return;
-  }
-  const exists = parsed.filter(p => contracts.some(c => c.date === p.date && c.name === p.name));
-  const ok = await askConfirm({
-    title: '계약서 사진 추가',
-    msg: `${parsed.length}장을 보관함에 올립니다.` +
-      (exists.length ? `\n이미 있는 ${exists.length}건은 이미지만 새로 바꿉니다.` : '') +
-      (bad.length ? `\n\n이름 형식이 달라 건너뛰는 파일 ${bad.length}개:\n${bad.slice(0, 6).join('\n')}${bad.length > 6 ? '\n…' : ''}` : '') +
-      '\n\n새로 올리는 건은 미확정 상태로 들어갑니다.',
-    ok: '올리기'
-  });
-  if (!ok) return;
+  if (!imgs.length) return;
 
   const overlay = document.getElementById('loadingOverlay');
   const txt = overlay.querySelector('.loading-text');
   overlay.classList.add('show');
-  let n = 0, fail = 0;
-  for (const p of parsed) {
+
+  const rows = [];
+  let n = 0;
+  for (const f of imgs) {
     n++;
-    txt.textContent = `계약서 올리는 중… ${n} / ${parsed.length}`;
+    const row = { file: f, base: f.name.replace(/\.[^.]+$/, '').trim(), img: '', err: '', v: {} };
+    rows.push(row);
     try {
-      const cv = await fileToCanvas(p.file);
-      const img = compressCanvas(cv, 1240);
-      const ex = extra[p.base] || {};
-      const fields = Object.assign({ name: p.name, date: p.date, source: 'upload', fileName: p.file.name }, ex);
-      const same = contracts.find(c => c.date === p.date && c.name === p.name);
+      txt.textContent = (!ocrMain && !ocrFailed) ? '글자 인식 준비 중… (처음 한 번만 조금 걸립니다)' : `계약서 읽는 중… ${n} / ${imgs.length}`;
+      const cv = await fileToCanvas(f);
+      row.img = compressCanvas(cv, 1240);
+      txt.textContent = `계약서 읽는 중… ${n} / ${imgs.length}`;
+      let read = null;
+      try { read = await readContract(cv); } catch (e) { console.error(f.name, e); }
+      const fromName = infoFromFileName(f.name);
+      const ex = extra[row.base] || {};
+      const v = Object.assign({}, read || {});
+      // 파일 이름 정보: "271102 송문찬" 형식은 우선, 그 외에는 빈칸만 채움
+      ['name', 'date', 'venue'].forEach(k => {
+        if (fromName[k] && (fromName.sure || !v[k] || k === 'name' || k === 'venue')) v[k] = fromName[k];
+      });
+      Object.keys(ex).forEach(k => { if (ex[k]) v[k] = ex[k]; });
+      row.v = v;
+      if (!read) row.err = ocrFailed ? '글자 인식 도구를 못 불러왔습니다 — 직접 입력해 주세요' : '글자를 읽지 못했습니다 — 직접 입력해 주세요';
+    } catch (e) {
+      console.error(f.name, e);
+      row.err = '사진을 열 수 없습니다 (아이폰 HEIC는 JPG로 바꿔서 올려주세요)';
+    }
+  }
+  overlay.classList.remove('show');
+  txt.textContent = '이미지 생성 중…';
+
+  const picked = await openBulkReview(rows);
+  if (!picked) return;
+
+  overlay.classList.add('show');
+  let done = 0, fail = 0;
+  for (const p of picked) {
+    done++;
+    txt.textContent = `계약서 올리는 중… ${done} / ${picked.length}`;
+    try {
+      const fields = { source: 'upload', fileName: p.file.name };
+      Object.keys(p.v).forEach(k => { if (p.v[k]) fields[k] = p.v[k]; });
+      const same = contracts.find(c => c.date === fields.date && c.name === fields.name);
       if (same) {
-        await saveContractDoc(Object.assign(fillEmpty(same, ex), { hasImage: true, fileName: p.file.name }), img, same.id);
+        await saveContractDoc(Object.assign(fillEmpty(same, fields), { hasImage: true, fileName: p.file.name }), p.img, same.id);
         delete thumbCache[same.id];
       } else {
-        await saveContractDoc(fields, img, null);
+        await saveContractDoc(fields, p.img, null);
       }
     } catch (e) {
       console.error(p.file.name, e);
@@ -3286,8 +3590,87 @@ document.getElementById('bulkInput').addEventListener('change', async function (
   }
   overlay.classList.remove('show');
   txt.textContent = '이미지 생성 중…';
-  alert(`완료: ${parsed.length - fail}장 올림` + (fail ? ` / 실패 ${fail}장` : ''));
+  alert(`완료: ${picked.length - fail}장 올림` + (fail ? ` / 실패 ${fail}장` : ''));
 });
+
+/* 올리기 전 확인 창 — 읽은 내용을 보여주고 고칠 수 있게 함 */
+const BR_FIELDS = [
+  ['name', '이름', 'text'], ['date', '예식일', 'date'], ['time', '시간', 'time'], ['venue', '장소', 'text'],
+  ['tel', '연락처', 'tel'], ['product', '상품', 'text'], ['price', '금액', 'text']
+];
+function openBulkReview(rows) {
+  return new Promise(resolve => {
+    const box = document.getElementById('bulkReview');
+    const list = document.getElementById('brList');
+    list.innerHTML = '';
+
+    rows.forEach((r, i) => {
+      const el = document.createElement('div');
+      el.className = 'br-row';
+      el.innerHTML =
+        `<label class="br-chk"><input type="checkbox" ${r.img ? 'checked' : 'disabled'}></label>` +
+        (r.img ? `<img class="br-thumb" src="${r.img}" alt="">` : '<div class="br-thumb br-noimg">✕</div>') +
+        `<div class="br-body">
+          <div class="br-file">${escHtml(r.file.name)}</div>
+          <div class="br-grid">${BR_FIELDS.map(([k, label, type]) =>
+            `<label class="br-f"><span>${label}</span><input type="${type}" data-k="${k}" value="${escHtml(r.v[k] || '')}" ${r.img ? '' : 'disabled'}></label>`).join('')}
+          </div>
+          <div class="br-state"></div>
+        </div>`;
+      list.appendChild(el);
+      r.el = el;
+      const thumb = el.querySelector('img.br-thumb');
+      if (thumb) thumb.addEventListener('click', () => openViewer(r.img, r.file.name));
+      const refresh = () => {
+        el.querySelectorAll('input[data-k]').forEach(inp => { r.v[inp.dataset.k] = inp.value.trim(); });
+        const st = el.querySelector('.br-state');
+        const on = el.querySelector('.br-chk input').checked;
+        el.classList.toggle('off', !on);
+        el.classList.remove('bad', 'dup');
+        if (!r.img) { st.textContent = r.err; el.classList.add('bad'); return; }
+        const miss = [!r.v.name && '이름', !r.v.date && '예식일'].filter(Boolean);
+        if (miss.length) {
+          st.textContent = (r.err ? r.err + ' · ' : '') + miss.join('·') + '을(를) 못 찾았습니다 — 직접 입력해 주세요';
+          el.classList.add('bad');
+        } else if (contracts.some(c => c.date === r.v.date && c.name === r.v.name)) {
+          st.textContent = '보관함에 이미 있는 계약서 — 이미지만 바꾸고 빈칸만 채웁니다';
+          el.classList.add('dup');
+        } else {
+          st.textContent = `${prettyDate(r.v.date)} ${r.v.time || ''} · 새로 올림 (미확정)`;
+        }
+      };
+      el.addEventListener('input', refresh);
+      el.addEventListener('change', refresh);
+      refresh();
+    });
+
+    const sum = document.getElementById('brSum');
+    const bad = rows.filter(r => r.el.classList.contains('bad')).length;
+    sum.textContent = `${rows.length}장 중 ${rows.length - bad}장 자동 인식` + (bad ? ` · ${bad}장은 직접 확인이 필요합니다` : '');
+
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const close = v => {
+      box.classList.remove('open');
+      document.body.style.overflow = '';
+      box.querySelector('.ok').onclick = null;
+      box.querySelector('.cancel').onclick = null;
+      resolve(v);
+    };
+    box.querySelector('.cancel').onclick = () => close(null);
+    box.querySelector('.ok').onclick = () => {
+      const on = rows.filter(r => r.img && r.el.querySelector('.br-chk input').checked);
+      if (!on.length) { alert('올릴 계약서를 하나 이상 체크해 주세요.'); return; }
+      const lack = on.filter(r => !r.v.name || !r.v.date);
+      if (lack.length) {
+        alert(`이름·예식일이 비어 있는 사진이 ${lack.length}장 있습니다.\n직접 입력하거나 체크를 해제해 주세요.\n\n${lack.map(r => r.file.name).slice(0, 6).join('\n')}`);
+        lack[0].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      close(on);
+    };
+  });
+}
 
 /* 기존 계약서에 비어 있는 칸만 골라냄 (이미 적힌 값은 건드리지 않음) */
 function fillEmpty(cur, ex) {
