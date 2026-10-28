@@ -681,6 +681,22 @@ body {
   vertical-align: middle;
 }
 
+/* 동의 문구 · 서명 표시 */
+.cp-agree-line {
+  text-align: center;
+  font-size: 11px;
+  color: #5A5650;
+  letter-spacing: 0.02em;
+  margin: -16px 0 18px;
+}
+.cp-sig-mark {
+  text-align: right;
+  font-size: 11px;
+  color: #1C1A17;
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+}
+
 /* PDF 생성 중 숨김 처리용 오버레이 */
 #loadingOverlay {
   display: none;
@@ -976,6 +992,17 @@ body {
 .rv-btn.yes.on { background: #2b5ea7; border-color: #2b5ea7; color: #fff; }
 .rv-btn.no.on { background: #8a8580; border-color: #8a8580; color: #fff; }
 .c-memo-mark { font-size: 10px; color: var(--accent); flex-shrink: 0; }
+/* 고객 동의 표시 */
+.sign-mark {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  border: 1px solid var(--accent-light);
+  color: var(--accent);
+}
+.sign-mark.ok { border-color: #2b5ea7; color: #2b5ea7; }
 .c-field textarea {
   border: 0.5px solid var(--border);
   background: transparent;
@@ -1237,6 +1264,36 @@ body {
 .cf-btns .ok { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 .cf-card.green .ok { background: #2e8b57; border-color: #2e8b57; }
 .cf-card.red .ok { background: #c0392b; border-color: #c0392b; }
+
+/* 고객 동의 링크 창 */
+#linkBox {
+  position: fixed;
+  inset: 0;
+  z-index: 1850;
+  background: rgba(28,26,23,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#linkBox.open { display: flex; }
+#linkBox .cf-card { max-width: 420px; }
+.lk-url {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--cream);
+  font-size: 12px;
+  line-height: 1.6;
+  word-break: break-all;
+  user-select: all;
+}
+.lk-msg {
+  margin-top: 10px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  white-space: pre-line;
+}
 
 /* 저장 알림 */
 #toast {
@@ -1715,7 +1772,10 @@ body {
       <button class="btn-preview" onclick="openPreview()">미리보기</button>
       <button class="btn-download" id="downloadBtn" onclick="downloadImage()">이미지 다운로드</button>
     </div>
-    <div style="font-size:11px; color:var(--accent); margin-top:10px; letter-spacing:0.04em;">이미지 다운로드 시 계약서 보관함에 자동 저장됩니다</div>
+    <div class="action-row" style="margin-top:12px;">
+      <button class="btn-download" id="linkBtn" onclick="createSignLink()" style="flex:1;">고객 동의 링크 만들기</button>
+    </div>
+    <div style="font-size:11px; color:var(--accent); margin-top:10px; letter-spacing:0.04em; line-height:1.8;">이미지 다운로드 시 계약서 보관함에 자동 저장됩니다<br>링크를 만들어 보내면 고객이 동의한 계약서가 보관함에 자동으로 들어옵니다</div>
 
   </div>
   </div><!-- /view-write -->
@@ -1731,6 +1791,8 @@ body {
         <button type="button" class="chip-btn" data-filter="pending">미확정</button>
         <button type="button" class="chip-btn" data-filter="done">계약완</button>
         <button type="button" class="chip-btn" data-filter="fail">계약불</button>
+        <button type="button" class="chip-btn" data-filter="signwait">동의 대기</button>
+        <button type="button" class="chip-btn" data-filter="signed">고객 동의</button>
         <input type="text" class="search-input" id="archiveSearch" placeholder="이름 · 홀 검색">
       </div>
       <div class="tool-row">
@@ -1773,6 +1835,21 @@ body {
     <div class="cf-title"></div>
     <div class="cf-msg"></div>
     <div class="cf-btns"><button type="button" class="cancel">취소</button><button type="button" class="ok">확인</button></div>
+  </div>
+</div>
+
+<!-- ───── 고객 동의 링크 ───── -->
+<div id="linkBox" onclick="if(event.target===this)closeLinkBox()">
+  <div class="cf-card green">
+    <div class="cf-title">고객 동의 링크</div>
+    <div class="cf-msg" id="lkHead"></div>
+    <div class="lk-url" id="lkUrl"></div>
+    <div class="lk-msg" id="lkMsg"></div>
+    <div class="cf-btns">
+      <button type="button" onclick="closeLinkBox()">닫기</button>
+      <button type="button" onclick="copyLinkOnly()">링크만 복사</button>
+      <button type="button" class="ok" onclick="copyLinkMsg()">안내 문구 복사</button>
+    </div>
   </div>
 </div>
 
@@ -1853,6 +1930,14 @@ body {
         <div class="cp-field-label">상품 금액</div>
         <div class="cp-field-value" id="cp_price"></div>
       </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">계약금 / 잔금</div>
+        <div class="cp-field-value" id="cp_pay"></div>
+      </div>
+      <div class="cp-field-row">
+        <div class="cp-field-label">입금 계좌</div>
+        <div class="cp-field-value" id="cp_account"></div>
+      </div>
     </div>
 
     <!-- 특약사항 -->
@@ -1860,6 +1945,9 @@ body {
       <div class="cp-special-label">특약사항</div>
       <div class="cp-special-content" id="cp_special"></div>
     </div>
+
+    <!-- 동의 문구 -->
+    <div class="cp-agree-line">위 계약 사항 및 LOTV SNAP 이용 규정을 확인하였으며 이에 동의합니다.</div>
 
     <!-- 날짜 -->
     <div class="cp-date-row" id="cp_contractDate"></div>
@@ -1876,7 +1964,7 @@ body {
         <div class="cp-sig-title">Client</div>
         <div class="cp-sig-line">성명 : <span id="cp_sig_name" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
         <div class="cp-sig-line" style="margin-top:8px;">연락처 : <span id="cp_sig_tel" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
-        <div style="text-align:right; font-size:11px; color:#1C1A17; margin-top:10px; letter-spacing:0.04em;">(인)</div>
+        <div class="cp-sig-mark">(인)</div>
       </div>
     </div>
 
@@ -2489,13 +2577,20 @@ function updateOptionField() {
   opt.value = combined;
 }
 
-const STANDARD_SPECIAL = `1. 계약금 100,000원은 예약 확정을 위한 보증금으로, 촬영 일정 확보 및 타 예약 조정을 위해 사용됩니다.
+/* 기본 특약 — 홈페이지 이용 규정(policy.html) 내용을 그대로 옮김 */
+const STANDARD_SPECIAL = `1. 계약은 계약금 10만 원 입금 후 확정되며, 잔금은 예식 7일 전 별도 안내합니다. 잔금 결제 이후 현금영수증 발행이 가능합니다.
 
-2. 계약 성립일로부터 7일 이내 취소 시 전액 환불되며, 이후 고객 사유로 취소하는 경우 계약 체결일 기준 LOTV SNAP 홈페이지 「POLICY」의 취소·환불 및 위약금 기준을 적용합니다.
+2. 계약금은 계약일로부터 7일이 지나면 환불되지 않으며, 잔금은 잔금 결제일로부터 7일이 지나면 환불되지 않습니다.
 
-3. 계약자는 계약 전 「POLICY」 링크를 제공받아 내용을 확인하고 이에 동의하며, 해당 「POLICY」를 본 계약의 일부로 합니다.
+3. LOTV SNAP의 일방적인 취소 또는 노쇼 발생 시 지불 금액의 2배를 보상하며, LOTV SNAP의 귀책으로 원본이 손상되거나 전달이 불가능한 경우 전액 환불합니다.
 
-4. 단, LOTV SNAP의 귀책으로 촬영이 취소되거나 원본 전달이 불가능한 경우 지급된 금액을 전액 환불하며, 촬영자의 일방적 일정 취소 또는 노쇼 시 별도 배상 기준을 적용합니다.`;
+4. 촬영본은 전달일 기준 14일 후 별도 안내 없이 삭제되며, 기간 내 다운로드하지 못해 발생하는 문제는 책임지지 않습니다.
+
+5. 메인 스냅 업체 측의 사전 동의는 필수이며, 사전 협의가 어려운 경우 촬영 진행이 불가합니다.
+
+6. 아이폰 촬영 특성상 약간의 노이즈, 흔들림, 빛 번짐 등이 발생할 수 있습니다. 단순 변심, 결과물에 대한 주관적인 만족도, 예식장 환경 및 현장 상황으로 인한 사항은 환불 및 보상 대상에 포함되지 않습니다.
+
+7. 촬영본의 저작권은 LOTV SNAP에 있으며, 얼굴 식별이 어렵거나 뒷모습 위주의 일부 사진은 포트폴리오 및 마케팅 용도로 사용될 수 있습니다.`;
 
 document.getElementById('f_product').addEventListener('change', function() {
   document.getElementById('productCustomWrap').style.display =
@@ -2545,26 +2640,60 @@ LOTV SNAP의 인스타그램, 블로그 및 기타 홍보 채널에
 });
 
 /* ─── 폼 → 계약서 DOM 채우기 ─── */
-function fillContract() {
-  const g = id => document.getElementById(id).value.trim();
+const BANK_ACCOUNT = '국민은행 756002-00-146621 (예금주 손승희)';
 
+/* 계약금 / 잔금 문구 (계약금 기준은 보관함과 같음) */
+function payTextOf(priceStr) {
+  if (!String(priceStr || '').trim()) return '';
+  const price = priceNum(priceStr);
+  if (!price) return '없음';
+  const dep = depositOf({ price: priceStr });
+  const bal = Math.max(price - dep, 0);
+  if (!bal) return `계약금 ${won(dep)} (전액)`;
+  return `계약금 ${won(dep)} / 잔금 ${won(bal)} (잔금은 예식 7일 전 안내)`;
+}
+
+/* 폼 → 계약서에 들어갈 글자들 (고객 동의 링크에도 그대로 넘어감) */
+function contractView() {
+  const g = id => document.getElementById(id).value.trim();
   const productSel = document.getElementById('f_product').value;
   const productVal = productSel === '직접입력'
     ? document.getElementById('f_product_custom').value.trim()
     : productSel;
+  const cd = g('f_contractDate');
+  return {
+    name: g('f_name'),
+    tel: g('f_tel'),
+    dateText: g('f_date'),
+    venue: g('f_venue'),
+    product: productVal,
+    option: g('f_option'),
+    price: g('f_price'),
+    pay: payTextOf(g('f_price')),
+    account: BANK_ACCOUNT,
+    special: g('f_special'),
+    contractDateText: cd ? `20${cd}` : ''
+  };
+}
+
+function fillContract() {
+  const v = contractView();
+  const set = (id, val) => { document.getElementById(id).textContent = val || '—'; };
 
   // 계약서 필드 채우기
-  document.getElementById('cp_name').textContent    = g('f_name')    || '—';
-  document.getElementById('cp_tel').textContent     = g('f_tel')     || '—';
-  document.getElementById('cp_date').textContent    = g('f_date')    || '—';
-  document.getElementById('cp_venue').textContent   = g('f_venue')   || '—';
-  document.getElementById('cp_product').textContent = productVal      || '—';
-  document.getElementById('cp_option').textContent  = g('f_option')  || '—';
+  set('cp_name', v.name);
+  set('cp_tel', v.tel);
+  set('cp_date', v.dateText);
+  set('cp_venue', v.venue);
+  set('cp_product', v.product);
+  set('cp_option', v.option);
+  set('cp_price', v.price);
+  set('cp_pay', v.pay);
+  set('cp_account', v.account);
 
-  document.getElementById('cp_price').textContent   = g('f_price')   || '—';
   const specEl = document.getElementById('cp_special');
   specEl.innerHTML = '';
-  (g('f_special') || '').split(/\n\s*\n/).forEach(function(par) {
+  (v.special || '').split(/\n\s*\n/).forEach(function(par) {
     const t = par.trim();
     if (!t) return;
     const d = document.createElement('div');
@@ -2574,13 +2703,11 @@ function fillContract() {
   });
 
   // 날짜
-  const cd = g('f_contractDate');
-  document.getElementById('cp_contractDate').textContent = cd
-    ? `20${cd}` : `20   년      월      일`;
+  document.getElementById('cp_contractDate').textContent = v.contractDateText || `20   년      월      일`;
 
   // 서명란
-  document.getElementById('cp_sig_name').textContent = g('f_name') || '';
-  document.getElementById('cp_sig_tel').textContent  = g('f_tel')  || '';
+  document.getElementById('cp_sig_name').textContent = v.name || '';
+  document.getElementById('cp_sig_tel').textContent  = v.tel  || '';
 }
 
 /* ─── 미리보기 모달 ─── */
@@ -2910,6 +3037,7 @@ function startContractsListener() {
     renderCalendar();
     return;
   }
+  startSignListener();
   db.collection('contracts').onSnapshot(snap => {
     contracts = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
     contracts.sort((a, b) => ((a.date || '9') + (a.time || '')).localeCompare((b.date || '9') + (b.time || '')));
@@ -3029,6 +3157,172 @@ async function saveFromForm(canvas) {
   }
 }
 
+/* ═══════════════════════════════════════════════
+   고객 동의 링크
+   1) 작성 화면에서 [고객 동의 링크 만들기] → 보관함에 '동의 대기'로 저장 + 링크 생성
+   2) 고객이 sign.html에서 동의·서명 → signRequests에 계약서 이미지와 함께 저장
+   3) 이 화면이 열려 있으면(또는 다음에 열 때) 자동으로 보관함에 옮김
+      → '고객 동의' 표시, 상태는 미확정 그대로 (계약금 확인 후 계약완을 직접 누름)
+   ═══════════════════════════════════════════════ */
+function makeToken() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const arr = new Uint32Array(32);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, n => chars[n % chars.length]).join('');
+}
+function signUrlOf(token) {
+  const base = /(^|\.)lotv\.co\.kr$/.test(location.hostname) ? location.origin : 'https://www.lotv.co.kr';
+  return `${base}/sign.html?k=${token}`;
+}
+function signMsgOf(name, url) {
+  return `[LOTV 촬영 계약서]\n${name ? name + '님, ' : ''}안녕하세요. LOTV SNAP입니다.\n아래 링크에서 계약 내용을 확인하신 뒤 동의 및 서명을 진행해 주세요.\n\n${url}\n\n계약은 계약금 입금 후 확정됩니다.\n${BANK_ACCOUNT}`;
+}
+
+let linkBoxData = { url: '', msg: '' };
+function openLinkBox(name, url, isNew) {
+  linkBoxData = { url, msg: signMsgOf(name, url) };
+  document.getElementById('lkHead').textContent = isNew
+    ? `${name}님 계약서가 보관함에 '동의 대기'로 저장됐습니다.\n아래 안내 문구를 복사해 카카오톡으로 보내 주세요.`
+    : `${name}님에게 보낸 동의 링크입니다.`;
+  document.getElementById('lkUrl').textContent = url;
+  document.getElementById('lkMsg').textContent = linkBoxData.msg;
+  document.getElementById('linkBox').classList.add('open');
+}
+function closeLinkBox() { document.getElementById('linkBox').classList.remove('open'); }
+async function copyText(t) {
+  try {
+    await navigator.clipboard.writeText(t);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+}
+async function copyLinkOnly() { await copyText(linkBoxData.url); toast('링크를 복사했습니다'); }
+async function copyLinkMsg() { await copyText(linkBoxData.msg); toast('안내 문구를 복사했습니다'); }
+
+async function createSignLink() {
+  if (!FB_READY) { alert('파이어베이스 설정 후 사용할 수 있습니다.'); return; }
+  const g = id => document.getElementById(id).value.trim();
+  if (!g('f_name')) { alert('성함을 입력해주세요.'); document.getElementById('f_name').focus(); return; }
+  if (!g('f_date_picker')) { alert('예식 날짜를 입력해주세요.'); return; }
+  if (!g('f_price')) { alert('상품 금액을 입력해주세요.'); document.getElementById('f_price').focus(); return; }
+
+  const dDate = g('f_date_picker');
+  const dDup = doneOnDate(dDate);
+  if (dDup.length) {
+    const go = await askConfirm({ title: '예식 중복 확인', tone: 'red', msg: `${prettyDate(dDate)}\n\n${dupLines(dDup)}`, warn: DUP_MSG, ok: '확인 후 계속', cancel: '취소' });
+    if (!go) return;
+  }
+
+  const v = contractView();
+  const productSel = g('f_product');
+  const fields = {
+    name: v.name,
+    tel: v.tel,
+    date: g('f_date_picker'),
+    time: g('f_time_picker'),
+    venue: v.venue,
+    product: productSel === '직접입력' ? g('f_product_custom') : productSel,
+    price: v.price,
+    contractDate: g('f_contractDate'),
+    source: 'link'
+  };
+  const same = contracts.find(c => c.name === fields.name && c.date === fields.date && c.status !== 'fail');
+
+  if (same && same.signState === 'agreed') {
+    const ok = await askConfirm({
+      title: '이미 고객 동의가 끝난 계약서입니다', tone: 'red', ok: '새 링크 만들기', cancel: '취소',
+      msg: `${prettyDate(same.date)} ${same.time || ''}\n${same.name || ''}${same.venue ? ' · ' + same.venue : ''}`,
+      warn: '새 링크를 만들면 고객에게 동의를 다시 받아야 하고, 새로 동의하면 보관함의 계약서 이미지가 바뀝니다.'
+    });
+    if (!ok) return;
+  }
+
+  const btn = document.getElementById('linkBtn');
+  btn.disabled = true;
+  try {
+    learnVenue();
+    const token = makeToken();
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const ref = same ? db.collection('contracts').doc(same.id) : db.collection('contracts').doc();
+    const data = Object.assign({}, fields, { signToken: token, signState: 'waiting', updatedAt: ts });
+    if (!same) { data.createdAt = ts; data.status = 'pending'; data.hasImage = false; }
+
+    // 예전에 보낸 링크(아직 동의 전)는 막음
+    if (same && same.signToken && same.signState === 'waiting') {
+      try { await db.collection('signRequests').doc(same.signToken).delete(); } catch (e) { console.warn(e); }
+    }
+
+    await db.collection('signRequests').doc(token).set({
+      contractId: ref.id,
+      view: v,
+      agreed: false,
+      createdAt: ts
+    });
+    await ref.set(data, { merge: true });
+
+    openLinkBox(v.name, signUrlOf(token), true);
+  } catch (e) {
+    console.error(e);
+    alert('링크 만들기에 실패했습니다.\n' + (e.message || e) + '\n\n파이어베이스 보안 규칙이 새로 올라갔는지 확인해 주세요.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* 고객이 동의한 계약서를 보관함으로 옮기기 */
+const syncing = new Set();
+function startSignListener() {
+  if (!FB_READY) return;
+  db.collection('signRequests').where('agreed', '==', true).onSnapshot(snap => {
+    snap.docs.forEach(d => {
+      const r = d.data();
+      if (r.synced || syncing.has(d.id)) return;
+      syncing.add(d.id);
+      syncSigned(d.id, r).finally(() => syncing.delete(d.id));
+    });
+  }, err => console.error('동의 확인 실패', err));
+}
+
+async function syncSigned(token, r) {
+  try {
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const ref = db.collection('contracts').doc(r.contractId || '_none_');
+    const snap = await ref.get();
+    // 보관함에서 지웠거나, 그 사이 새 링크로 바뀐 경우엔 옮기지 않음
+    if (!snap.exists || snap.data().signToken !== token) {
+      await db.collection('signRequests').doc(token).set({ synced: true, syncSkipped: true }, { merge: true });
+      return;
+    }
+    if (r.image) {
+      await db.collection('contractImages').doc(ref.id).set({ data: r.image, updatedAt: ts });
+      delete thumbCache[ref.id];
+    }
+    await ref.set({
+      signState: 'agreed',
+      agreedAt: r.agreedAt || ts,
+      agreeName: r.agreeName || '',
+      hasImage: !!r.image || !!snap.data().hasImage,
+      updatedAt: ts
+    }, { merge: true });
+    await db.collection('signRequests').doc(token).set({ synced: true }, { merge: true });
+    toast(`${r.agreeName || snap.data().name || '고객'}님 계약서 동의가 도착해 보관함에 저장했습니다`);
+  } catch (e) {
+    console.error('동의 계약서 옮기기 실패', e);
+  }
+}
+
+function agreedText(c) {
+  const t = c.agreedAt && c.agreedAt.toDate ? c.agreedAt.toDate() : null;
+  return t ? `고객 동의 ${pad2(t.getMonth() + 1)}.${pad2(t.getDate())}` : '고객 동의';
+}
+
 /* ─── 보관함 화면 ─── */
 let archiveFilter = 'all';
 let showPast = false;
@@ -3063,7 +3357,9 @@ function renderArchive() {
   const q = compact(document.getElementById('archiveSearch').value);
   const today = todayStr();
   let list = contracts.filter(c => {
-    if (archiveFilter !== 'all' && (c.status || 'pending') !== archiveFilter) return false;
+    if (archiveFilter === 'signwait') { if (c.signState !== 'waiting') return false; }
+    else if (archiveFilter === 'signed') { if (c.signState !== 'agreed') return false; }
+    else if (archiveFilter !== 'all' && (c.status || 'pending') !== archiveFilter) return false;
     if (!showPast && c.date && c.date < today && !q) return false;
     if (q && !compact((c.name || '') + (c.venue || '') + codeOf(c.date)).includes(q)) return false;
     return true;
@@ -3120,6 +3416,7 @@ function itemHtml(c) {
         <span class="c-name">${escHtml(c.name || '(이름 없음)')}</span>
         <span class="c-sub">${escHtml(sub)}</span>
       </button>
+      ${c.signState === 'waiting' ? '<span class="sign-mark">동의 대기</span>' : c.signState === 'agreed' ? '<span class="sign-mark ok">' + agreedText(c) + '</span>' : ''}
       ${c.memo ? '<span class="c-memo-mark" title="' + escHtml(c.memo) + '">메모</span>' : ''}
       <div class="rv-btns">
         <button type="button" class="rv-btn yes${c.review === 'yes' ? ' on' : ''}" data-act="rvyes">리뷰 참</button>
@@ -3147,6 +3444,7 @@ function itemHtml(c) {
         <div class="c-field memo"><label>메모</label><textarea data-k="memo" placeholder="간단한 메모">${escHtml(c.memo || '')}</textarea></div>
         <div class="c-actions">
           <button type="button" class="primary" data-act="save">수정 저장</button>
+          ${c.signToken && c.signState === 'waiting' ? '<button type="button" data-act="copyLink">동의 링크 보기</button>' : ''}
           <button type="button" data-act="replaceImg">이미지 교체</button>
           <button type="button" class="danger" data-act="delete">삭제</button>
         </div>
@@ -3226,11 +3524,14 @@ document.getElementById('archiveList').addEventListener('click', async e => {
     });
     if (!ok) return;
     try {
+      if (c.signToken) { try { await db.collection('signRequests').doc(c.signToken).delete(); } catch (e2) { console.warn(e2); } }
       await db.collection('contractImages').doc(id).delete();
       await db.collection('contracts').doc(id).delete();
       openItems.delete(id);
       toast('삭제했습니다');
     } catch (err) { alert('삭제 실패: ' + err.message); }
+  } else if (act === 'copyLink') {
+    openLinkBox(c.name || '', signUrlOf(c.signToken), false);
   } else if (act === 'replaceImg') {
     const inp = document.createElement('input');
     inp.type = 'file';

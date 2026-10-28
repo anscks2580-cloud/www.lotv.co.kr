@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTV l 촬영 계약서 확인</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #F2EFE8;
+  --cream-dark: #E8E3D8;
+  --ink: #1C1A17;
+  --ink-soft: #5A5650;
+  --warm-white: #FAF8F4;
+  --accent: #9B8E7A;
+  --accent-light: #C4B8A8;
+  --border: rgba(155,142,122,0.25);
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* 머리 */
+.head { text-align: center; padding: 48px 20px 28px; }
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; letter-spacing: 0.3em; padding-left: 0.3em; }
+.logo-sub { font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--accent); margin-top: 6px; }
+.head-line { width: 1px; height: 28px; background: var(--accent-light); margin: 22px auto; }
+.head-title { font-size: 15px; font-weight: 400; letter-spacing: 0.08em; }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 80px; }
+.intro { font-size: 13px; line-height: 1.9; color: var(--ink-soft); text-align: center; margin-bottom: 28px; word-break: keep-all; }
+.intro b { color: var(--ink); font-weight: 400; }
+
+/* 계약서 보기 */
+.paper-view { background: #fff; box-shadow: 0 2px 18px rgba(28,26,23,0.08); overflow: hidden; margin-bottom: 36px; }
+.paper-scale { transform-origin: top left; width: 595px; }
+
+/* 섹션 */
+.sec-label { font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.box { background: var(--warm-white); padding: 22px 20px; margin-bottom: 28px; }
+
+/* 동의 항목 */
+.chk { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 0.5px solid var(--border); cursor: pointer; }
+.chk:last-child { border-bottom: none; }
+.chk input { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ink); cursor: pointer; }
+.chk span { font-size: 12.5px; line-height: 1.8; color: var(--ink-soft); word-break: keep-all; }
+.chk span a { color: var(--ink); }
+.chk.all { padding-top: 0; }
+.chk.all span { color: var(--ink); font-weight: 400; font-size: 13.5px; }
+.chk .req { color: #b0533c; font-size: 11px; margin-right: 4px; }
+
+/* 성함 · 서명 */
+.field-label { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.04em; margin-bottom: 8px; display: block; }
+.text-input {
+  width: 100%;
+  border: none;
+  border-bottom: 0.5px solid var(--accent-light);
+  background: transparent;
+  padding: 10px 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  border-radius: 0;
+}
+.text-input:focus { border-bottom-color: var(--ink); }
+.hint { font-size: 11px; color: var(--accent); margin-top: 8px; line-height: 1.6; }
+.sig-wrap { position: relative; margin-top: 24px; }
+#sigPad { display: block; width: 100%; height: 180px; background: #fff; border: 0.5px solid var(--accent-light); touch-action: none; cursor: crosshair; }
+.sig-ph { position: absolute; left: 0; right: 0; top: 108px; text-align: center; font-size: 12px; color: var(--accent-light); pointer-events: none; letter-spacing: 0.1em; }
+.sig-tools { display: flex; justify-content: flex-end; margin-top: 8px; }
+.sig-tools button { border: none; background: none; font-size: 11px; color: var(--accent); text-decoration: underline; cursor: pointer; font-family: inherit; }
+
+.btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--ink);
+  border: none;
+  color: var(--cream);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13.5px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn:disabled { opacity: 0.35; cursor: default; }
+.btn.line { background: transparent; color: var(--ink); border: 0.5px solid var(--ink); margin-top: 10px; }
+.err { color: #b0533c; font-size: 12px; text-align: center; margin-top: 12px; min-height: 18px; line-height: 1.6; }
+
+/* 안내 화면 */
+.state { text-align: center; padding: 40px 10px; font-size: 13.5px; line-height: 2; color: var(--ink-soft); word-break: keep-all; }
+.state .big { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--ink); letter-spacing: 0.08em; margin-bottom: 10px; }
+.done-img { width: 100%; display: block; margin: 26px 0 14px; box-shadow: 0 2px 18px rgba(28,26,23,0.08); background: #fff; }
+
+.foot { text-align: center; font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.28em; color: var(--accent); padding: 0 20px 40px; text-transform: uppercase; }
+
+/* 저장 중 */
+#loading { display: none; position: fixed; inset: 0; background: rgba(242,239,232,0.93); z-index: 50; align-items: center; justify-content: center; flex-direction: column; gap: 12px; font-size: 12px; letter-spacing: 0.2em; color: var(--ink-soft); }
+#loading.show { display: flex; }
+
+/* ── 계약서 종이 (계약서 작성 페이지와 같은 모양) ── */
+#contractPaper, .paper-clone {
+  width: 595px;
+  min-height: 842px;
+  background: #ffffff;
+  padding: 60px 56px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  color: #1C1A17;
+  position: relative;
+}
+.cp-badge { position: absolute; top: 60px; right: 56px; background: #6B5B4E; color: #fff; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; padding: 5px 10px; }
+.cp-title { font-size: 22px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 36px; color: #1C1A17; }
+.cp-client-block { border-left: 3px solid #9B8E7A; padding-left: 16px; margin-bottom: 28px; }
+.cp-field-row { display: flex; align-items: baseline; padding: 9px 0; border-bottom: 0.5px solid #E0DBD3; }
+.cp-field-row:last-child { border-bottom: none; }
+.cp-field-label { width: 80px; flex-shrink: 0; font-size: 11px; font-weight: 400; color: #5A5650; letter-spacing: 0.03em; }
+.cp-field-value { font-size: 12px; font-weight: 300; color: #1C1A17; flex: 1; word-break: break-all; }
+.cp-event-block { border-left: 3px solid #6B5B4E; padding-left: 16px; margin-bottom: 28px; }
+.cp-special-block { border-left: 3px solid #9B8E7A; padding-left: 16px; margin-bottom: 40px; min-height: 80px; }
+.cp-special-label { font-size: 11px; font-weight: 400; color: #5A5650; margin-bottom: 10px; letter-spacing: 0.03em; }
+.cp-special-content { font-size: 12px; color: #1C1A17; line-height: 1.9; white-space: pre-wrap; word-break: break-all; }
+.cp-special-para { margin-bottom: 8px; }
+.cp-special-para:last-child { margin-bottom: 0; }
+.cp-agree-line { text-align: center; font-size: 11px; color: #5A5650; letter-spacing: 0.02em; margin: -16px 0 18px; }
+.cp-date-row { text-align: center; font-size: 13px; color: #1C1A17; letter-spacing: 0.12em; margin-bottom: 40px; }
+.cp-sig-row { display: flex; gap: 32px; }
+.cp-sig-box { flex: 1; border: 0.5px solid #E0DBD3; padding: 20px; }
+.cp-sig-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 16px; color: #1C1A17; }
+.cp-sig-line { font-size: 11px; color: #5A5650; line-height: 2.2; letter-spacing: 0.02em; }
+.cp-sig-line span { display: inline; color: #1C1A17; font-weight: 400; }
+.cp-sig-mark { text-align: right; font-size: 11px; color: #1C1A17; margin-top: 10px; letter-spacing: 0.04em; }
+.cp-sig-img { display: block; margin: 6px 0 0 auto; height: 52px; max-width: 100%; }
+.cp-esign { text-align: right; font-size: 9.5px; color: #9B8E7A; margin-top: 4px; letter-spacing: 0.02em; }
+.capture-area { position: fixed; left: -9999px; top: 0; z-index: -1; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="logo">LOTV</div>
+  <div class="logo-sub">Lily of the Valley Snap</div>
+  <div class="head-line"></div>
+  <div class="head-title">촬영 계약서 확인</div>
+</div>
+
+<div class="wrap" id="main">
+  <div class="state" id="stateBox">계약서를 불러오는 중입니다…</div>
+
+  <div id="signArea" style="display:none;">
+    <div class="intro" id="intro"></div>
+
+    <div class="paper-view" id="paperView"><div class="paper-scale" id="paperScale"></div></div>
+
+    <div class="sec-label">Agreement</div>
+    <div class="box" id="agreeBox"></div>
+
+    <div class="sec-label">Signature</div>
+    <div class="box">
+      <label class="field-label" for="agreeName">계약자 성함</label>
+      <input type="text" class="text-input" id="agreeName" autocomplete="name">
+      <div class="hint" id="nameHint"></div>
+
+      <div class="sig-wrap">
+        <label class="field-label">서명</label>
+        <canvas id="sigPad"></canvas>
+        <div class="sig-ph" id="sigPh">여기에 손가락으로 서명해 주세요</div>
+      </div>
+      <div class="sig-tools"><button type="button" onclick="clearSig()">서명 다시 하기</button></div>
+    </div>
+
+    <button type="button" class="btn" id="submitBtn" onclick="submitAgree()" disabled>동의하고 제출하기</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="doneArea" style="display:none;">
+    <div class="state">
+      <div class="big">Thank you</div>
+      <span id="doneMsg"></span>
+    </div>
+    <img class="done-img" id="doneImg" alt="동의한 계약서">
+    <button type="button" class="btn" onclick="saveImage()">계약서 이미지 저장</button>
+    <div class="hint" style="text-align:center; margin-top:12px;">저장이 안 되면 위 계약서 이미지를 길게 눌러 저장해 주세요.</div>
+  </div>
+</div>
+
+<div class="foot">LOTV Snap</div>
+
+<div id="loading">계약서를 저장하는 중입니다…</div>
+
+<!-- 이미지로 찍을 계약서 원본 (화면 밖) -->
+<div class="capture-area">
+  <div id="contractPaper">
+    <div class="cp-badge">Contract</div>
+    <div class="cp-title">LOTV 촬영 계약서</div>
+    <div class="cp-client-block">
+      <div class="cp-field-row"><div class="cp-field-label">성함</div><div class="cp-field-value" id="cp_name"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">연락처</div><div class="cp-field-value" id="cp_tel"></div></div>
+    </div>
+    <div class="cp-event-block">
+      <div class="cp-field-row"><div class="cp-field-label">일시</div><div class="cp-field-value" id="cp_date"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">장소</div><div class="cp-field-value" id="cp_venue"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">상품명</div><div class="cp-field-value" id="cp_product"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">내용</div><div class="cp-field-value" id="cp_option" style="white-space:pre-wrap;"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">상품 금액</div><div class="cp-field-value" id="cp_price"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">계약금 / 잔금</div><div class="cp-field-value" id="cp_pay"></div></div>
+      <div class="cp-field-row"><div class="cp-field-label">입금 계좌</div><div class="cp-field-value" id="cp_account"></div></div>
+    </div>
+    <div class="cp-special-block">
+      <div class="cp-special-label">특약사항</div>
+      <div class="cp-special-content" id="cp_special"></div>
+    </div>
+    <div class="cp-agree-line">위 계약 사항 및 LOTV SNAP 이용 규정을 확인하였으며 이에 동의합니다.</div>
+    <div class="cp-date-row" id="cp_contractDate"></div>
+    <div class="cp-sig-row">
+      <div class="cp-sig-box">
+        <div class="cp-sig-title">Photographer</div>
+        <div class="cp-sig-line">회사명 : <span>엘오티브이(LOTV)</span></div>
+        <div class="cp-sig-line">사업자등록번호 : <span>349-29-02113</span></div>
+        <div class="cp-sig-line">대표자 : <span>손승희</span></div>
+      </div>
+      <div class="cp-sig-box">
+        <div class="cp-sig-title">Client</div>
+        <div class="cp-sig-line">성명 : <span id="cp_sig_name" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
+        <div class="cp-sig-line" style="margin-top:8px;">연락처 : <span id="cp_sig_tel" style="min-width:140px; border-bottom:0.5px solid #ccc; display:inline-block;">&nbsp;</span></div>
+        <div id="cp_sig_area"><div class="cp-sig-mark">(인)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCP5wakGnA9ToM_NvYE9w2NCTVN3nNXzLc",
+  authDomain: "lotv-d8904.firebaseapp.com",
+  projectId: "lotv-d8904",
+  storageBucket: "lotv-d8904.firebasestorage.app",
+  messagingSenderId: "66688085295",
+  appId: "1:66688085295:web:6850ed5009deedc41585da"
+};
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
+
+const token = new URLSearchParams(location.search).get('k') || '';
+let req = null;        // 동의 요청 문서
+let sigDrawn = false;
+let doneImage = '';
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+function compact(s) { return (s || '').replace(/\s+/g, '').toLowerCase(); }
+function showState(html) {
+  document.getElementById('stateBox').innerHTML = html;
+  document.getElementById('stateBox').style.display = 'block';
+  document.getElementById('signArea').style.display = 'none';
+}
+
+/* ─── 계약서 종이 채우기 ─── */
+function fillPaper(v) {
+  const set = (id, val) => { document.getElementById(id).textContent = val || '—'; };
+  set('cp_name', v.name);
+  set('cp_tel', v.tel);
+  set('cp_date', v.dateText);
+  set('cp_venue', v.venue);
+  set('cp_product', v.product);
+  set('cp_option', v.option);
+  set('cp_price', v.price);
+  set('cp_pay', v.pay);
+  set('cp_account', v.account);
+  const specEl = document.getElementById('cp_special');
+  specEl.innerHTML = '';
+  specialParas(v.special).forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'cp-special-para';
+    d.textContent = t;
+    specEl.appendChild(d);
+  });
+  document.getElementById('cp_contractDate').textContent = v.contractDateText || '20   년      월      일';
+  document.getElementById('cp_sig_name').textContent = v.name || '';
+  document.getElementById('cp_sig_tel').textContent = v.tel || '';
+}
+function specialParas(text) {
+  return String(text || '').split(/\n\s*\n/).map(t => t.trim()).filter(Boolean);
+}
+
+/* 화면용 계약서: 화면 폭에 맞춰 줄여서 보여줌 */
+function renderPaperView() {
+  const paper = document.getElementById('contractPaper');
+  const scaleBox = document.getElementById('paperScale');
+  scaleBox.innerHTML = '';
+  const clone = paper.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.className = 'paper-clone';
+  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  scaleBox.appendChild(clone);
+  fitPaperView();
+}
+function fitPaperView() {
+  const view = document.getElementById('paperView');
+  const scaleBox = document.getElementById('paperScale');
+  const w = view.clientWidth;
+  const s = Math.min(1, w / 595);
+  scaleBox.style.transform = `scale(${s})`;
+  view.style.height = (scaleBox.firstChild ? scaleBox.firstChild.offsetHeight * s : 0) + 'px';
+}
+window.addEventListener('resize', fitPaperView);
+
+/* ─── 동의 항목 ─── */
+function buildAgreeList(v) {
+  const box = document.getElementById('agreeBox');
+  const items = specialParas(v.special).map(t => ({ text: t.replace(/^\d+\.\s*/, '') }));
+  items.push({ html: '<a href="policy.html" target="_blank" rel="noopener">LOTV SNAP 이용 규정</a>을 확인하였으며, 이를 본 계약의 일부로 하는 데 동의합니다.' });
+  items.push({ text: '계약 체결 및 이행·관리를 위해 성함과 연락처를 수집·이용하는 데 동의합니다.' });
+
+  let html = `<label class="chk all"><input type="checkbox" id="chkAll"><span>위 계약 내용과 아래 항목에 모두 동의합니다</span></label>`;
+  items.forEach((it, i) => {
+    const body = it.html ? it.html : escHtml(it.text);
+    html += `<label class="chk"><input type="checkbox" class="agree-item" data-i="${i}"><span><em class="req">필수</em>${body}</span></label>`;
+  });
+  box.innerHTML = html;
+  box.querySelectorAll('.chk a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
+
+  const all = document.getElementById('chkAll');
+  const list = Array.from(box.querySelectorAll('.agree-item'));
+  all.addEventListener('change', () => { list.forEach(c => c.checked = all.checked); checkReady(); });
+  list.forEach(c => c.addEventListener('change', () => { all.checked = list.every(x => x.checked); checkReady(); }));
+}
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function checkReady() {
+  const list = Array.from(document.querySelectorAll('.agree-item'));
+  const allChecked = list.length && list.every(c => c.checked);
+  const name = document.getElementById('agreeName').value.trim();
+  document.getElementById('submitBtn').disabled = !(allChecked && name && sigDrawn);
+}
+document.getElementById('agreeName').addEventListener('input', () => { document.getElementById('err').textContent = ''; checkReady(); });
+
+/* ─── 서명 ─── */
+const pad = document.getElementById('sigPad');
+const pctx = pad.getContext('2d');
+let drawing = false, last = null;
+function sizePad() {
+  const r = pad.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const keep = sigDrawn ? pad.toDataURL() : null;
+  pad.width = Math.round(r.width * dpr);
+  pad.height = Math.round(r.height * dpr);
+  pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  pctx.lineWidth = 2.4;
+  pctx.lineCap = 'round';
+  pctx.lineJoin = 'round';
+  pctx.strokeStyle = '#1C1A17';
+  if (keep) {
+    const img = new Image();
+    img.onload = () => pctx.drawImage(img, 0, 0, r.width, r.height);
+    img.src = keep;
+  }
+}
+function posOf(e) {
+  const r = pad.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+pad.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  drawing = true;
+  last = posOf(e);
+  pad.setPointerCapture(e.pointerId);
+  pctx.beginPath();
+  pctx.arc(last.x, last.y, 1.1, 0, Math.PI * 2);
+  pctx.fillStyle = '#1C1A17';
+  pctx.fill();
+});
+pad.addEventListener('pointermove', e => {
+  if (!drawing) return;
+  e.preventDefault();
+  const p = posOf(e);
+  pctx.beginPath();
+  pctx.moveTo(last.x, last.y);
+  pctx.lineTo(p.x, p.y);
+  pctx.stroke();
+  last = p;
+  if (!sigDrawn) {
+    sigDrawn = true;
+    document.getElementById('sigPh').style.display = 'none';
+    checkReady();
+  }
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => pad.addEventListener(t, () => { drawing = false; }));
+function clearSig() {
+  pctx.clearRect(0, 0, pad.width, pad.height);
+  sigDrawn = false;
+  document.getElementById('sigPh').style.display = 'block';
+  checkReady();
+}
+
+/* 서명 부분만 잘라서 이미지로 */
+function signatureImage() {
+  const w = pad.width, h = pad.height;
+  const data = pctx.getImageData(0, 0, w, h).data;
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y += 2) {
+    for (let x = 0; x < w; x += 2) {
+      if (data[(y * w + x) * 4 + 3] > 20) {
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return '';
+  const m = 12;
+  minX = Math.max(0, minX - m); minY = Math.max(0, minY - m);
+  maxX = Math.min(w, maxX + m); maxY = Math.min(h, maxY + m);
+  const c = document.createElement('canvas');
+  c.width = maxX - minX; c.height = maxY - minY;
+  c.getContext('2d').drawImage(pad, minX, minY, c.width, c.height, 0, 0, c.width, c.height);
+  return c.toDataURL('image/png');
+}
+
+/* ─── 이미지 압축 (데이터베이스 한 칸 1MB 제한) ─── */
+function compressCanvas(srcCanvas, maxW) {
+  const w = Math.min(maxW || 1240, srcCanvas.width);
+  const h = Math.round(srcCanvas.height * w / srcCanvas.width);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(srcCanvas, 0, 0, w, h);
+  let q = 0.85, data = c.toDataURL('image/jpeg', q);
+  while (data.length > 850000 && q > 0.4) { q -= 0.08; data = c.toDataURL('image/jpeg', q); }
+  if (data.length > 850000) return compressCanvas(c, Math.round(w * 0.8));
+  return data;
+}
+
+/* ─── 제출 ─── */
+async function submitAgree() {
+  const errEl = document.getElementById('err');
+  errEl.textContent = '';
+  const name = document.getElementById('agreeName').value.trim();
+  const v = req.view || {};
+  if (v.name && compact(v.name).indexOf(compact(name)) === -1 && compact(name).indexOf(compact(v.name)) === -1) {
+    errEl.textContent = `계약서에 적힌 성함(${v.name})과 다릅니다. 성함을 다시 확인해 주세요.`;
+    return;
+  }
+  const sig = signatureImage();
+  if (!sig) { errEl.textContent = '서명을 해 주세요.'; return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.add('show');
+
+  try {
+    // 서명 · 동의 일시를 계약서에 넣고 이미지로
+    const now = new Date();
+    const stamp = `${now.getFullYear()}.${pad2(now.getMonth() + 1)}.${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    document.getElementById('cp_sig_name').textContent = name;
+    const area = document.getElementById('cp_sig_area');
+    area.innerHTML = '';
+    const img = new Image();
+    img.className = 'cp-sig-img';
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = sig; });
+    area.appendChild(img);
+    const es = document.createElement('div');
+    es.className = 'cp-esign';
+    es.textContent = `전자 동의 ${stamp}`;
+    area.appendChild(es);
+
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await new Promise(r => setTimeout(r, 200));
+
+    const paper = document.getElementById('contractPaper');
+    const canvas = await html2canvas(paper, {
+      scale: 2.5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: 595,
+      windowWidth: 595
+    });
+    const image = compressCanvas(canvas, 1240);
+
+    const checks = Array.from(document.querySelectorAll('.agree-item')).map(c => c.closest('.chk').innerText.replace(/^필수\s*/, '').trim());
+
+    await db.collection('signRequests').doc(token).update({
+      agreed: true,
+      agreeName: name,
+      agreedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      agreedLocal: stamp,
+      checks: checks,
+      image: image
+    });
+
+    doneImage = image;
+    showDone(name);
+  } catch (e) {
+    console.error(e);
+    errEl.textContent = '제출하지 못했습니다. 잠시 후 다시 시도해 주세요. 계속 안 되면 LOTV 카카오톡으로 알려 주세요.';
+    // 서명란 원래대로
+    document.getElementById('cp_sig_area').innerHTML = '<div class="cp-sig-mark">(인)</div>';
+    document.getElementById('cp_sig_name').textContent = (req.view && req.view.name) || '';
+    checkReady();
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+function showDone(name) {
+  document.getElementById('stateBox').style.display = 'none';
+  document.getElementById('signArea').style.display = 'none';
+  document.getElementById('doneArea').style.display = 'block';
+  document.getElementById('doneMsg').innerHTML =
+    `${escHtml(name || '')}님, 계약서 동의가 완료되었습니다.<br>계약은 계약금 입금 후 확정되며, 확인되면 따로 안내드리겠습니다.`;
+  const im = document.getElementById('doneImg');
+  if (doneImage) { im.src = doneImage; im.style.display = 'block'; }
+  else im.style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function saveImage() {
+  if (!doneImage) return;
+  const v = (req && req.view) || {};
+  const a = document.createElement('a');
+  a.href = doneImage;
+  a.download = `LOTV_계약서_${(v.name || '').replace(/[\\/:*?"<>|]/g, '')}.jpg`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/* ─── 시작 ─── */
+async function init() {
+  if (!/^[A-Za-z0-9]{20,64}$/.test(token)) {
+    showState('링크가 올바르지 않습니다.<br>LOTV에서 받은 링크를 다시 확인해 주세요.');
+    return;
+  }
+  try {
+    const snap = await db.collection('signRequests').doc(token).get();
+    if (!snap.exists) {
+      showState('만료되었거나 더 이상 사용할 수 없는 링크입니다.<br>LOTV 카카오톡으로 문의해 주세요.');
+      return;
+    }
+    req = snap.data();
+    const v = req.view || {};
+    fillPaper(v);
+
+    if (req.agreed) {
+      doneImage = req.image || '';
+      showDone(req.agreeName || v.name);
+      return;
+    }
+
+    document.getElementById('stateBox').style.display = 'none';
+    document.getElementById('signArea').style.display = 'block';
+    document.getElementById('intro').innerHTML =
+      `<b>${escHtml(v.name || '')}</b>님, 안녕하세요.<br>아래 계약 내용을 확인하신 뒤 각 항목에 동의하고 서명해 주세요.`;
+    document.getElementById('nameHint').textContent = v.name ? `계약서에 적힌 성함: ${v.name}` : '';
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    renderPaperView();
+    buildAgreeList(v);
+    sizePad();
+    window.addEventListener('resize', sizePad);
+  } catch (e) {
+    console.error(e);
+    showState('계약서를 불러오지 못했습니다.<br>잠시 후 다시 열어 주세요.');
+  }
+}
+init();
+</script>
+</body>
+</html>
