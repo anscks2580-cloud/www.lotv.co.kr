@@ -955,7 +955,23 @@ body {
   font-size: 14px;
   letter-spacing: 0.04em;
 }
-.c-name { font-size: 14px; font-weight: 400; }
+.c-name { font-size: 14px; font-weight: 400; white-space: nowrap; flex-shrink: 0; }
+.c-code { white-space: nowrap; flex-shrink: 0; }
+#view-archive .panel-wrap { max-width: 1120px; }
+/* 잔금 받음 체크 */
+.pay-btn {
+  border: 1px solid #b07d2b;
+  background: transparent;
+  color: #b07d2b;
+  padding: 5px 9px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pay-btn.on { background: #b07d2b; color: #fff; }
 .c-sub {
   font-size: 11px;
   color: var(--ink-soft);
@@ -1793,6 +1809,7 @@ body {
         <button type="button" class="chip-btn" data-filter="fail">계약불</button>
         <button type="button" class="chip-btn" data-filter="signwait">동의 대기</button>
         <button type="button" class="chip-btn" data-filter="signed">고객 동의</button>
+        <button type="button" class="chip-btn" data-filter="unpaid">잔금 미수</button>
         <input type="text" class="search-input" id="archiveSearch" placeholder="이름 · 홀 검색">
       </div>
       <div class="tool-row">
@@ -2578,7 +2595,7 @@ function updateOptionField() {
 }
 
 /* 기본 특약 — 홈페이지 이용 규정(policy.html) 내용을 그대로 옮김 */
-const STANDARD_SPECIAL = `1. 계약은 계약금 10만 원 입금 후 확정되며, 잔금은 예식 7일 전 별도 안내합니다. 잔금 결제 이후 현금영수증 발행이 가능합니다.
+const STANDARD_SPECIAL = `1. 계약은 계약금 10만 원 입금 후 확정되며, 잔금은 예식 1주 전 금요일에 별도 안내합니다. 잔금 결제 이후 현금영수증 발행이 가능합니다.
 
 2. 계약금은 계약일로부터 7일이 지나면 환불되지 않으며, 잔금은 잔금 결제일로부터 7일이 지나면 환불되지 않습니다.
 
@@ -2650,7 +2667,7 @@ function payTextOf(priceStr) {
   const dep = depositOf({ price: priceStr });
   const bal = Math.max(price - dep, 0);
   if (!bal) return `계약금 ${won(dep)} (전액)`;
-  return `계약금 ${won(dep)} / 잔금 ${won(bal)} (잔금은 예식 7일 전 안내)`;
+  return `계약금 ${won(dep)} / 잔금 ${won(bal)} (잔금은 예식 1주 전 금요일 안내)`;
 }
 
 /* 폼 → 계약서에 들어갈 글자들 (고객 동의 링크에도 그대로 넘어감) */
@@ -3023,6 +3040,8 @@ function depositOf(c) {
 function balanceOf(c) { return Math.max(priceNum(c.price) - depositOf(c), 0); }
 function sumDeposit(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + depositOf(c), 0); }
 function sumBalance(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + balanceOf(c), 0); }
+/* 잔금 미수: 계약불이 아니고 잔금이 남았는데 받음 체크가 안 된 건 */
+function isUnpaid(c) { return c.status !== 'fail' && balanceOf(c) > 0 && !c.balancePaid; }
 function moneyLine(list) { return `합계 ${won(sumPrice(list))} · 계약금 ${won(sumDeposit(list))} · 잔금 ${won(sumBalance(list))}`; }
 const STATUS_TEXT = { pending: '미확정', done: '계약완', fail: '계약불' };
 
@@ -3359,6 +3378,7 @@ function renderArchive() {
   let list = contracts.filter(c => {
     if (archiveFilter === 'signwait') { if (c.signState !== 'waiting') return false; }
     else if (archiveFilter === 'signed') { if (c.signState !== 'agreed') return false; }
+    else if (archiveFilter === 'unpaid') { if (!isUnpaid(c)) return false; }
     else if (archiveFilter !== 'all' && (c.status || 'pending') !== archiveFilter) return false;
     if (!showPast && c.date && c.date < today && !q) return false;
     if (q && !compact((c.name || '') + (c.venue || '') + codeOf(c.date)).includes(q)) return false;
@@ -3368,8 +3388,10 @@ function renderArchive() {
   const cnt = { pending: 0, done: 0, fail: 0 };
   contracts.forEach(c => cnt[c.status || 'pending']++);
   const rvYes = contracts.filter(c => c.review === 'yes').length;
+  const unpaid = contracts.filter(isUnpaid);
+  const unpaidSum = unpaid.reduce((s, c) => s + balanceOf(c), 0);
   document.getElementById('archiveCount').textContent =
-    `전체 ${contracts.length}건 · ${moneyLine(contracts)} (계약불 제외)  |  계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}  |  리뷰 참 ${rvYes}` +
+    `전체 ${contracts.length}건 · ${moneyLine(contracts)} (계약불 제외)  |  계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}  |  잔금 미수 ${unpaid.length}건 ${won(unpaidSum)}  |  리뷰 참 ${rvYes}` +
     (list.length !== contracts.length ? `  —  표시 ${list.length}건 · ${moneyLine(list)}` : '');
 
   if (!list.length) {
@@ -3418,6 +3440,7 @@ function itemHtml(c) {
       </button>
       ${c.signState === 'waiting' ? '<span class="sign-mark">동의 대기</span>' : c.signState === 'agreed' ? '<span class="sign-mark ok">' + agreedText(c) + '</span>' : ''}
       ${c.memo ? '<span class="c-memo-mark" title="' + escHtml(c.memo) + '">메모</span>' : ''}
+      ${balanceOf(c) > 0 ? `<button type="button" class="pay-btn${c.balancePaid ? ' on' : ''}" data-act="paid">${c.balancePaid ? '잔금 받음' : '잔금 미수'}</button>` : ''}
       <div class="rv-btns">
         <button type="button" class="rv-btn yes${c.review === 'yes' ? ' on' : ''}" data-act="rvyes">리뷰 참</button>
         <button type="button" class="rv-btn no${c.review === 'no' ? ' on' : ''}" data-act="rvno">리뷰 불</button>
@@ -3438,7 +3461,7 @@ function itemHtml(c) {
         ${f('product', '상품', 'text')}
         ${f('price', '금액', 'text')}
         <div class="c-field"><label>계약금</label><input type="text" data-k="deposit" value="${escHtml(c.deposit != null && String(c.deposit) !== '' ? c.deposit : '')}" placeholder="${escHtml(won(depositOf(c)))} (기준 자동)"></div>
-        <div class="c-field"><label>잔금</label><input type="text" value="${escHtml(won(balanceOf(c)))}" disabled style="color:var(--ink-soft)"></div>
+        <div class="c-field"><label>잔금</label><input type="text" value="${escHtml(won(balanceOf(c)) + (balanceOf(c) > 0 ? (c.balancePaid ? ' (받음)' : ' (미수)') : ''))}" disabled style="color:var(--ink-soft)"></div>
         ${f('tel', '연락처', 'text')}
         ${f('contractDate', '작성일', 'text')}
         <div class="c-field memo"><label>메모</label><textarea data-k="memo" placeholder="간단한 메모">${escHtml(c.memo || '')}</textarea></div>
@@ -3530,6 +3553,22 @@ document.getElementById('archiveList').addEventListener('click', async e => {
       openItems.delete(id);
       toast('삭제했습니다');
     } catch (err) { alert('삭제 실패: ' + err.message); }
+  } else if (act === 'paid') {
+    const next = !c.balancePaid;
+    const ok = await askConfirm({
+      title: next ? '잔금 받음으로 바꿀까요?' : '잔금 미수로 되돌릴까요?',
+      tone: next ? 'green' : '',
+      ok: next ? '잔금 받음' : '되돌리기',
+      msg: `${prettyDate(c.date)} ${c.time || ''}\n${c.name || ''}${c.venue ? ' · ' + c.venue : ''}\n잔금 ${won(balanceOf(c))}`
+    });
+    if (!ok) return;
+    try {
+      await db.collection('contracts').doc(id).set({
+        balancePaid: next,
+        balancePaidAt: next ? firebase.firestore.FieldValue.serverTimestamp() : null
+      }, { merge: true });
+      toast(next ? '잔금 받음으로 표시했습니다' : '잔금 미수로 되돌렸습니다');
+    } catch (err) { alert('저장 실패: ' + err.message); }
   } else if (act === 'copyLink') {
     openLinkBox(c.name || '', signUrlOf(c.signToken), false);
   } else if (act === 'replaceImg') {
