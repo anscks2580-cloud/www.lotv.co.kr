@@ -958,6 +958,20 @@ body {
 .c-name { font-size: 14px; font-weight: 400; white-space: nowrap; flex-shrink: 0; }
 .c-code { white-space: nowrap; flex-shrink: 0; }
 #view-archive .panel-wrap { max-width: 1120px; }
+/* 잔금 안내 알림 */
+.pay-alert {
+  border: 0.5px solid #b07d2b;
+  background: #fbf5ea;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.pay-alert .pa-title { font-weight: 400; color: #8a5f1c; margin-bottom: 4px; }
+.pay-alert .pa-sub { color: var(--ink-soft); font-size: 11.5px; margin-top: 8px; }
+.pay-alert .pa-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drawer-item .pa-cnt { margin-left: 8px; font-size: 11px; color: #fff; background: #b07d2b; border-radius: 10px; padding: 1px 7px; }
 /* 잔금 받음 체크 */
 .pay-btn {
   border: 1px solid #b07d2b;
@@ -1453,7 +1467,7 @@ body {
     <button type="button" class="drawer-close" onclick="closeMenu()" aria-label="메뉴 닫기">✕</button>
   </div>
   <button type="button" class="drawer-item" data-view="write" onclick="showView('write')"><span class="num">01</span>계약서 작성</button>
-  <button type="button" class="drawer-item" data-view="archive" onclick="showView('archive')"><span class="num">02</span>계약서 보관함</button>
+  <button type="button" class="drawer-item" data-view="archive" onclick="showView('archive')"><span class="num">02</span>계약서 보관함<span class="pa-cnt" id="payCnt" style="display:none;"></span></button>
   <button type="button" class="drawer-item" data-view="calendar" onclick="showView('calendar')"><span class="num">03</span>예식 달력</button>
   <button type="button" class="drawer-item" data-view="thanks" onclick="showView('thanks')"><span class="num">04</span>Thank you 카드</button>
   <div class="drawer-foot">
@@ -1801,6 +1815,7 @@ body {
     <div class="panel-wrap">
       <div class="form-section-label">Contracts</div>
       <div class="notice-box" id="archiveNotice" style="display:none;"></div>
+      <div class="pay-alert" id="payAlert" style="display:none;"></div>
 
       <div class="tool-row">
         <button type="button" class="chip-btn on" data-filter="all">전체</button>
@@ -3040,6 +3055,70 @@ function depositOf(c) {
 function balanceOf(c) { return Math.max(priceNum(c.price) - depositOf(c), 0); }
 function sumDeposit(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + depositOf(c), 0); }
 function sumBalance(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + balanceOf(c), 0); }
+/* 잔금 안내일: 예식 1주 전 날짜에서 거꾸로 가장 가까운 금요일 */
+function noticeDateOf(date) {
+  if (!date) return '';
+  const d = new Date(date + 'T00:00:00');
+  d.setDate(d.getDate() - 7);
+  while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function shortDate(date) { return date ? `${date.slice(5, 7)}.${date.slice(8, 10)}(${dowOf(date)})` : ''; }
+/* 지금 잔금 안내·확인할 예식: 계약완 + 잔금 남음 + 안 받음 + 안내일이 지났고 예식 전 (예식 지났는데 못 받은 것도 포함) */
+function payDueList() {
+  const today = todayStr();
+  return contracts.filter(c => c.status === 'done' && balanceOf(c) > 0 && !c.balancePaid && c.date && noticeDateOf(c.date) <= today)
+    .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+}
+/* 다음 7일 안에 안내일이 오는 예식 */
+function paySoonList() {
+  const today = todayStr();
+  const t = new Date(); t.setDate(t.getDate() + 7);
+  const lim = `${t.getFullYear()}-${pad2(t.getMonth() + 1)}-${pad2(t.getDate())}`;
+  return contracts.filter(c => c.status === 'done' && balanceOf(c) > 0 && !c.balancePaid && c.date && noticeDateOf(c.date) > today && noticeDateOf(c.date) <= lim)
+    .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+}
+function payLine(c) {
+  const late = c.date < todayStr() ? ' · 예식 지남' : '';
+  return `${shortDate(c.date)} ${c.time || ''}  ${c.name || ''}  ·  잔금 ${won(balanceOf(c))}  ·  안내일 ${shortDate(noticeDateOf(c.date))}${late}`;
+}
+function renderPayAlert() {
+  const due = payDueList(), soon = paySoonList();
+  const cnt = document.getElementById('payCnt');
+  if (cnt) { cnt.style.display = due.length ? 'inline' : 'none'; cnt.textContent = '잔금 ' + due.length; }
+  const box = document.getElementById('payAlert');
+  if (!box) return;
+  if (!due.length && !soon.length) { box.style.display = 'none'; return; }
+  let html = '';
+  if (due.length) {
+    html += `<div class="pa-title">💰 잔금 안내·확인할 예식 ${due.length}건 · ${won(due.reduce((s, c) => s + balanceOf(c), 0))}</div>`;
+    html += due.map(c => `<div class="pa-row">${escHtml(payLine(c))}</div>`).join('');
+  }
+  if (soon.length) {
+    html += `<div class="pa-sub">다음 7일 안에 안내할 예식: ` + soon.map(c => escHtml(`${shortDate(c.date)} ${c.name || ''}`)).join(', ') + `</div>`;
+  }
+  html += `<div class="pa-sub">잔금을 받으면 해당 예식의 [잔금 미수] 버튼을 눌러 '잔금 받음'으로 바꿔 주세요.</div>`;
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+/* 들어올 때 하루 한 번 알림 창 */
+let payPopupChecked = false;
+function maybePayPopup() {
+  if (payPopupChecked) return;
+  payPopupChecked = true;
+  const due = payDueList();
+  if (!due.length) return;
+  const key = 'lotv_pay_popup_day';
+  let shown = '';
+  try { shown = localStorage.getItem(key) || ''; } catch (e) {}
+  if (shown === todayStr()) return;
+  try { localStorage.setItem(key, todayStr()); } catch (e) {}
+  askConfirm({
+    title: `잔금 안내할 예식 ${due.length}건`, tone: '', ok: '보관함에서 보기', cancel: '닫기',
+    msg: due.map(payLine).join('\n') + `\n\n합계 ${won(due.reduce((s, c) => s + balanceOf(c), 0))}`
+  }).then(go => { if (go) showView('archive'); });
+}
+
 /* 잔금 미수: 계약불이 아니고 잔금이 남았는데 받음 체크가 안 된 건 */
 function isUnpaid(c) { return c.status !== 'fail' && balanceOf(c) > 0 && !c.balancePaid; }
 function moneyLine(list) { return `합계 ${won(sumPrice(list))} · 계약금 ${won(sumDeposit(list))} · 잔금 ${won(sumBalance(list))}`; }
@@ -3064,6 +3143,8 @@ function startContractsListener() {
     if (currentView === 'archive') renderArchive();
     if (currentView === 'calendar') renderCalendar();
     updateDupWarn();
+    renderPayAlert();
+    maybePayPopup();
   }, err => {
     console.error(err);
     const n = document.getElementById('archiveNotice');
@@ -3461,7 +3542,7 @@ function itemHtml(c) {
         ${f('product', '상품', 'text')}
         ${f('price', '금액', 'text')}
         <div class="c-field"><label>계약금</label><input type="text" data-k="deposit" value="${escHtml(c.deposit != null && String(c.deposit) !== '' ? c.deposit : '')}" placeholder="${escHtml(won(depositOf(c)))} (기준 자동)"></div>
-        <div class="c-field"><label>잔금</label><input type="text" value="${escHtml(won(balanceOf(c)) + (balanceOf(c) > 0 ? (c.balancePaid ? ' (받음)' : ' (미수)') : ''))}" disabled style="color:var(--ink-soft)"></div>
+        <div class="c-field"><label>잔금</label><input type="text" value="${escHtml(won(balanceOf(c)) + (balanceOf(c) > 0 ? (c.balancePaid ? ' (받음)' : ' (미수) · 안내일 ' + shortDate(noticeDateOf(c.date))) : ''))}" disabled style="color:var(--ink-soft)"></div>
         ${f('tel', '연락처', 'text')}
         ${f('contractDate', '작성일', 'text')}
         <div class="c-field memo"><label>메모</label><textarea data-k="memo" placeholder="간단한 메모">${escHtml(c.memo || '')}</textarea></div>
