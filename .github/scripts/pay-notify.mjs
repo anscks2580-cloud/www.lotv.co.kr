@@ -90,14 +90,18 @@ async function loadContracts(idToken) {
   return out;
 }
 
+// 받는 사람이 여러 명이면 비밀값에 쉼표로 이어서 넣음 (예: 12345,67890)
 async function sendTelegram(text) {
-  const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: CHAT_ID, text, disable_web_page_preview: true })
-  });
-  const j = await r.json();
-  if (!j.ok) throw new Error('텔레그램 보내기 실패: ' + j.description);
+  const ids = String(CHAT_ID).split(',').map(x => x.trim()).filter(Boolean);
+  for (const id of ids) {
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: id, text, disable_web_page_preview: true })
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error(`텔레그램 보내기 실패 (${id}): ` + j.description);
+  }
 }
 
 function line(c, today) {

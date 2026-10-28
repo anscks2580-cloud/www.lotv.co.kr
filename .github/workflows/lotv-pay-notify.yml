@@ -43,8 +43,8 @@ jobs:
               const seen={};
               (j.result||[]).forEach(u=>{ const m=u.message||u.my_chat_member||u.channel_post||{}; const c=m.chat; if(c) seen[c.id]=(c.title||c.first_name||"")+" ("+c.type+")"; });
               const ids=Object.keys(seen);
-              if(!ids.length) console.log("찾은 방이 없습니다. 단체방에 아무 말이나 보낸 뒤 다시 실행해 주세요.");
-              ids.forEach(id=>console.log("단체방 번호: "+id+"   이름: "+seen[id]));
+              if(!ids.length) console.log("찾은 방이 없습니다. 봇과의 대화방에서 /start 를 보낸 뒤 다시 실행해 주세요.");
+              ids.forEach(id=>console.log("번호: "+id+"   이름: "+seen[id]));
             });'
 
       - name: 잔금 알림 보내기
