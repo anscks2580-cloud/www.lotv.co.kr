@@ -252,6 +252,7 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 
 const token = new URLSearchParams(location.search).get('k') || '';
+const EXPIRED_MSG = '보관 기간(예식 후 30일)이 지났거나 더 이상 사용할 수 없는 링크입니다.<br>필요하시면 LOTV 카카오톡으로 문의해 주세요.';
 let req = null;        // 동의 요청 문서
 let sigDrawn = false;
 let doneImage = '';
@@ -544,12 +545,20 @@ async function init() {
     return;
   }
   try {
-    const snap = await db.collection('signRequests').doc(token).get();
+    let snap;
+    try {
+      snap = await db.collection('signRequests').doc(token).get();
+    } catch (e) {
+      // 예식 후 30일이 지나면 보안 규칙에서 막힘
+      if (e && e.code === 'permission-denied') { showState(EXPIRED_MSG); return; }
+      throw e;
+    }
     if (!snap.exists) {
       showState('만료되었거나 더 이상 사용할 수 없는 링크입니다.<br>LOTV 카카오톡으로 문의해 주세요.');
       return;
     }
     req = snap.data();
+    if (req.expireAt && req.expireAt.toDate && req.expireAt.toDate() < new Date()) { showState(EXPIRED_MSG); return; }
     const v = req.view || {};
     fillPaper(v);
 

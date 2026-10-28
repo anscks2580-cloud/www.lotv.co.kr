@@ -3362,11 +3362,15 @@ async function createSignLink() {
       try { await db.collection('signRequests').doc(same.signToken).delete(); } catch (e) { console.warn(e); }
     }
 
+    // 예식 후 30일이 지나면 고객이 링크를 열 수 없음 (예식 다음날부터 30일째 되는 날 자정까지)
+    const exp = new Date(fields.date + 'T00:00:00+09:00');
+    exp.setDate(exp.getDate() + 31);
     await db.collection('signRequests').doc(token).set({
       contractId: ref.id,
       view: v,
       agreed: false,
-      createdAt: ts
+      createdAt: ts,
+      expireAt: firebase.firestore.Timestamp.fromDate(exp)
     });
     await ref.set(data, { merge: true });
 
