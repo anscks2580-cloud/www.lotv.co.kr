@@ -2610,7 +2610,7 @@ function updateOptionField() {
 }
 
 /* 기본 특약 — 홈페이지 이용 규정(policy.html) 내용을 그대로 옮김 */
-const STANDARD_SPECIAL = `1. 계약은 계약금 10만 원 입금 후 확정되며, 잔금은 예식 1주 전 금요일에 별도 안내합니다. 잔금 결제 이후 현금영수증 발행이 가능합니다.
+const STANDARD_SPECIAL = `1. 계약은 계약금 10만 원 입금 후 확정되며, 잔금은 촬영 진행 전주 금요일에 정산하며, 해당일에 별도 안내합니다. 잔금 결제 이후 현금영수증 발행이 가능합니다.
 
 2. 계약금은 계약일로부터 7일이 지나면 환불되지 않으며, 잔금은 잔금 결제일로부터 7일이 지나면 환불되지 않습니다.
 
@@ -2682,7 +2682,7 @@ function payTextOf(priceStr) {
   const dep = depositOf({ price: priceStr });
   const bal = Math.max(price - dep, 0);
   if (!bal) return `계약금 ${won(dep)} (전액)`;
-  return `계약금 ${won(dep)} / 잔금 ${won(bal)} (잔금은 예식 1주 전 금요일 안내)`;
+  return `계약금 ${won(dep)} / 잔금 ${won(bal)} (잔금은 진행 전주 금요일 정산)`;
 }
 
 /* 폼 → 계약서에 들어갈 글자들 (고객 동의 링크에도 그대로 넘어감) */
@@ -3055,12 +3055,11 @@ function depositOf(c) {
 function balanceOf(c) { return Math.max(priceNum(c.price) - depositOf(c), 0); }
 function sumDeposit(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + depositOf(c), 0); }
 function sumBalance(list) { return list.filter(c => c.status !== 'fail').reduce((s, c) => s + balanceOf(c), 0); }
-/* 잔금 안내일: 예식 1주 전 날짜에서 거꾸로 가장 가까운 금요일 */
+/* 잔금 정산일: 예식이 속한 주(월~일)의 전주 금요일 (토요일 예식이면 8일 전, 일요일 예식이면 9일 전) */
 function noticeDateOf(date) {
   if (!date) return '';
   const d = new Date(date + 'T00:00:00');
-  d.setDate(d.getDate() - 7);
-  while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7) - 3);
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 function shortDate(date) { return date ? `${date.slice(5, 7)}.${date.slice(8, 10)}(${dowOf(date)})` : ''; }

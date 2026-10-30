@@ -2,7 +2,7 @@
 // 매주 금요일 아침 깃허브가 자동으로 실행 → 계약서 보관함을 읽어 잔금 안내할 예식을 텔레그램 단체방으로 보냄
 // 계산 기준은 contract.html 보관함과 같음
 //  · 대상: 계약완 + 잔금 남음 + '잔금 받음' 체크 안 됨
-//  · 안내일: 예식 1주 전 날짜에서 거꾸로 가장 가까운 금요일
+//  · 안내일(잔금 정산일): 예식이 속한 주(월~일)의 전주 금요일
 //  · 계약금: 25만원 이상이면 10만원, 그 미만이면 전액 (보관함에서 직접 적은 계약금이 있으면 그 금액)
 
 const API_KEY = 'AIzaSyCP5wakGnA9ToM_NvYE9w2NCTVN3nNXzLc';
@@ -32,9 +32,8 @@ function addDays(date, n) {
 }
 function dow(date) { return DAY_KO[new Date(date + 'T00:00:00Z').getUTCDay()]; }
 function noticeDateOf(date) {
-  let d = addDays(date, -7);
-  while (new Date(d + 'T00:00:00Z').getUTCDay() !== 5) d = addDays(d, -1);
-  return d;
+  const dow = new Date(date + 'T00:00:00Z').getUTCDay();
+  return addDays(date, -((dow + 6) % 7) - 3);
 }
 function shortDate(date) { return `${date.slice(5, 7)}.${date.slice(8, 10)}(${dow(date)})`; }
 
