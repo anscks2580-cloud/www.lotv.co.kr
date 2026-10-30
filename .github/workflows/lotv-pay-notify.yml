@@ -1,9 +1,12 @@
 name: LOTV 잔금 안내 알림
 
 on:
-  # 매주 금요일 오전 9시 7분 (한국 시간) = 금요일 0시 7분 (세계 표준시)
+  # 매주 금요일 (한국 시간) 오전 9시 7분 · 10시 37분 · 정오 12시 7분
+  # 깃허브 예약 실행은 늦거나 빠지는 일이 있어서 세 번 걸어 두고, 이미 보낸 날은 건너뜀
   schedule:
     - cron: '7 0 * * 5'
+    - cron: '37 1 * * 5'
+    - cron: '7 3 * * 5'
   # 깃허브 액션 화면에서 직접 실행
   workflow_dispatch:
     inputs:
@@ -47,8 +50,18 @@ jobs:
               ids.forEach(id=>console.log("번호: "+id+"   이름: "+seen[id]));
             });'
 
+      # 오늘(한국 시간) 이미 정식 발송했으면 건너뜀
+      - name: 오늘 보냈는지 확인
+        id: sent
+        run: |
+          TODAY=$(TZ=Asia/Seoul date '+%Y-%m-%d')
+          if [ "${{ github.event_name }}" = "schedule" ] && grep -q "^$TODAY .*잔금 알림 발송" .github/notify-log.txt 2>/dev/null; then
+            echo "오늘은 이미 보냈습니다. 건너뜁니다."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 잔금 알림 보내기
-        if: github.event_name == 'schedule' || inputs.mode != 'chatid'
+        if: steps.sent.outputs.skip != '1' && (github.event_name == 'schedule' || inputs.mode != 'chatid')
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -58,7 +71,7 @@ jobs:
 
       # 실행 기록을 한 줄 남김 → 저장소 변경으로 잡혀서 60일 자동 정지에 안 걸림
       - name: 실행 기록 남기기
-        if: github.event_name == 'schedule'
+        if: steps.sent.outputs.skip != '1' && (github.event_name == 'schedule' || inputs.mode == 'weekly')
         run: |
           echo "$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M') 잔금 알림 발송" >> .github/notify-log.txt
           tail -n 60 .github/notify-log.txt > .github/notify-log.tmp && mv .github/notify-log.tmp .github/notify-log.txt
