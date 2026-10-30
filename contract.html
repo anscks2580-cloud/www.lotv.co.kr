@@ -1049,6 +1049,9 @@ body {
 .c-field.memo { align-items: start; }
 .c-field.memo label { padding-top: 6px; }
 .month-head .sum { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-soft); font-weight: 300; }
+.month-head .sum b, #archiveCount b { font-weight: 500; }
+.left-due { color: #c0392b; }
+.left-ok { color: #2e7d32; }
 .st-btn.del { border-color: var(--accent-light); color: var(--ink-soft); }
 .st-btn.del:hover { border-color: #1C1A17; color: #1C1A17; }
 .st-btn.fail.on { background: #c0392b; color: #fff; }
@@ -3123,7 +3126,13 @@ function maybePayPopup() {
 
 /* 잔금 미수: 계약불이 아니고 잔금이 남았는데 받음 체크가 안 된 건 */
 function isUnpaid(c) { return c.status !== 'fail' && balanceOf(c) > 0 && !c.balancePaid; }
-function moneyLine(list) { return `합계 ${won(sumPrice(list))} · 계약금 ${won(sumDeposit(list))} · 잔금 ${won(sumBalance(list))}`; }
+function sumPaid(list) { return list.filter(c => c.status !== 'fail' && c.balancePaid).reduce((s, c) => s + balanceOf(c), 0); }
+function sumUnpaid(list) { return list.filter(isUnpaid).reduce((s, c) => s + balanceOf(c), 0); }
+/* 월 아코디언·상단 요약 금액 줄: '잔금 받음'을 누르면 남은 잔금이 바로 줄어듦 */
+function moneyLine(list) {
+  const left = sumUnpaid(list);
+  return `합계 ${won(sumPrice(list))} · 계약금 ${won(sumDeposit(list))} · 잔금 ${won(sumBalance(list))} (받음 ${won(sumPaid(list))} · <b class="${left > 0 ? 'left-due' : 'left-ok'}">남은 잔금 ${won(left)}</b>)`;
+}
 const STATUS_TEXT = { pending: '미확정', done: '계약완', fail: '계약불' };
 
 /* ─── 데이터 ─── */
@@ -3477,7 +3486,7 @@ function renderArchive() {
   const rvYes = contracts.filter(c => c.review === 'yes').length;
   const unpaid = contracts.filter(isUnpaid);
   const unpaidSum = unpaid.reduce((s, c) => s + balanceOf(c), 0);
-  document.getElementById('archiveCount').textContent =
+  document.getElementById('archiveCount').innerHTML =
     `전체 ${contracts.length}건 · ${moneyLine(contracts)} (계약불 제외)  |  계약완 ${cnt.done} · 계약불 ${cnt.fail} · 미확정 ${cnt.pending}  |  잔금 미수 ${unpaid.length}건 ${won(unpaidSum)}  |  리뷰 참 ${rvYes}` +
     (list.length !== contracts.length ? `  —  표시 ${list.length}건 · ${moneyLine(list)}` : '');
 
