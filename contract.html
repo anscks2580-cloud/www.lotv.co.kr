@@ -3564,6 +3564,7 @@ function itemHtml(c) {
         <div class="c-actions">
           <button type="button" class="primary" data-act="save">수정 저장</button>
           ${c.signToken && c.signState === 'waiting' ? '<button type="button" data-act="copyLink">동의 링크 보기</button>' : ''}
+          ${c.signToken && c.signState === 'agreed' ? '<button type="button" data-act="pushLinkImg">고객 링크에 반영</button><button type="button" data-act="copyLink">고객 링크 보기</button>' : ''}
           <button type="button" data-act="replaceImg">이미지 교체</button>
           <button type="button" class="danger" data-act="delete">삭제</button>
         </div>
@@ -3665,6 +3666,19 @@ document.getElementById('archiveList').addEventListener('click', async e => {
       }, { merge: true });
       toast(next ? '잔금 받음으로 표시했습니다' : '잔금 미수로 되돌렸습니다');
     } catch (err) { alert('저장 실패: ' + err.message); }
+  } else if (act === 'pushLinkImg') {
+    const ok = await askConfirm({
+      title: '고객 링크의 계약서를 바꿀까요?', tone: '', ok: '반영', cancel: '취소',
+      msg: `${prettyDate(c.date)} ${c.time || ''}\n${c.name || ''}\n\n지금 보관함에 있는 계약서 이미지로 고객 링크 화면의 계약서를 바꿉니다.`
+    });
+    if (!ok) return;
+    try {
+      const snap = await db.collection('contractImages').doc(id).get();
+      const img = snap.exists ? snap.data().data : '';
+      if (!img) { alert('보관함에 계약서 이미지가 없습니다.'); return; }
+      await db.collection('signRequests').doc(c.signToken).set({ image: img }, { merge: true });
+      toast('고객 링크의 계약서를 바꿨습니다');
+    } catch (err) { alert('반영 실패: ' + err.message); }
   } else if (act === 'copyLink') {
     openLinkBox(c.name || '', signUrlOf(c.signToken), false);
   } else if (act === 'replaceImg') {
@@ -3680,7 +3694,8 @@ document.getElementById('archiveList').addEventListener('click', async e => {
         await saveContractDoc({ hasImage: true }, img, id);
         // 고객 동의 링크가 있으면 고객 화면의 계약서 이미지도 같이 바꿈
         if (c.signToken && c.signState === 'agreed') {
-          try { await db.collection('signRequests').doc(c.signToken).set({ image: img }, { merge: true }); } catch (e2) { console.warn(e2); }
+          try { await db.collection('signRequests').doc(c.signToken).set({ image: img }, { merge: true }); }
+          catch (e2) { console.warn(e2); alert('보관함 이미지는 바꿨지만 고객 링크 이미지는 못 바꿨습니다.\n[고객 링크에 반영]을 눌러 다시 시도해 주세요.\n' + (e2.message || e2)); }
         }
         thumbCache[id] = img;
         loadThumb(id);
