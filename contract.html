@@ -3678,6 +3678,10 @@ document.getElementById('archiveList').addEventListener('click', async e => {
         const cv = await fileToCanvas(file);
         const img = compressCanvas(cv, 1240);
         await saveContractDoc({ hasImage: true }, img, id);
+        // 고객 동의 링크가 있으면 고객 화면의 계약서 이미지도 같이 바꿈
+        if (c.signToken && c.signState === 'agreed') {
+          try { await db.collection('signRequests').doc(c.signToken).set({ image: img }, { merge: true }); } catch (e2) { console.warn(e2); }
+        }
         thumbCache[id] = img;
         loadThumb(id);
         toast('이미지를 바꿨습니다');
