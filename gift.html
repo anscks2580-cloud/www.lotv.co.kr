@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="LOTV Gift — 인스타그램 태그 또는 네이버 블로그 후기를 남겨주시면 Thank you 카드 또는 빈티지캠 영상을 선물로 드립니다.">
+<meta name="description" content="LOTV Gift — 인스타그램 태그 또는 네이버 블로그 후기를 남겨주시면 Thank you 카드(결혼식용·돌잔치용)와 빈티지캠 영상을 선물로 드립니다.">
 <meta property="og:title" content="Gift | LOTV 로토브 스냅">
 <title>Gift | LOTV l 로토브 스냅</title>
 
@@ -326,6 +326,37 @@ html.gift-intro-out .site-header { opacity: 1; transition: opacity 1s ease 0.5s;
 }
 .gift-media img,
 .gift-media video { display: block; width: 100%; height: auto; }
+/* 땡큐 카드: 결혼식용 / 돌잔치용 나란히 */
+.gift-media-set {
+  margin-top: calc(28px * var(--s, 1));
+  max-width: calc(640px * var(--s, 1));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(20px * var(--s, 1));
+}
+.gift-media-set .gift-media { margin-top: 0; max-width: none; }
+.gift-media-set .gift-cap {
+  margin-top: calc(10px * var(--s, 1));
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: calc(15px * var(--s, 1));
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.gift-media-set .gift-cap small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--sans, 'Noto Sans KR', sans-serif);
+  font-style: normal;
+  font-size: calc(12px * var(--s, 1));
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.gift-media-set .gift-media.is-empty { display: flex; aspect-ratio: 4 / 5; }
+@media (max-width: 560px) {
+  .gift-media-set { grid-template-columns: 1fr; max-width: calc(440px * var(--s, 1)); }
+}
 .gift-media.is-empty {
   aspect-ratio: 3 / 4;
   display: flex;
@@ -424,11 +455,24 @@ html.gift-intro-out .site-header { opacity: 1; transition: opacity 1s ease 0.5s;
       <div class="doc-row">
         <div class="doc-label"><h2>Thank you <br>Card</h2><small>땡큐 카드</small></div>
         <div class="doc-body">
-          <p>그날의 사진을 담아 <br>하객분들께 감사 인사를 전할 수 있는 <br>Thank you 카드를 만들어드립니다.</p>
-          <figure class="gift-media" data-empty="Thank you Card">
-            <img src="gift/thankyou-card.jpg" alt="LOTV Thank you 카드 예시" loading="lazy" data-fade
-                 onerror="this.parentNode.classList.add('is-empty'); this.remove();">
-          </figure>
+          <p>그날의 사진을 담아 <br>함께해 주신 분들께 감사 인사를 전할 수 있는 <br>Thank you 카드를 만들어드립니다.</p>
+          <p>결혼식용과 돌잔치용 두 가지로 준비되어 있어 <br>행사에 맞는 카드로 제작해 드립니다.</p>
+          <div class="gift-media-set">
+            <div>
+              <figure class="gift-media" data-empty="Wedding">
+                <img src="gift/thankyou-card.jpg" alt="LOTV Thank you 카드 결혼식용 예시" loading="lazy" data-fade
+                     onerror="this.parentNode.classList.add('is-empty'); this.remove();">
+              </figure>
+              <p class="gift-cap">Wedding<small>결혼식용</small></p>
+            </div>
+            <div>
+              <figure class="gift-media" data-empty="First Birthday">
+                <img src="gift/thankyou-card-baby.jpg" alt="LOTV Thank you 카드 돌잔치용 예시" loading="lazy" data-fade
+                     onerror="this.parentNode.classList.add('is-empty'); this.remove();">
+              </figure>
+              <p class="gift-cap">First Birthday<small>돌잔치용</small></p>
+            </div>
+          </div>
         </div>
       </div>
 

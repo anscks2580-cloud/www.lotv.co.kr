@@ -189,6 +189,8 @@ body {
   gap: 14px;
 }
 .name-row input { text-align: center; }
+.name-row.baby { grid-template-columns: 1fr; }
+.name-row.baby .name-amp, .name-row.baby #name2 { display: none; }
 .name-amp {
   font-family: 'Playfair Display', serif;
   font-size: 18px;
@@ -361,7 +363,15 @@ html.embedded .app-head { display: none; }
   <div class="app-wrap">
     <section class="panel" aria-label="카드 정보 입력">
       <h1 class="panel-title">Thank you Card</h1>
-      <p class="panel-desc">사진 · 이름 · 날짜를 넣으면 카드가 자동으로 만들어집니다.<br>미리보기에서 사진을 드래그해 위치를 맞출 수 있어요.</p>
+      <p class="panel-desc">결혼식 · 돌잔치 중 종류를 고르고 사진 · 이름 · 날짜를 넣으면 카드가 자동으로 만들어집니다.<br>미리보기에서 사진을 드래그해 위치를 맞출 수 있어요.</p>
+
+      <div class="field">
+        <label>TYPE · 카드 종류</label>
+        <div class="seg" role="group" aria-label="카드 종류">
+          <button type="button" data-kind="wedding" aria-pressed="true">결혼식</button>
+          <button type="button" data-kind="baby" aria-pressed="false">돌잔치</button>
+        </div>
+      </div>
 
       <div class="field">
         <label>PHOTO · 사진</label>
@@ -399,16 +409,17 @@ html.embedded .app-head { display: none; }
       </div>
 
       <div class="field">
-        <label for="name1">NAME · 이름</label>
-        <div class="name-row">
+        <label for="name1" id="nameLabel">NAME · 이름</label>
+        <div class="name-row" id="nameRow">
           <input type="text" id="name1" placeholder="로로" autocomplete="off" aria-label="첫 번째 이름">
           <span class="name-amp">&amp;</span>
           <input type="text" id="name2" placeholder="토브" autocomplete="off" aria-label="두 번째 이름">
         </div>
+        <small id="nameHint" style="display:none">카드에는 "하율의 첫 번째 생일"처럼 표기돼요.</small>
       </div>
 
       <div class="field">
-        <label for="date">DATE · 예식 일자</label>
+        <label for="date" id="dateLabel">DATE · 예식 일자</label>
         <input type="date" id="date">
         <small id="datePreview"></small>
       </div>
@@ -485,7 +496,7 @@ const SANS  = '"Noto Sans KR", sans-serif';
 // top: 글자 윗선 위치(원본 카드 기준), ref: 위치를 잡는 기준 문장, max: 최대 폭
 const TEXT = {
   title:  { font: '800 113px ' + SERIF, color: 'main', top: 832,  ref: 'THANK YOU' },
-  sub:    { font: '800 58.5px ' + SERIF, color: 'main', top: 943, ref: 'FOR CELEBRATING WITH US.' },
+  sub:    { font: '800 58.5px ' + SERIF, color: 'main', top: 943, ref: 'FOR CELEBRATING WITH US.', max: 960 },
   names:  { font: '600 40px ' + SANS,  color: 'main', top: 1035, ref: '로로 & 토브', max: 900 },
   date:   { font: '300 37px ' + SANS,  color: 'soft', top: 1088, ref: 'June 7, 2026', max: 900 },
   msg1:   { font: '400 30.5px ' + SANS, color: 'main', top: 1146, ref: '특별한 순간을 함께해 주셔서 감사합니다.', max: 960 },
@@ -499,6 +510,45 @@ const PALETTES = {
   brown: { main: '#78482E', soft: '#8A5E45' }
 };
 let textColor = 'black';
+
+// 카드 종류별 기본 문구 (결혼식 / 돌잔치)
+const KINDS = {
+  wedding: {
+    sub: 'FOR CELEBRATING WITH US.',
+    nameLabel: 'NAME · 이름', dateLabel: 'DATE · 예식 일자',
+    ph1: '로로', ph2: '토브',
+    msg1: '특별한 순간을 함께해 주셔서 감사합니다.',
+    msg2: '그날의 따뜻한 마음 오래도록 간직하겠습니다.',
+    file: 'LOTV_ThankYou_'
+  },
+  baby: {
+    sub: 'FOR THE FIRST BIRTHDAY.',
+    nameLabel: 'NAME · 아기 이름', dateLabel: 'DATE · 돌잔치 일자',
+    ph1: '하율', ph2: '',
+    msg1: '소중한 첫 생일을 함께해 주셔서 감사합니다.',
+    msg2: '아이에게 보내주신 사랑 오래도록 간직하겠습니다.',
+    file: 'LOTV_ThankYou_Baby_'
+  }
+};
+let kind = 'wedding';
+
+function setKind(k) {
+  const prev = KINDS[kind];
+  kind = k;
+  const cur = KINDS[k];
+  document.querySelectorAll('.seg button[data-kind]').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.getAttribute('data-kind') === k ? 'true' : 'false');
+  });
+  document.getElementById('nameLabel').textContent = cur.nameLabel;
+  document.getElementById('dateLabel').textContent = cur.dateLabel;
+  document.getElementById('nameRow').classList.toggle('baby', k === 'baby');
+  document.getElementById('nameHint').style.display = k === 'baby' ? 'block' : 'none';
+  els.name1.placeholder = cur.ph1;
+  els.name2.placeholder = cur.ph2;
+  // 문구를 직접 고치지 않았다면 종류에 맞는 기본 문구로 바꿈
+  if (els.msg1.value.trim() === prev.msg1 || !els.msg1.value.trim()) els.msg1.value = cur.msg1;
+  if (els.msg2.value.trim() === prev.msg2 || !els.msg2.value.trim()) els.msg2.value = cur.msg2;
+}
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -525,6 +575,10 @@ const els = {
 })();
 
 function joinNames() {
+  if (kind === 'baby') {
+    const n = els.name1.value.trim() || '하율';
+    return n + '의 첫 번째 생일';
+  }
   const a = els.name1.value.trim() || '로로';
   const b = els.name2.value.trim() || '토브';
   return a + ' & ' + b;
@@ -635,7 +689,7 @@ function drawText(ctx, key, text) {
 function texts() {
   return {
     title: 'THANK YOU',
-    sub: 'FOR CELEBRATING WITH US.',
+    sub: KINDS[kind].sub,
     names: joinNames(),
     date: formatDate(els.date.value),
     msg1: els.msg1.value.trim(),
@@ -679,6 +733,12 @@ function quickRender() {
 document.querySelectorAll('.seg button[data-orient]').forEach(function (b) {
   b.addEventListener('click', function () {
     setOrient(b.getAttribute('data-orient'));
+    render();
+  });
+});
+document.querySelectorAll('.seg button[data-kind]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    setKind(b.getAttribute('data-kind'));
     render();
   });
 });
@@ -758,9 +818,9 @@ els.photo.addEventListener('change', function () {
 /* ──────────────── 저장 / 공유 ──────────────── */
 function fileName() {
   const clean = function (v) { return v.trim().replace(/[\\/:*?"<>|\s&]+/g, ''); };
-  const n = [clean(els.name1.value), clean(els.name2.value)].filter(Boolean).join('_') || '이름';
+  const n = (kind === 'baby' ? [clean(els.name1.value)] : [clean(els.name1.value), clean(els.name2.value)]).filter(Boolean).join('_') || '이름';
   const d = (els.date.value || '').replace(/-/g, '');
-  return 'LOTV_ThankYou_' + n + (d ? '_' + d : '') + '.jpg';
+  return KINDS[kind].file + n + (d ? '_' + d : '') + '.jpg';
 }
 
 async function makeBlob() {
@@ -775,7 +835,9 @@ async function makeBlob() {
 
 function warnIfEmpty() {
   if (!state.img) { els.status.textContent = '사진을 먼저 선택해 주세요.'; return true; }
-  if (!els.name1.value.trim() || !els.name2.value.trim()) { els.status.textContent = '이름 두 칸을 모두 입력해 주세요.'; return true; }
+  if (kind === 'baby') {
+    if (!els.name1.value.trim()) { els.status.textContent = '아기 이름을 입력해 주세요.'; return true; }
+  } else if (!els.name1.value.trim() || !els.name2.value.trim()) { els.status.textContent = '이름 두 칸을 모두 입력해 주세요.'; return true; }
   return false;
 }
 
