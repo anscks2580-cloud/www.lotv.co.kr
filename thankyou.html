@@ -754,22 +754,38 @@ function drawBackground(ctx) {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
   if (bgMode !== 'dots') return;
-  // 검정 도트: 크기가 제각각인 동글동글한 점을 랜덤하게 흩뿌림 (느슨한 격자 + 흔들림)
+  // 검정 도트: 큼직한 물방울무늬를 띄엄띄엄 (글자 T보다 조금 큰 크기, 사진·글자 자리는 피함)
   const rnd = seededRandom(dotSeed);
-  const cell = 64;                       // 기본 간격 (원본 카드 기준)
+  const pad = 12;
+  const avoid = [
+    { x: PHOTO.x - pad, y: PHOTO.y - pad, w: PHOTO.w + pad * 2, h: PHOTO.h + pad * 2 },  // 사진
+    { x: 40, y: 815 + SHIFT, w: W - 80, h: 410 },                                          // 글자 묶음
+    { x: 200, y: 1290, w: W - 400, h: 60 }                                                 // 하단 © 줄
+  ];
+  const dots = [];
+  let tries = 0;
+  while (dots.length < 11 && tries < 600) {
+    tries++;
+    const r = (50 + rnd() * 24) * dotScale;      // 지름 100~148px
+    const x = rnd() * W;                          // 가장자리에 살짝 잘리는 도트도 허용
+    const y = rnd() * H;
+    let bad = false;
+    for (const z of avoid) {
+      if (x + r > z.x && x - r < z.x + z.w && y + r > z.y && y - r < z.y + z.h) { bad = true; break; }
+    }
+    if (!bad) for (const d of dots) {
+      if (Math.hypot(d.x - x, d.y - y) < d.r + r + 40) { bad = true; break; }
+    }
+    if (bad) continue;
+    dots.push({ x: x, y: y, r: r });
+  }
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,' + dotAlpha + ')';
-  for (let gy = 0; gy < H + cell; gy += cell) {
-    for (let gx = 0; gx < W + cell; gx += cell) {
-      if (rnd() < 0.18) continue;                       // 가끔 비워서 빽빽하지 않게
-      const x = gx + (rnd() - 0.5) * cell * 1.1;
-      const y = gy + (rnd() - 0.5) * cell * 1.1;
-      const r = (7 + rnd() * 9) * dotScale;             // 지름 14~32px
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
+  dots.forEach(function (d) {
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
   ctx.restore();
 }
 
