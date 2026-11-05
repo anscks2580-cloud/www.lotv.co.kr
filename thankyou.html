@@ -8,9 +8,16 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&display=swap" rel="stylesheet">
 
 <style>
+/* Type 2 카드 글씨체: 마롱둥근고딕 Medium */
+@font-face {
+  font-family: 'MrRound';
+  src: url('fonts/mr_round-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -524,7 +531,7 @@ const W = 1080, H = 1350;
 const EXPORT_SCALE = 2;                       // 저장 시 2배 해상도
 const SERIF  = '"Playfair Display", serif';
 const SANS   = '"Noto Sans KR", sans-serif';
-const SCRIPT = '"Dancing Script", cursive';
+const SCRIPT = '"MrRound", "Noto Sans KR", sans-serif';
 
 /* Type 1: 사진 한 장 + THANK YOU */
 // 세로: 원본 카드 그대로(3:4) / 가로: 4:3 사진 칸, 사진+글 묶음을 위아래 같은 여백으로 가운데 정렬
@@ -550,8 +557,8 @@ const TEXT = {
 const T2 = {
   bg: '#ECEAE7',
   slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
-  titleFont: '500 70px ' + SCRIPT, titleTop: 440,
-  dateFont:  '500 60px ' + SCRIPT, dateTop: 878
+  titleFont: '500 46px ' + SCRIPT, titleTop: 452,
+  dateFont:  '500 40px ' + SCRIPT, dateTop: 872
 };
 T2.x0 = Math.round((W - (T2.slot * 3 + T2.gap * 2)) / 2);
 T2.rects = [0, 1, 2].map(function (i) {
