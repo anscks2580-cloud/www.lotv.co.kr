@@ -864,6 +864,10 @@ function paintType2(ctx, scale, tx, forExport) {
   drawScript(ctx, T2.titleFont, tx.title2, T2.titleTop, 960);
   drawHearts(ctx);
   drawScript(ctx, T2.dateFont, tx.date2, T2.dateTop, 960);
+  // 맨 아래 © 줄은 Type 1과 동일
+  const savedShift = SHIFT; SHIFT = 0;
+  drawText(ctx, 'footer', tx.footer);
+  SHIFT = savedShift;
   // 미리보기에서만: 선택된 사진 칸 테두리 표시
   if (!forExport) {
     const r = T2.rects[state2.active];
