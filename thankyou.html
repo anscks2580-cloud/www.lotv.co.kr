@@ -478,6 +478,7 @@ html.embedded .app-head { display: none; }
 
       <div class="actions">
         <button type="button" class="btn-main" id="saveBtn">이미지 저장 (JPG)</button>
+        <button type="button" class="btn-sub" id="saveStoryBtn">인스타 스토리용 저장 (9:16)</button>
         <button type="button" class="btn-sub" id="shareBtn">공유 · 사진 앱에 저장</button>
       </div>
       <div class="status" id="status"></div>
@@ -996,21 +997,31 @@ els.photo.addEventListener('change', function () {
 })();
 
 /* ──────────────── 저장 / 공유 ──────────────── */
-function fileName() {
+function fileName(story) {
   const clean = function (v) { return v.trim().replace(/[\\/:*?"<>|\s&]+/g, ''); };
   const n = (kind === 'baby' ? [clean(els.name1.value)] : [clean(els.name1.value), clean(els.name2.value)]).filter(Boolean).join('_') || '이름';
   const d = (els.date.value || '').replace(/-/g, '');
-  return KINDS[kind].file + (cardStyle === 2 ? 'T2_' : '') + n + (d ? '_' + d : '') + '.jpg';
+  return KINDS[kind].file + (cardStyle === 2 ? 'T2_' : '') + (story ? 'Story_' : '') + n + (d ? '_' + d : '') + '.jpg';
 }
 
-async function makeBlob() {
+async function makeBlob(story) {
   const tx = texts();
   await ensureFonts(tx);
   const out = document.createElement('canvas');
   out.width = W * EXPORT_SCALE;
   out.height = H * EXPORT_SCALE;
   paint(out.getContext('2d'), EXPORT_SCALE, tx, true);
-  return new Promise(function (res) { out.toBlob(res, 'image/jpeg', 0.95); });
+  if (!story) return new Promise(function (res) { out.toBlob(res, 'image/jpeg', 0.95); });
+
+  // 인스타 스토리(9:16, 2160×3840): 카드를 가운데 두고 위아래를 카드 배경색으로 채움
+  const sw = W * EXPORT_SCALE, sh = Math.round(sw * 16 / 9);
+  const st = document.createElement('canvas');
+  st.width = sw; st.height = sh;
+  const c = st.getContext('2d');
+  c.fillStyle = cardStyle === 2 ? T2.bg : '#FFFFFF';
+  c.fillRect(0, 0, sw, sh);
+  c.drawImage(out, 0, Math.round((sh - out.height) / 2));
+  return new Promise(function (res) { st.toBlob(res, 'image/jpeg', 0.95); });
 }
 
 function warnIfEmpty() {
@@ -1026,20 +1037,22 @@ function warnIfEmpty() {
   return false;
 }
 
-document.getElementById('saveBtn').addEventListener('click', async function () {
+async function saveImage(story) {
   if (warnIfEmpty()) return;
   els.status.textContent = '저장 중…';
-  const blob = await makeBlob();
+  const blob = await makeBlob(story);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = fileName();
+  a.download = fileName(story);
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-  els.status.textContent = '저장했어요 · ' + fileName();
-});
+  els.status.textContent = '저장했어요 · ' + fileName(story);
+}
+document.getElementById('saveBtn').addEventListener('click', function () { saveImage(false); });
+document.getElementById('saveStoryBtn').addEventListener('click', function () { saveImage(true); });
 
 /* 휴대폰: 공유 시트로 바로 사진 앱 저장 / 카톡 전송 */
 (function () {
