@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -524,7 +524,7 @@ const W = 1080, H = 1350;
 const EXPORT_SCALE = 2;                       // 저장 시 2배 해상도
 const SERIF  = '"Playfair Display", serif';
 const SANS   = '"Noto Sans KR", sans-serif';
-const SCRIPT = '"Mrs Saint Delafield", cursive';
+const SCRIPT = '"Dancing Script", cursive';
 
 /* Type 1: 사진 한 장 + THANK YOU */
 // 세로: 원본 카드 그대로(3:4) / 가로: 4:3 사진 칸, 사진+글 묶음을 위아래 같은 여백으로 가운데 정렬
@@ -550,8 +550,8 @@ const TEXT = {
 const T2 = {
   bg: '#ECEAE7',
   slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
-  titleFont: '400 58px ' + SCRIPT, titleTop: 452,
-  dateFont:  '400 52px ' + SCRIPT, dateTop: 880
+  titleFont: '500 70px ' + SCRIPT, titleTop: 440,
+  dateFont:  '500 60px ' + SCRIPT, dateTop: 878
 };
 T2.x0 = Math.round((W - (T2.slot * 3 + T2.gap * 2)) / 2);
 T2.rects = [0, 1, 2].map(function (i) {
