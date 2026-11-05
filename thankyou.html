@@ -431,10 +431,17 @@ html.embedded .app-head { display: none; }
           <button type="button" data-bg="white" aria-pressed="true">흰색</button>
           <button type="button" data-bg="dots" aria-pressed="false">검정 도트</button>
         </div>
-        <div class="range-row" id="dotRow" style="display:none; margin-top:10px">
-          <span class="range-label">도트 진하기</span>
-          <input type="range" id="dotAlpha" min="0.05" max="1" step="0.01" value="0.35">
-          <span class="range-val" id="dotAlphaVal">35%</span>
+        <div id="dotRow" style="display:none">
+          <div class="range-row" style="margin-top:10px">
+            <span class="range-label">진하기</span>
+            <input type="range" id="dotAlpha" min="0.05" max="1" step="0.01" value="0.35">
+            <span class="range-val" id="dotAlphaVal">35%</span>
+          </div>
+          <div class="range-row" style="margin-top:8px">
+            <span class="range-label">크기</span>
+            <input type="range" id="dotScale" min="0.5" max="2" step="0.05" value="1">
+            <button type="button" id="dotShuffle">다시 섞기</button>
+          </div>
         </div>
       </div>
 
@@ -542,6 +549,19 @@ const PALETTES = {
 let textColor = 'black';
 let bgMode = 'white';      // 'white' | 'dots'
 let dotAlpha = 0.35;       // 검정 도트 진하기 (0~1)
+let dotSeed = Date.now() % 100000;   // 도트 배치 랜덤 시드 (다시 섞기 버튼으로 변경)
+let dotScale = 1;          // 도트 크기 배율
+
+// 시드 기반 난수 → 미리보기와 저장 이미지가 똑같은 배치로 나옴
+function seededRandom(seed) {
+  let t = seed >>> 0;
+  return function () {
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 // 카드 종류별 기본 문구 (결혼식 / 돌잔치)
 const KINDS = {
@@ -734,12 +754,17 @@ function drawBackground(ctx) {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
   if (bgMode !== 'dots') return;
-  // 검정 도트 패턴 (원본 카드 기준 간격 24px, 지름 4px) — 진하기는 슬라이더로
-  const gap = 24, r = 2;
+  // 검정 도트: 크기가 제각각인 동글동글한 점을 랜덤하게 흩뿌림 (느슨한 격자 + 흔들림)
+  const rnd = seededRandom(dotSeed);
+  const cell = 64;                       // 기본 간격 (원본 카드 기준)
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,' + dotAlpha + ')';
-  for (let y = gap / 2; y < H; y += gap) {
-    for (let x = gap / 2; x < W; x += gap) {
+  for (let gy = 0; gy < H + cell; gy += cell) {
+    for (let gx = 0; gx < W + cell; gx += cell) {
+      if (rnd() < 0.18) continue;                       // 가끔 비워서 빽빽하지 않게
+      const x = gx + (rnd() - 0.5) * cell * 1.1;
+      const y = gy + (rnd() - 0.5) * cell * 1.1;
+      const r = (7 + rnd() * 9) * dotScale;             // 지름 14~32px
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
@@ -797,13 +822,21 @@ document.querySelectorAll('.seg button[data-bg]').forEach(function (b) {
     document.querySelectorAll('.seg button[data-bg]').forEach(function (x) {
       x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
     });
-    document.getElementById('dotRow').style.display = bgMode === 'dots' ? 'flex' : 'none';
+    document.getElementById('dotRow').style.display = bgMode === 'dots' ? 'block' : 'none';
     render();
   });
 });
 document.getElementById('dotAlpha').addEventListener('input', function () {
   dotAlpha = parseFloat(this.value);
   document.getElementById('dotAlphaVal').textContent = Math.round(dotAlpha * 100) + '%';
+  quickRender();
+});
+document.getElementById('dotScale').addEventListener('input', function () {
+  dotScale = parseFloat(this.value);
+  quickRender();
+});
+document.getElementById('dotShuffle').addEventListener('click', function () {
+  dotSeed = Math.floor(Math.random() * 1000000);
   quickRender();
 });
 document.querySelectorAll('.seg button[data-color]').forEach(function (b) {
