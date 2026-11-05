@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&family=Noto+Sans+KR:wght@300;400;600&family=Playfair+Display:wght@400;800&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -248,7 +248,9 @@ body {
   padding: 10px;
 }
 .file-btn:hover { background: var(--cream); }
-#photoInput { display: none; }
+#photoInput, #photoInput2a, #photoInput2b, #photoInput2c { display: none; }
+.photo3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.photo3 .file-btn { min-height: 44px; padding: 8px 4px; font-size: 12px; }
 
 .range-row {
   display: flex;
@@ -256,13 +258,6 @@ body {
   gap: 12px;
 }
 .range-row input[type="range"] { flex: 1; accent-color: var(--ink); }
-.range-row .range-label, .range-row .range-val {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-.range-row .range-val { min-width: 34px; text-align: right; }
 .range-row button {
   border: 0.5px solid var(--accent-light);
   background: transparent;
@@ -380,7 +375,7 @@ html.embedded .app-head { display: none; }
   <div class="app-wrap">
     <section class="panel" aria-label="카드 정보 입력">
       <h1 class="panel-title">Thank you Card</h1>
-      <p class="panel-desc">결혼식 · 돌잔치 중 종류를 고르고 사진 · 이름 · 날짜를 넣으면 카드가 자동으로 만들어집니다.<br>미리보기에서 사진을 드래그해 위치를 맞출 수 있어요.</p>
+      <p class="panel-desc">결혼식 · 돌잔치 중 종류와 스타일을 고르고 사진 · 이름 · 날짜를 넣으면 카드가 자동으로 만들어집니다.<br>미리보기에서 사진을 드래그해 위치를 맞출 수 있어요.</p>
 
       <div class="field">
         <label>TYPE · 카드 종류</label>
@@ -391,12 +386,33 @@ html.embedded .app-head { display: none; }
       </div>
 
       <div class="field">
+        <label>STYLE · 스타일</label>
+        <div class="seg" role="group" aria-label="카드 스타일">
+          <button type="button" data-style="1" aria-pressed="true">Type 1 · 사진 한 장</button>
+          <button type="button" data-style="2" aria-pressed="false">Type 2 · 사진 세 장</button>
+        </div>
+      </div>
+
+      <div class="field" data-t1>
         <label>PHOTO · 사진</label>
         <label class="file-btn" for="photoInput" id="fileLabel">사진 선택하기</label>
         <input type="file" id="photoInput" accept="image/*">
       </div>
 
-      <div class="field">
+      <div class="field" data-t2 style="display:none">
+        <label>PHOTO · 사진 세 장</label>
+        <div class="photo3">
+          <label class="file-btn" for="photoInput2a" id="fileLabel2a">사진 1</label>
+          <label class="file-btn" for="photoInput2b" id="fileLabel2b">사진 2</label>
+          <label class="file-btn" for="photoInput2c" id="fileLabel2c">사진 3</label>
+        </div>
+        <input type="file" id="photoInput2a" accept="image/*" data-slot="0">
+        <input type="file" id="photoInput2b" accept="image/*" data-slot="1">
+        <input type="file" id="photoInput2c" accept="image/*" data-slot="2">
+        <small>미리보기에서 사진을 누르면 그 사진이 선택되고, 확대·드래그로 위치를 맞출 수 있어요.</small>
+      </div>
+
+      <div class="field" data-t1>
         <label>ORIENTATION · 사진 방향</label>
         <div class="seg" role="group" aria-label="사진 방향">
           <button type="button" data-orient="portrait" aria-pressed="true"><i class="i-portrait"></i>세로 사진</button>
@@ -406,7 +422,7 @@ html.embedded .app-head { display: none; }
       </div>
 
       <div class="field">
-        <label for="zoom">ZOOM · 사진 확대</label>
+        <label for="zoom" id="zoomLabel">ZOOM · 사진 확대</label>
         <div class="range-row">
           <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
           <button type="button" id="resetBtn">위치 초기화</button>
@@ -426,26 +442,6 @@ html.embedded .app-head { display: none; }
       </div>
 
       <div class="field">
-        <label>BACKGROUND · 배경</label>
-        <div class="seg" role="group" aria-label="배경">
-          <button type="button" data-bg="white" aria-pressed="true">흰색</button>
-          <button type="button" data-bg="dots" aria-pressed="false">검정 도트</button>
-        </div>
-        <div id="dotRow" style="display:none">
-          <div class="range-row" style="margin-top:10px">
-            <span class="range-label">진하기</span>
-            <input type="range" id="dotAlpha" min="0.05" max="1" step="0.01" value="0.35">
-            <span class="range-val" id="dotAlphaVal">35%</span>
-          </div>
-          <div class="range-row" style="margin-top:8px">
-            <span class="range-label">크기</span>
-            <input type="range" id="dotScale" min="0.5" max="2" step="0.05" value="1">
-            <button type="button" id="dotShuffle">다시 섞기</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
         <label for="name1" id="nameLabel">NAME · 이름</label>
         <div class="name-row" id="nameRow">
           <input type="text" id="name1" placeholder="로로" autocomplete="off" aria-label="첫 번째 이름">
@@ -455,13 +451,19 @@ html.embedded .app-head { display: none; }
         <small id="nameHint" style="display:none">카드에는 "하율의 첫 번째 생일"처럼 표기돼요.</small>
       </div>
 
+      <div class="field" data-t2 style="display:none">
+        <label for="title2">TITLE · 윗줄 문구</label>
+        <input type="text" id="title2" placeholder="A-HYUN, 1st B-day" autocomplete="off">
+        <small id="titleHint">비워두면 이름으로 자동 완성돼요.</small>
+      </div>
+
       <div class="field">
         <label for="date" id="dateLabel">DATE · 예식 일자</label>
         <input type="date" id="date">
         <small id="datePreview"></small>
       </div>
 
-      <div class="field">
+      <div class="field" data-t1>
         <label for="msg1">MESSAGE · 문구</label>
         <input type="text" id="msg1" value="특별한 순간을 함께해 주셔서 감사합니다." autocomplete="off">
         <input type="text" id="msg2" value="그날의 따뜻한 마음 오래도록 간직하겠습니다." autocomplete="off">
@@ -520,6 +522,11 @@ document.getElementById('pwInput').addEventListener('keydown', function (e) {
 /* ──────────────── 카드 레이아웃 (원본 1080 × 1350 기준) ──────────────── */
 const W = 1080, H = 1350;
 const EXPORT_SCALE = 2;                       // 저장 시 2배 해상도
+const SERIF  = '"Playfair Display", serif';
+const SANS   = '"Noto Sans KR", sans-serif';
+const SCRIPT = '"Mrs Saint Delafield", cursive';
+
+/* Type 1: 사진 한 장 + THANK YOU */
 // 세로: 원본 카드 그대로(3:4) / 가로: 4:3 사진 칸, 사진+글 묶음을 위아래 같은 여백으로 가운데 정렬
 const LAYOUTS = {
   portrait:  { photo: { x: 279, y: 90,  w: 522, h: 696 }, shift: 0 },
@@ -527,8 +534,6 @@ const LAYOUTS = {
 };
 let PHOTO = LAYOUTS.portrait.photo;
 let SHIFT = 0;   // 글 묶음 위아래 이동 (하단 © 줄은 고정)
-const SERIF = '"Playfair Display", serif';
-const SANS  = '"Noto Sans KR", sans-serif';
 
 // top: 글자 윗선 위치(원본 카드 기준), ref: 위치를 잡는 기준 문장, max: 최대 폭
 const TEXT = {
@@ -541,27 +546,25 @@ const TEXT = {
   footer: { font: '400 11px ' + SERIF, color: 'soft', top: 1314, ref: '© 2026 LOTV SNAP. All Rights Reserved.' }
 };
 
+/* Type 2: 연한 회색 바탕 + 손글씨 한 줄 + 정사각 사진 세 장 + 날짜 */
+const T2 = {
+  bg: '#ECEAE7',
+  slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
+  titleFont: '400 58px ' + SCRIPT, titleTop: 452,
+  dateFont:  '400 52px ' + SCRIPT, dateTop: 880
+};
+T2.x0 = Math.round((W - (T2.slot * 3 + T2.gap * 2)) / 2);
+T2.rects = [0, 1, 2].map(function (i) {
+  return { x: T2.x0 + i * (T2.slot + T2.gap), y: T2.slotsTop, w: T2.slot, h: T2.slot };
+});
+
 // 글씨 색 (검정 / 갈색)
 const PALETTES = {
   black: { main: '#333333', soft: '#555555' },
   brown: { main: '#78482E', soft: '#8A5E45' }
 };
 let textColor = 'black';
-let bgMode = 'white';      // 'white' | 'dots'
-let dotAlpha = 0.35;       // 검정 도트 진하기 (0~1)
-let dotSeed = Date.now() % 100000;   // 도트 배치 랜덤 시드 (다시 섞기 버튼으로 변경)
-let dotScale = 1;          // 도트 크기 배율
-
-// 시드 기반 난수 → 미리보기와 저장 이미지가 똑같은 배치로 나옴
-function seededRandom(seed) {
-  let t = seed >>> 0;
-  return function () {
-    t += 0x6D2B79F5;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-  };
-}
+let cardStyle = 1;     // 1: 사진 한 장 / 2: 사진 세 장
 
 // 카드 종류별 기본 문구 (결혼식 / 돌잔치)
 const KINDS = {
@@ -584,27 +587,12 @@ const KINDS = {
 };
 let kind = 'wedding';
 
-function setKind(k) {
-  const prev = KINDS[kind];
-  kind = k;
-  const cur = KINDS[k];
-  document.querySelectorAll('.seg button[data-kind]').forEach(function (b) {
-    b.setAttribute('aria-pressed', b.getAttribute('data-kind') === k ? 'true' : 'false');
-  });
-  document.getElementById('nameLabel').textContent = cur.nameLabel;
-  document.getElementById('dateLabel').textContent = cur.dateLabel;
-  document.getElementById('nameRow').classList.toggle('baby', k === 'baby');
-  document.getElementById('nameHint').style.display = k === 'baby' ? 'block' : 'none';
-  els.name1.placeholder = cur.ph1;
-  els.name2.placeholder = cur.ph2;
-  // 문구를 직접 고치지 않았다면 종류에 맞는 기본 문구로 바꿈
-  if (els.msg1.value.trim() === prev.msg1 || !els.msg1.value.trim()) els.msg1.value = cur.msg1;
-  if (els.msg2.value.trim() === prev.msg2 || !els.msg2.value.trim()) els.msg2.value = cur.msg2;
-}
-
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-const state = { img: null, zoom: 1, panX: 0, panY: 0, orient: 'portrait' };
+function newSlot() { return { img: null, zoom: 1, panX: 0, panY: 0 }; }
+const state = { img: null, zoom: 1, panX: 0, panY: 0, orient: 'portrait' };   // Type 1 사진
+const state2 = { slots: [newSlot(), newSlot(), newSlot()], active: 0 };      // Type 2 사진 세 장
+
 const els = {
   canvas: document.getElementById('card'),
   photo:  document.getElementById('photoInput'),
@@ -613,6 +601,7 @@ const els = {
   bw:     document.getElementById('bw'),
   name1:  document.getElementById('name1'),
   name2:  document.getElementById('name2'),
+  title2: document.getElementById('title2'),
   date:   document.getElementById('date'),
   datePv: document.getElementById('datePreview'),
   msg1:   document.getElementById('msg1'),
@@ -626,6 +615,37 @@ const els = {
   els.date.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
 })();
 
+function setKind(k) {
+  const prev = KINDS[kind];
+  kind = k;
+  const cur = KINDS[k];
+  document.querySelectorAll('.seg button[data-kind]').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.getAttribute('data-kind') === k ? 'true' : 'false');
+  });
+  document.getElementById('nameLabel').textContent = cur.nameLabel;
+  document.getElementById('dateLabel').textContent = cur.dateLabel;
+  document.getElementById('nameRow').classList.toggle('baby', k === 'baby');
+  document.getElementById('nameHint').style.display = (k === 'baby' && cardStyle === 1) ? 'block' : 'none';
+  els.name1.placeholder = cur.ph1;
+  els.name2.placeholder = cur.ph2;
+  els.title2.placeholder = autoTitle2();
+  // 문구를 직접 고치지 않았다면 종류에 맞는 기본 문구로 바꿈
+  if (els.msg1.value.trim() === prev.msg1 || !els.msg1.value.trim()) els.msg1.value = cur.msg1;
+  if (els.msg2.value.trim() === prev.msg2 || !els.msg2.value.trim()) els.msg2.value = cur.msg2;
+}
+
+function setStyle(n) {
+  cardStyle = n;
+  document.querySelectorAll('.seg button[data-style]').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.getAttribute('data-style') === String(n) ? 'true' : 'false');
+  });
+  document.querySelectorAll('[data-t1]').forEach(function (el) { el.style.display = n === 1 ? '' : 'none'; });
+  document.querySelectorAll('[data-t2]').forEach(function (el) { el.style.display = n === 2 ? '' : 'none'; });
+  document.getElementById('nameHint').style.display = (kind === 'baby' && n === 1) ? 'block' : 'none';
+  document.getElementById('zoomLabel').textContent = n === 2 ? 'ZOOM · 선택한 사진 확대' : 'ZOOM · 사진 확대';
+  syncZoomSlider();
+}
+
 function joinNames() {
   if (kind === 'baby') {
     const n = els.name1.value.trim() || '하율';
@@ -636,6 +656,13 @@ function joinNames() {
   return a + ' & ' + b;
 }
 
+// Type 2 윗줄 자동 문구
+function autoTitle2() {
+  if (kind === 'baby') return (els.name1.value.trim() || 'A-HYUN') + ', 1st B-day';
+  return (els.name1.value.trim() || '로로') + ' & ' + (els.name2.value.trim() || '토브');
+}
+function title2Text() { return els.title2.value.trim() || autoTitle2(); }
+
 function setOrient(o) {
   state.orient = o;
   PHOTO = LAYOUTS[o].photo;
@@ -644,7 +671,7 @@ function setOrient(o) {
     b.setAttribute('aria-pressed', b.getAttribute('data-orient') === o ? 'true' : 'false');
   });
   state.panX = 0; state.panY = 0;
-  clampPan();
+  clampPan(state, PHOTO);
 }
 
 function formatDate(v) {
@@ -652,53 +679,56 @@ function formatDate(v) {
   const [y, m, d] = v.split('-').map(Number);
   return MONTHS[m - 1] + ' ' + d + ', ' + y;
 }
+function formatDateDots(v) { return v ? v.replace(/-/g, '.') : ''; }
 function yearOf(v) { return v ? v.split('-')[0] : String(new Date().getFullYear()); }
 
 /* ──────────────── 폰트 로딩 ──────────────── */
-async function ensureFonts(texts) {
+async function ensureFonts(tx) {
   if (!document.fonts || !document.fonts.load) return;
   const jobs = [];
   Object.keys(TEXT).forEach(function (k) {
-    jobs.push(document.fonts.load(TEXT[k].font, (texts[k] || '') + TEXT[k].ref));
+    jobs.push(document.fonts.load(TEXT[k].font, (tx[k] || '') + TEXT[k].ref));
   });
+  jobs.push(document.fonts.load(T2.titleFont, (tx.title2 || '') + 'A-HYUN, 1st B-day 2026.10.28'));
+  jobs.push(document.fonts.load(T2.dateFont, '0123456789.'));
   try { await Promise.all(jobs); } catch (e) {}
 }
 
-/* ──────────────── 사진 그리기 ──────────────── */
-function clampPan() {
-  if (!state.img) return;
-  const s = baseScale() * state.zoom;
-  const maxX = Math.max(0, (state.img.width * s - PHOTO.w) / 2);
-  const maxY = Math.max(0, (state.img.height * s - PHOTO.h) / 2);
-  state.panX = Math.min(maxX, Math.max(-maxX, state.panX));
-  state.panY = Math.min(maxY, Math.max(-maxY, state.panY));
+/* ──────────────── 사진 그리기 (공통) ──────────────── */
+function baseScaleOf(s, rect) {
+  return Math.max(rect.w / s.img.width, rect.h / s.img.height);
 }
-function baseScale() {
-  return Math.max(PHOTO.w / state.img.width, PHOTO.h / state.img.height);
+function clampPan(s, rect) {
+  if (!s.img) return;
+  const k = baseScaleOf(s, rect) * s.zoom;
+  const maxX = Math.max(0, (s.img.width * k - rect.w) / 2);
+  const maxY = Math.max(0, (s.img.height * k - rect.h) / 2);
+  s.panX = Math.min(maxX, Math.max(-maxX, s.panX));
+  s.panY = Math.min(maxY, Math.max(-maxY, s.panY));
 }
 
-function drawPhoto(ctx, scale) {
-  const pw = Math.round(PHOTO.w * scale), ph = Math.round(PHOTO.h * scale);
+function drawPhotoInto(ctx, scale, rect, s, placeholder) {
+  const pw = Math.round(rect.w * scale), ph = Math.round(rect.h * scale);
   const off = document.createElement('canvas');
   off.width = pw; off.height = ph;
   const o = off.getContext('2d');
 
-  if (!state.img) {
-    o.fillStyle = '#EDEBE6';
+  if (!s.img) {
+    o.fillStyle = '#E3E0DB';
     o.fillRect(0, 0, pw, ph);
     o.fillStyle = '#9B8E7A';
-    o.font = '400 ' + (26 * scale) + 'px ' + SANS;
+    o.font = '400 ' + (Math.min(26, rect.w / 11) * scale) + 'px ' + SANS;
     o.textAlign = 'center';
     o.textBaseline = 'middle';
-    o.fillText('사진을 선택해 주세요', pw / 2, ph / 2);
+    o.fillText(placeholder, pw / 2, ph / 2);
   } else {
-    const s = baseScale() * state.zoom * scale;
-    const iw = state.img.width * s, ih = state.img.height * s;
-    const dx = (pw - iw) / 2 + state.panX * scale;
-    const dy = (ph - ih) / 2 + state.panY * scale;
+    const k = baseScaleOf(s, rect) * s.zoom * scale;
+    const iw = s.img.width * k, ih = s.img.height * k;
+    const dx = (pw - iw) / 2 + s.panX * scale;
+    const dy = (ph - ih) / 2 + s.panY * scale;
     o.imageSmoothingEnabled = true;
     o.imageSmoothingQuality = 'high';
-    o.drawImage(state.img, dx, dy, iw, ih);
+    o.drawImage(s.img, dx, dy, iw, ih);
 
     if (els.bw.checked) {
       const data = o.getImageData(0, 0, pw, ph);
@@ -710,10 +740,10 @@ function drawPhoto(ctx, scale) {
       o.putImageData(data, 0, 0);
     }
   }
-  ctx.drawImage(off, PHOTO.x * scale, PHOTO.y * scale);
+  ctx.drawImage(off, rect.x * scale, rect.y * scale);
 }
 
-/* ──────────────── 글자 그리기 ──────────────── */
+/* ──────────────── Type 1 글자 ──────────────── */
 function drawText(ctx, key, text) {
   if (!text) return;
   const t = TEXT[key];
@@ -746,67 +776,82 @@ function texts() {
     date: formatDate(els.date.value),
     msg1: els.msg1.value.trim(),
     msg2: els.msg2.value.trim(),
-    footer: '© ' + yearOf(els.date.value) + ' LOTV SNAP. All Rights Reserved.'
+    footer: '© ' + yearOf(els.date.value) + ' LOTV SNAP. All Rights Reserved.',
+    title2: title2Text(),
+    date2: formatDateDots(els.date.value)
   };
 }
 
-function drawBackground(ctx) {
+/* ──────────────── 카드 전체 그리기 ──────────────── */
+function paintType1(ctx, scale, tx) {
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
-  if (bgMode !== 'dots') return;
-  // 검정 도트: 큼직한 물방울무늬를 띄엄띄엄 (글자 T보다 조금 큰 크기, 사진·글자 자리는 피함)
-  const rnd = seededRandom(dotSeed);
-  const pad = 12;
-  const avoid = [
-    { x: PHOTO.x - pad, y: PHOTO.y - pad, w: PHOTO.w + pad * 2, h: PHOTO.h + pad * 2 },  // 사진
-    { x: 40, y: 815 + SHIFT, w: W - 80, h: 410 },                                          // 글자 묶음
-    { x: 200, y: 1290, w: W - 400, h: 60 }                                                 // 하단 © 줄
-  ];
-  const dots = [];
-  let tries = 0;
-  while (dots.length < 11 && tries < 600) {
-    tries++;
-    const r = (50 + rnd() * 24) * dotScale;      // 지름 100~148px
-    const x = rnd() * W;                          // 가장자리에 살짝 잘리는 도트도 허용
-    const y = rnd() * H;
-    let bad = false;
-    for (const z of avoid) {
-      if (x + r > z.x && x - r < z.x + z.w && y + r > z.y && y - r < z.y + z.h) { bad = true; break; }
-    }
-    if (!bad) for (const d of dots) {
-      if (Math.hypot(d.x - x, d.y - y) < d.r + r + 40) { bad = true; break; }
-    }
-    if (bad) continue;
-    dots.push({ x: x, y: y, r: r });
-  }
-  ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,' + dotAlpha + ')';
-  dots.forEach(function (d) {
-    ctx.beginPath();
-    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.restore();
-}
-
-function paint(ctx, scale, tx) {
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
-  drawBackground(ctx);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  drawPhoto(ctx, scale);
+  drawPhotoInto(ctx, scale, PHOTO, state, '사진을 선택해 주세요');
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   Object.keys(TEXT).forEach(function (k) { drawText(ctx, k, tx[k]); });
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function drawScript(ctx, font, text, top, max) {
+  if (!text) return;
+  ctx.font = font;
+  const m = ctx.measureText(text);
+  const baseline = top + m.actualBoundingBoxAscent;
+  const w = m.width;
+  ctx.save();
+  ctx.fillStyle = PALETTES[textColor].soft;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  if (max && w > max) {
+    ctx.translate(W / 2, baseline);
+    ctx.scale(max / w, 1);
+    ctx.fillText(text, 0, 0);
+  } else {
+    ctx.fillText(text, W / 2, baseline);
+  }
+  ctx.restore();
+}
+
+function paintType2(ctx, scale, tx, forExport) {
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.fillStyle = T2.bg;
+  ctx.fillRect(0, 0, W, H);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  T2.rects.forEach(function (r, i) {
+    drawPhotoInto(ctx, scale, r, state2.slots[i], '사진 ' + (i + 1));
+  });
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  drawScript(ctx, T2.titleFont, tx.title2, T2.titleTop, 960);
+  drawScript(ctx, T2.dateFont, tx.date2, T2.dateTop, 960);
+  // 미리보기에서만: 선택된 사진 칸 테두리 표시
+  if (!forExport) {
+    const r = T2.rects[state2.active];
+    ctx.save();
+    ctx.strokeStyle = 'rgba(155,142,122,0.9)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10, 8]);
+    ctx.strokeRect(r.x - 6, r.y - 6, r.w + 12, r.h + 12);
+    ctx.restore();
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function paint(ctx, scale, tx, forExport) {
+  if (cardStyle === 2) paintType2(ctx, scale, tx, forExport);
+  else paintType1(ctx, scale, tx);
 }
 
 let renderToken = 0;
 async function render() {
   const token = ++renderToken;
   const tx = texts();
-  els.datePv.textContent = tx.date ? '카드 표기: ' + tx.date : '';
+  els.datePv.textContent = tx.date ? '카드 표기: ' + (cardStyle === 2 ? tx.date2 : tx.date) : '';
+  els.title2.placeholder = autoTitle2();
   await ensureFonts(tx);
   if (token !== renderToken) return;
-  paint(els.canvas.getContext('2d'), 1, tx);
+  paint(els.canvas.getContext('2d'), 1, tx, false);
 }
 
 /* 드래그 중에는 폰트 대기 없이 바로 다시 그림 */
@@ -815,45 +860,25 @@ function quickRender() {
   if (rafId) return;
   rafId = requestAnimationFrame(function () {
     rafId = 0;
-    paint(els.canvas.getContext('2d'), 1, texts());
+    paint(els.canvas.getContext('2d'), 1, texts(), false);
   });
 }
 
+/* 현재 조작 대상 사진(Type 1 사진 / Type 2 선택 칸) */
+function activePhoto() {
+  return cardStyle === 2 ? { s: state2.slots[state2.active], rect: T2.rects[state2.active] } : { s: state, rect: PHOTO };
+}
+function syncZoomSlider() { els.zoom.value = activePhoto().s.zoom; }
+
 /* ──────────────── 입력 이벤트 ──────────────── */
-document.querySelectorAll('.seg button[data-orient]').forEach(function (b) {
-  b.addEventListener('click', function () {
-    setOrient(b.getAttribute('data-orient'));
-    render();
-  });
-});
 document.querySelectorAll('.seg button[data-kind]').forEach(function (b) {
-  b.addEventListener('click', function () {
-    setKind(b.getAttribute('data-kind'));
-    render();
-  });
+  b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); render(); });
 });
-document.querySelectorAll('.seg button[data-bg]').forEach(function (b) {
-  b.addEventListener('click', function () {
-    bgMode = b.getAttribute('data-bg');
-    document.querySelectorAll('.seg button[data-bg]').forEach(function (x) {
-      x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
-    });
-    document.getElementById('dotRow').style.display = bgMode === 'dots' ? 'block' : 'none';
-    render();
-  });
+document.querySelectorAll('.seg button[data-style]').forEach(function (b) {
+  b.addEventListener('click', function () { setStyle(parseInt(b.getAttribute('data-style'), 10)); render(); });
 });
-document.getElementById('dotAlpha').addEventListener('input', function () {
-  dotAlpha = parseFloat(this.value);
-  document.getElementById('dotAlphaVal').textContent = Math.round(dotAlpha * 100) + '%';
-  quickRender();
-});
-document.getElementById('dotScale').addEventListener('input', function () {
-  dotScale = parseFloat(this.value);
-  quickRender();
-});
-document.getElementById('dotShuffle').addEventListener('click', function () {
-  dotSeed = Math.floor(Math.random() * 1000000);
-  quickRender();
+document.querySelectorAll('.seg button[data-orient]').forEach(function (b) {
+  b.addEventListener('click', function () { setOrient(b.getAttribute('data-orient')); render(); });
 });
 document.querySelectorAll('.seg button[data-color]').forEach(function (b) {
   b.addEventListener('click', function () {
@@ -865,41 +890,66 @@ document.querySelectorAll('.seg button[data-color]').forEach(function (b) {
   });
 });
 
-['name1', 'name2', 'date', 'msg1', 'msg2'].forEach(function (k) {
+['name1', 'name2', 'title2', 'date', 'msg1', 'msg2'].forEach(function (k) {
   els[k].addEventListener('input', render);
 });
 els.bw.addEventListener('change', render);
 els.zoom.addEventListener('input', function () {
-  state.zoom = parseFloat(els.zoom.value);
-  clampPan();
+  const a = activePhoto();
+  a.s.zoom = parseFloat(els.zoom.value);
+  clampPan(a.s, a.rect);
   quickRender();
 });
 document.getElementById('resetBtn').addEventListener('click', function () {
-  state.zoom = 1; state.panX = 0; state.panY = 0;
+  const a = activePhoto();
+  a.s.zoom = 1; a.s.panX = 0; a.s.panY = 0;
   els.zoom.value = 1;
   render();
 });
 
+function loadImageFile(file, cb) {
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = function () { cb(img); };
+  img.onerror = function () {
+    els.status.textContent = '이 사진은 열 수 없어요. JPG 또는 PNG로 다시 선택해 주세요.';
+  };
+  img.src = url;
+}
+
+// Type 1 사진
 els.photo.addEventListener('change', function () {
   const file = els.photo.files && els.photo.files[0];
   if (!file) return;
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = function () {
+  loadImageFile(file, function (img) {
     state.img = img;
     state.zoom = 1;
     els.zoom.value = 1;
     setOrient(img.width > img.height ? 'landscape' : 'portrait');
     els.label.textContent = file.name + ' (다른 사진으로 바꾸기)';
     render();
-  };
-  img.onerror = function () {
-    els.status.textContent = '이 사진은 열 수 없어요. JPG 또는 PNG로 다시 선택해 주세요.';
-  };
-  img.src = url;
+  });
 });
 
-/* 미리보기에서 사진 드래그 */
+// Type 2 사진 세 장
+['photoInput2a', 'photoInput2b', 'photoInput2c'].forEach(function (id) {
+  const input = document.getElementById(id);
+  input.addEventListener('change', function () {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const i = parseInt(input.getAttribute('data-slot'), 10);
+    loadImageFile(file, function (img) {
+      state2.slots[i] = newSlot();
+      state2.slots[i].img = img;
+      state2.active = i;
+      els.zoom.value = 1;
+      document.getElementById('fileLabel2' + 'abc'[i]).textContent = '사진 ' + (i + 1) + ' ✓';
+      render();
+    });
+  });
+});
+
+/* 미리보기에서 사진 드래그 (Type 2는 누른 칸이 선택됨) */
 (function () {
   const c = els.canvas;
   let drag = null;
@@ -907,20 +957,26 @@ els.photo.addEventListener('change', function () {
     const r = c.getBoundingClientRect();
     return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
   }
+  function inRect(p, r) { return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h; }
   c.addEventListener('pointerdown', function (e) {
-    if (!state.img) return;
     const p = toCard(e);
-    if (p.x < PHOTO.x || p.x > PHOTO.x + PHOTO.w || p.y < PHOTO.y || p.y > PHOTO.y + PHOTO.h) return;
-    drag = { x: p.x, y: p.y, px: state.panX, py: state.panY };
+    if (cardStyle === 2) {
+      const i = T2.rects.findIndex(function (r) { return inRect(p, r); });
+      if (i < 0) return;
+      if (state2.active !== i) { state2.active = i; syncZoomSlider(); quickRender(); }
+    } else if (!inRect(p, PHOTO)) return;
+    const a = activePhoto();
+    if (!a.s.img) return;
+    drag = { x: p.x, y: p.y, px: a.s.panX, py: a.s.panY, s: a.s, rect: a.rect };
     c.setPointerCapture(e.pointerId);
     c.classList.add('dragging');
   });
   c.addEventListener('pointermove', function (e) {
     if (!drag) return;
     const p = toCard(e);
-    state.panX = drag.px + (p.x - drag.x);
-    state.panY = drag.py + (p.y - drag.y);
-    clampPan();
+    drag.s.panX = drag.px + (p.x - drag.x);
+    drag.s.panY = drag.py + (p.y - drag.y);
+    clampPan(drag.s, drag.rect);
     quickRender();
   });
   function end() { drag = null; c.classList.remove('dragging'); }
@@ -933,7 +989,7 @@ function fileName() {
   const clean = function (v) { return v.trim().replace(/[\\/:*?"<>|\s&]+/g, ''); };
   const n = (kind === 'baby' ? [clean(els.name1.value)] : [clean(els.name1.value), clean(els.name2.value)]).filter(Boolean).join('_') || '이름';
   const d = (els.date.value || '').replace(/-/g, '');
-  return KINDS[kind].file + n + (d ? '_' + d : '') + '.jpg';
+  return KINDS[kind].file + (cardStyle === 2 ? 'T2_' : '') + n + (d ? '_' + d : '') + '.jpg';
 }
 
 async function makeBlob() {
@@ -942,11 +998,16 @@ async function makeBlob() {
   const out = document.createElement('canvas');
   out.width = W * EXPORT_SCALE;
   out.height = H * EXPORT_SCALE;
-  paint(out.getContext('2d'), EXPORT_SCALE, tx);
+  paint(out.getContext('2d'), EXPORT_SCALE, tx, true);
   return new Promise(function (res) { out.toBlob(res, 'image/jpeg', 0.95); });
 }
 
 function warnIfEmpty() {
+  if (cardStyle === 2) {
+    if (state2.slots.some(function (s) { return !s.img; })) { els.status.textContent = '사진 세 장을 모두 선택해 주세요.'; return true; }
+    if (!els.title2.value.trim() && !els.name1.value.trim()) { els.status.textContent = '이름 또는 윗줄 문구를 입력해 주세요.'; return true; }
+    return false;
+  }
   if (!state.img) { els.status.textContent = '사진을 먼저 선택해 주세요.'; return true; }
   if (kind === 'baby') {
     if (!els.name1.value.trim()) { els.status.textContent = '아기 이름을 입력해 주세요.'; return true; }
