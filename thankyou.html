@@ -555,10 +555,11 @@ const TEXT = {
 
 /* Type 2: 연한 회색 바탕 + 손글씨 한 줄 + 정사각 사진 세 장 + 날짜 */
 const T2 = {
-  bg: '#ECEAE7',
+  bg: '#F5F4F2',
+  hearts: { n: 5, size: 22, gap: 18, top: 852, line: 2.5 },   // 사진 아래 속 빈 하트 5개
   slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
   titleFont: '500 46px ' + SCRIPT, titleTop: 452,
-  dateFont:  '500 40px ' + SCRIPT, dateTop: 872
+  dateFont:  '500 40px ' + SCRIPT, dateTop: 906
 };
 T2.x0 = Math.round((W - (T2.slot * 3 + T2.gap * 2)) / 2);
 T2.rects = [0, 1, 2].map(function (i) {
@@ -821,6 +822,36 @@ function drawScript(ctx, font, text, top, max) {
   ctx.restore();
 }
 
+// 속이 빈 하트 (cx, cy: 중심, w: 너비)
+function heartPath(ctx, cx, cy, w) {
+  const h = w * 0.9;
+  const x = cx - w / 2, y = cy - h / 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, y + h);
+  ctx.bezierCurveTo(cx, y + h * 0.78, x, y + h * 0.56, x, y + h * 0.3);
+  ctx.bezierCurveTo(x, y + h * 0.08, x + w * 0.22, y, x + w * 0.36, y);
+  ctx.bezierCurveTo(x + w * 0.45, y, cx, y + h * 0.06, cx, y + h * 0.22);
+  ctx.bezierCurveTo(cx, y + h * 0.06, x + w * 0.55, y, x + w * 0.64, y);
+  ctx.bezierCurveTo(x + w * 0.78, y, x + w, y + h * 0.08, x + w, y + h * 0.3);
+  ctx.bezierCurveTo(x + w, y + h * 0.56, cx, y + h * 0.78, cx, y + h);
+  ctx.closePath();
+}
+function drawHearts(ctx) {
+  const hs = T2.hearts;
+  const total = hs.n * hs.size + (hs.n - 1) * hs.gap;
+  let x = (W - total) / 2 + hs.size / 2;
+  ctx.save();
+  ctx.strokeStyle = PALETTES[textColor].main;
+  ctx.lineWidth = hs.line;
+  ctx.lineJoin = 'round';
+  for (let i = 0; i < hs.n; i++) {
+    heartPath(ctx, x, hs.top + hs.size / 2, hs.size);
+    ctx.stroke();
+    x += hs.size + hs.gap;
+  }
+  ctx.restore();
+}
+
 function paintType2(ctx, scale, tx, forExport) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.fillStyle = T2.bg;
@@ -831,6 +862,7 @@ function paintType2(ctx, scale, tx, forExport) {
   });
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   drawScript(ctx, T2.titleFont, tx.title2, T2.titleTop, 960);
+  drawHearts(ctx);
   drawScript(ctx, T2.dateFont, tx.date2, T2.dateTop, 960);
   // 미리보기에서만: 선택된 사진 칸 테두리 표시
   if (!forExport) {
