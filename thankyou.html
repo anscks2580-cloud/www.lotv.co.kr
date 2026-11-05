@@ -556,10 +556,9 @@ const TEXT = {
 /* Type 2: 연한 회색 바탕 + 손글씨 한 줄 + 정사각 사진 세 장 + 날짜 */
 const T2 = {
   bg: '#F5F4F2',
-  cake: { w: 60, top: 836, line: 2.4 },                        // 사진 아래 선으로 그린 케이크 하나
   slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
   titleFont: '500 46px ' + SCRIPT, titleTop: 452,
-  dateFont:  '500 40px ' + SCRIPT, dateTop: 906
+  dateFont:  '500 40px ' + SCRIPT, dateTop: 872
 };
 T2.x0 = Math.round((W - (T2.slot * 3 + T2.gap * 2)) / 2);
 T2.rects = [0, 1, 2].map(function (i) {
@@ -822,64 +821,6 @@ function drawScript(ctx, font, text, top, max) {
   ctx.restore();
 }
 
-// 사진 아래 케이크: 선만 따서 그린 심플한 케이크 (초 하나 + 물결 크림 + 받침)
-function drawCake(ctx) {
-  const c = T2.cake;
-  const w = c.w, h = w * 1.0;
-  const x0 = W / 2 - w / 2, y0 = c.top;
-  const bodyTop = y0 + h * 0.42, bodyBot = y0 + h * 0.86;
-  ctx.save();
-  ctx.strokeStyle = PALETTES[textColor].main;
-  ctx.lineWidth = c.line;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-
-  // 몸통 (옆면·바닥)
-  ctx.beginPath();
-  ctx.moveTo(x0 + w * 0.08, bodyTop + h * 0.08);
-  ctx.lineTo(x0 + w * 0.08, bodyBot);
-  ctx.lineTo(x0 + w * 0.92, bodyBot);
-  ctx.lineTo(x0 + w * 0.92, bodyTop + h * 0.08);
-  ctx.stroke();
-
-  // 물결 크림 (윗선)
-  const waves = 4, ww = (w * 0.84) / waves;
-  ctx.beginPath();
-  ctx.moveTo(x0 + w * 0.08, bodyTop + h * 0.08);
-  for (let i = 0; i < waves; i++) {
-    const sx = x0 + w * 0.08 + i * ww;
-    ctx.quadraticCurveTo(sx + ww / 2, bodyTop - h * 0.1, sx + ww, bodyTop + h * 0.08);
-  }
-  ctx.stroke();
-
-  // 크림 아래로 흘러내린 방울 두 개
-  ctx.beginPath();
-  ctx.moveTo(x0 + w * 0.30, bodyTop + h * 0.08);
-  ctx.quadraticCurveTo(x0 + w * 0.30, bodyTop + h * 0.26, x0 + w * 0.36, bodyTop + h * 0.22);
-  ctx.moveTo(x0 + w * 0.66, bodyTop + h * 0.08);
-  ctx.quadraticCurveTo(x0 + w * 0.66, bodyTop + h * 0.30, x0 + w * 0.72, bodyTop + h * 0.26);
-  ctx.stroke();
-
-  // 받침 접시
-  ctx.beginPath();
-  ctx.moveTo(x0 - w * 0.02, bodyBot + h * 0.10);
-  ctx.lineTo(x0 + w * 1.02, bodyBot + h * 0.10);
-  ctx.stroke();
-
-  // 초 + 불꽃
-  const cx = W / 2;
-  ctx.beginPath();
-  ctx.moveTo(cx, bodyTop - h * 0.02);
-  ctx.lineTo(cx, y0 + h * 0.18);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx, y0 + h * 0.14);
-  ctx.quadraticCurveTo(cx + w * 0.10, y0 + h * 0.06, cx, y0);
-  ctx.quadraticCurveTo(cx - w * 0.10, y0 + h * 0.06, cx, y0 + h * 0.14);
-  ctx.stroke();
-  ctx.restore();
-}
-
 function paintType2(ctx, scale, tx, forExport) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.fillStyle = T2.bg;
@@ -890,7 +831,6 @@ function paintType2(ctx, scale, tx, forExport) {
   });
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   drawScript(ctx, T2.titleFont, tx.title2, T2.titleTop, 960);
-  drawCake(ctx);
   drawScript(ctx, T2.dateFont, tx.date2, T2.dateTop, 960);
   // 맨 아래 © 줄은 Type 1과 동일
   const savedShift = SHIFT; SHIFT = 0;
