@@ -556,7 +556,7 @@ const TEXT = {
 /* Type 2: 연한 회색 바탕 + 손글씨 한 줄 + 정사각 사진 세 장 + 날짜 */
 const T2 = {
   bg: '#F5F4F2',
-  hearts: { n: 5, size: 22, gap: 18, top: 852, line: 2.5 },   // 사진 아래 속 빈 하트 5개
+  hearts: { n: 5, size: 34, gap: 16, top: 846, line: 2.6 },   // 사진 아래 속 빈 하트 5개
   slot: 296, gap: 20, slotsTop: 527,          // 사진 칸: 296px 정사각 세 개, 가로 가운데 정렬
   titleFont: '500 46px ' + SCRIPT, titleTop: 452,
   dateFont:  '500 40px ' + SCRIPT, dateTop: 906
@@ -822,19 +822,18 @@ function drawScript(ctx, font, text, top, max) {
   ctx.restore();
 }
 
-// 속이 빈 하트 (cx, cy: 중심, w: 너비)
-function heartPath(ctx, cx, cy, w) {
-  const h = w * 0.9;
-  const x = cx - w / 2, y = cy - h / 2;
-  ctx.beginPath();
-  ctx.moveTo(cx, y + h);
-  ctx.bezierCurveTo(cx, y + h * 0.78, x, y + h * 0.56, x, y + h * 0.3);
-  ctx.bezierCurveTo(x, y + h * 0.08, x + w * 0.22, y, x + w * 0.36, y);
-  ctx.bezierCurveTo(x + w * 0.45, y, cx, y + h * 0.06, cx, y + h * 0.22);
-  ctx.bezierCurveTo(cx, y + h * 0.06, x + w * 0.55, y, x + w * 0.64, y);
-  ctx.bezierCurveTo(x + w * 0.78, y, x + w, y + h * 0.08, x + w, y + h * 0.3);
-  ctx.bezierCurveTo(x + w, y + h * 0.56, cx, y + h * 0.78, cx, y + h);
-  ctx.closePath();
+// 속이 빈 하트: 둥근 봉우리에 부드러운 아래 꼭짓점 (24×24 기준 벡터를 크기에 맞게 확대)
+const HEART_PATH = new Path2D('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+function strokeHeart(ctx, cx, cy, w, line) {
+  const k = w / 20;                 // 경로의 실제 폭(2~22 → 20) 기준 비율
+  ctx.save();
+  ctx.translate(cx - 12 * k, cy - 12.2 * k);
+  ctx.scale(k, k);
+  ctx.lineWidth = line / k;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.stroke(HEART_PATH);
+  ctx.restore();
 }
 function drawHearts(ctx) {
   const hs = T2.hearts;
@@ -842,11 +841,8 @@ function drawHearts(ctx) {
   let x = (W - total) / 2 + hs.size / 2;
   ctx.save();
   ctx.strokeStyle = PALETTES[textColor].main;
-  ctx.lineWidth = hs.line;
-  ctx.lineJoin = 'round';
   for (let i = 0; i < hs.n; i++) {
-    heartPath(ctx, x, hs.top + hs.size / 2, hs.size);
-    ctx.stroke();
+    strokeHeart(ctx, x, hs.top + hs.size / 2, hs.size, hs.line);
     x += hs.size + hs.gap;
   }
   ctx.restore();
